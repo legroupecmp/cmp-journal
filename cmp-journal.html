@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CMP Journal — Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --cream:#f5f0e8;--cream2:#ede7d9;--cream3:#e6ddd0;
+  --navy:#1a2744;--navy2:#243158;--blue:#2d4a8a;--blue-light:#4a6db0;
+  --text:#1a2744;--text2:#4a5568;--text3:#7a8599;
+  --border:rgba(26,39,68,0.12);--border2:rgba(26,39,68,0.22);
+  --shadow:0 2px 16px rgba(26,39,68,0.08);--radius:12px;--tr:0.18s ease;
+  --green:#1a7a4a;--red:#b03030;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:var(--cream);}
+#login-screen::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(45,74,138,0.06) 0%,transparent 70%);pointer-events:none;}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:400px;}
+.login-header{text-align:center;margin-bottom:2rem;}
+.login-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:400;color:var(--navy);margin-bottom:0.25rem;}
+.login-sub{font-size:12px;color:var(--text3);letter-spacing:0.15em;text-transform:uppercase;}
+.login-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow);}
+.login-role{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+.role-btn{padding:1rem;border:1.5px solid var(--border2);border-radius:9px;background:var(--cream);cursor:pointer;font-family:'Lato',sans-serif;color:var(--text2);transition:all var(--tr);text-align:center;}
+.role-btn:hover{border-color:var(--blue-light);background:#edf2fc;}
+.role-btn.selected{border-color:var(--navy);background:#e8eef7;color:var(--navy);}
+.role-icon{font-size:1.75rem;margin-bottom:0.4rem;}
+.role-label{font-size:13px;font-weight:700;color:var(--navy);}
+.role-desc{font-size:11px;color:var(--text3);}
+.login-error{background:#fceaea;border:1px solid rgba(176,48,48,0.2);border-radius:8px;padding:0.65rem 1rem;font-size:13px;color:var(--red);margin-bottom:1rem;display:none;}
+
+/* APP */
+#main-app{display:none;min-height:100vh;}
+.top-bar{background:var(--navy);padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.top-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:white;font-weight:400;letter-spacing:0.04em;}
+.top-logo span{color:rgba(255,255,255,0.45);font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-left:10px;}
+.top-right{display:flex;align-items:center;gap:12px;}
+.save-badge{font-size:10px;color:rgba(255,255,255,0.5);font-family:'Lato',sans-serif;}
+.top-user{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.8);}
+.user-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+.btn-logout{font-size:11px;color:rgba(255,255,255,0.5);background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:'Lato',sans-serif;transition:all var(--tr);}
+.btn-logout:hover{color:white;border-color:rgba(255,255,255,0.5);}
+.tabs{display:flex;background:white;border-bottom:1px solid var(--border);padding:0 1.5rem;flex-wrap:wrap;position:sticky;top:49px;z-index:99;}
+.tab{padding:0.85rem 1rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;transition:all var(--tr);font-family:'Lato',sans-serif;white-space:nowrap;}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy);}
+.tab:hover:not(.active){color:var(--text2);}
+.body{padding:1.5rem;max-width:1100px;margin:0 auto;}
+.section-badge{display:inline-flex;align-items:center;gap:7px;background:white;border:1px solid var(--border2);border-radius:999px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;box-shadow:var(--shadow);}
+.page-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:400;color:var(--navy);margin-bottom:0.3rem;}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:1.25rem;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;}
+@media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr;}}
+.stat-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:0.4rem;}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:400;color:var(--navy);}
+.stat-val.green{color:var(--green);}.stat-val.red{color:var(--red);}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.q-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:0.85rem;box-shadow:var(--shadow);}
+.q-card-title{font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:0.85rem;}
+.trades-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.trades-table th{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);padding:0 0.6rem 0.6rem;text-align:left;border-bottom:1px solid var(--border);}
+.trades-table td{padding:0.6rem;border-bottom:1px solid var(--border);color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trades-table tr:last-child td{border-bottom:none;}
+.trades-table tr:hover td{background:var(--cream);}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;}
+.badge-long{background:#e8f4ec;color:var(--green);border:1px solid rgba(26,122,74,0.2);}
+.badge-short{background:#fceaea;color:var(--red);border:1px solid rgba(176,48,48,0.2);}
+.badge-win{background:#e8f4ec;color:var(--green);}
+.badge-loss{background:#fceaea;color:var(--red);}
+.pnl-pos{color:var(--green);font-weight:700;}
+.pnl-neg{color:var(--red);font-weight:700;}
+.import-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:2.5rem;text-align:center;background:var(--cream);cursor:pointer;transition:all var(--tr);margin-bottom:1rem;}
+.import-zone:hover,.import-zone.dragover{border-color:var(--blue-light);background:#edf2fc;}
+.btn-next{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:white;border:none;border-radius:9px;padding:10px 22px;font-size:12px;font-family:'Lato',sans-serif;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all var(--tr);box-shadow:0 2px 10px rgba(26,39,68,0.2);}
+.btn-next:hover{background:var(--navy2);transform:translateY(-1px);}
+.btn-back{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text3);border:1px solid var(--border2);border-radius:9px;padding:10px 18px;font-size:12px;font-family:'Lato',sans-serif;cursor:pointer;transition:all var(--tr);}
+.btn-back:hover{color:var(--text);border-color:var(--blue);background:white;}
+.btn-sm{padding:6px 14px !important;font-size:11px !important;}
+.btn-danger{background:var(--red);color:white;border:none;border-radius:9px;padding:6px 14px;font-size:11px;font-family:'Lato',sans-serif;font-weight:700;cursor:pointer;transition:all var(--tr);}
+.btn-danger:hover{background:#8a2020;}
+.input-label{display:block;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.q-input{width:100%;background:var(--cream);border:1px solid var(--border2);border-radius:9px;padding:9px 12px;font-size:13px;font-family:'Lato',sans-serif;font-weight:300;color:var(--text);outline:none;transition:all var(--tr);}
+.q-input:focus{border-color:var(--blue);background:white;box-shadow:0 0 0 3px rgba(45,74,138,0.1);}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;}
+.student-item{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);margin-bottom:8px;flex-wrap:wrap;gap:8px;}
+.student-info{display:flex;align-items:center;gap:12px;}
+.student-avatar{width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+.import-ok{background:#e8f4ec;border:1px solid rgba(26,122,74,0.2);border-radius:9px;padding:0.85rem 1.25rem;margin-bottom:1rem;display:none;}
+.import-ok-title{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:0.3rem;}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.mini-stat-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+.mini-stat{background:var(--cream2);border-radius:9px;padding:0.6rem 0.85rem;flex:1;min-width:80px;text-align:center;}
+.mini-stat-v{font-size:1rem;font-weight:700;color:var(--navy);font-family:'Playfair Display',serif;}
+.mini-stat-l{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.chart-bar-wrap{display:flex;flex-direction:column;gap:8px;}
+.chart-row{display:flex;align-items:center;gap:10px;}
+.chart-label{width:55px;color:var(--text3);text-align:right;flex-shrink:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;}
+.chart-track{flex:1;background:var(--cream2);border-radius:5px;height:22px;overflow:hidden;}
+.chart-bar{height:100%;border-radius:5px;min-width:4px;transition:width 0.5s ease;}
+.chart-val{font-size:12px;font-weight:700;white-space:nowrap;min-width:72px;}
+.recent-row{display:flex;justify-content:space-between;align-items:center;padding:0.55rem 0;border-bottom:1px solid var(--border);}
+.recent-row:last-child{border-bottom:none;}
+.loading-msg{text-align:center;padding:2rem;color:var(--text3);font-style:italic;font-size:13px;}
+.info-box{background:var(--cream2);border-radius:9px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2);line-height:1.7;}
+.storage-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;}
+
+/* CALENDRIER */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.cal-month-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-dow{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 0;}
+.cal-day{background:white;border:1px solid var(--border);border-radius:8px;padding:5px 6px;min-height:64px;}
+.cal-day.empty{background:transparent;border-color:transparent;}
+.cal-day.today{border-color:var(--blue-light);}
+.cal-day-num{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:3px;}
+.cal-day.today .cal-day-num{color:var(--blue);}
+.cal-day-pnl{font-size:11px;font-weight:700;line-height:1.3;}
+.cal-day-pnl.pos{color:var(--green);}.cal-day-pnl.neg{color:var(--red);}
+.cal-day-trades{font-size:10px;color:var(--text3);}
+.cal-day.has-win{background:#f7fcf9;border-color:rgba(26,122,74,0.25);}
+.cal-day.has-loss{background:#fdf7f7;border-color:rgba(176,48,48,0.25);}
+.cal-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:1.25rem;}
+@media(max-width:500px){.cal-summary{grid-template-columns:1fr 1fr;}}
+.cal-sum-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;}
+.cal-sum-val{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);}
+.cal-sum-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;}
+@media(max-width:480px){.cal-grid{gap:2px;}.cal-day{min-height:50px;padding:3px 4px;}.cal-day-pnl{font-size:10px;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-header">
+      <div class="login-title">CMP Journal</div>
+      <div class="login-sub">Trading · Groupe C.M.P</div>
+    </div>
+    <div class="login-card">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:0.75rem;">Je suis...</div>
+      <div class="login-role">
+        <div class="role-btn" id="role-prof" onclick="selectRole('prof')">
+          <div class="role-icon">🎓</div>
+          <div class="role-label">Professeur</div>
+          <div class="role-desc">Accès complet</div>
+        </div>
+        <div class="role-btn" id="role-etudiant" onclick="selectRole('etudiant')">
+          <div class="role-icon">📈</div>
+          <div class="role-label">Étudiant</div>
+          <div class="role-desc">Mon journal</div>
+        </div>
+      </div>
+      <div id="login-prof-fields" style="display:none;">
+        <div style="margin-bottom:1rem;">
+          <label class="input-label">Mot de passe professeur</label>
+          <input class="q-input" type="password" id="prof-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginProf()">
+        </div>
+        <button class="btn-next" style="width:100%;justify-content:center;" onclick="loginProf()">Accéder au tableau de bord</button>
+      </div>
+      <div id="login-etu-fields" style="display:none;">
+        <div class="input-row" style="margin-bottom:1rem;">
+          <div>
+            <label class="input-label">Prénom</label>
+            <input class="q-input" type="text" id="etu-prenom" placeholder="Jean" onkeydown="if(event.key==='Enter')loginEtu()">
+          </div>
+          <div>
+            <label class="input-label">Nom</label>
+            <input class="q-input" type="text" id="etu-nom" placeholder="Tremblay" onkeydown="if(event.key==='Enter')loginEtu()">
+          </div>
+        </div>
+        <button class="btn-next" style="width:100%;justify-content:center;" onclick="loginEtu()">Ouvrir mon journal</button>
+      </div>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="main-app">
+  <div class="top-bar">
+    <div class="top-logo">CMP Journal <span id="top-role-label">Trading</span></div>
+    <div class="top-right">
+      <div class="save-badge" id="save-badge">💾 —</div>
+      <div class="top-user">
+        <div class="user-dot" id="top-avatar">?</div>
+        <span id="top-name">—</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs-bar">
+    <div class="tab active" onclick="switchTab('dashboard')">Tableau de bord</div>
+    <div class="tab" onclick="switchTab('trades')">Trades</div>
+    <div class="tab" onclick="switchTab('calendrier')">Calendrier</div>
+    <div class="tab" onclick="switchTab('import')">Importer</div>
+    <div class="tab" id="tab-etu-btn" onclick="switchTab('etudiants')" style="display:none;">Étudiants</div>
+  </div>
+  <div class="body">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="section-badge">📊 Aperçu</div>
+      <div class="page-title" id="db-title">Tableau de bord</div>
+      <div class="page-sub" id="db-sub">Performance cumulée — toutes les sessions</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">P&L Total</div><div class="stat-val" id="db-pnl">—</div><div class="stat-sub">Net après frais</div></div>
+        <div class="stat-card"><div class="stat-label">Trades fermés</div><div class="stat-val" id="db-trades">0</div><div class="stat-sub">Logique FIFO</div></div>
+        <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val" id="db-wr">—</div><div class="stat-sub">Gagnants / Total</div></div>
+        <div class="stat-card"><div class="stat-label">Meilleur jour</div><div class="stat-val" id="db-best">—</div><div class="stat-sub">P&L journalier max</div></div>
+      </div>
+      <div class="q-card">
+        <div class="q-card-title">Courbe de performance cumulée</div>
+        <div style="position:relative;width:100%;height:220px;">
+          <canvas id="perf-chart" role="img" aria-label="Courbe de performance cumulée des trades">Aucune donnée disponible.</canvas>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="q-card">
+          <div class="q-card-title">P&L par Symbole</div>
+          <div class="chart-bar-wrap" id="db-chart"><div class="loading-msg">Aucun trade enregistré</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-title">Derniers trades</div>
+          <div id="db-recent"><div class="loading-msg">Aucun trade enregistré</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRADES -->
+    <div id="tab-trades" class="tab-content">
+      <div class="section-badge">📋 Historique</div>
+      <div class="page-title">Journal des trades</div>
+      <div class="page-sub">Regroupement FIFO — une ligne par trade fermé</div>
+      <div class="mini-stat-row">
+        <div class="mini-stat"><div class="mini-stat-v" id="tr-count">0</div><div class="mini-stat-l">Trades</div></div>
+        <div class="mini-stat"><div class="mini-stat-v" id="tr-wins" style="color:var(--green)">0</div><div class="mini-stat-l">Gagnants</div></div>
+        <div class="mini-stat"><div class="mini-stat-v" id="tr-losses" style="color:var(--red)">0</div><div class="mini-stat-l">Perdants</div></div>
+        <div class="mini-stat"><div class="mini-stat-v" id="tr-pnl">—</div><div class="mini-stat-l">P&L Net</div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
+        <button class="btn-danger" onclick="confirmReset()">🗑 Effacer mes trades</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <div class="q-card" style="padding:0;min-width:640px;">
+          <table class="trades-table">
+            <thead><tr>
+              <th style="width:95px">Date</th>
+              <th style="width:70px">Symbole</th>
+              <th style="width:60px">Dir.</th>
+              <th style="width:65px">Qté</th>
+              <th style="width:85px">Entrée moy.</th>
+              <th style="width:85px">Sortie moy.</th>
+              <th style="width:70px">Frais</th>
+              <th style="width:85px">P&L Net</th>
+              <th style="width:60px">Résultat</th>
+            </tr></thead>
+            <tbody id="trades-body">
+              <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistré</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:0.5rem;font-style:italic;">Logique FIFO : plusieurs exécutions regroupées en un seul trade fermé dès que la position revient à zéro.</div>
+    </div>
+
+    <!-- CALENDRIER -->
+    <div id="tab-calendrier" class="tab-content">
+      <div class="section-badge">📅 Calendrier</div>
+      <div class="page-title">Calendrier de trading</div>
+      <div class="page-sub">P&L quotidien et cumulatif mensuel</div>
+      <div class="q-card">
+        <div class="cal-nav">
+          <button class="btn-back btn-sm" onclick="calPrev()">← Précédent</button>
+          <div class="cal-month-title" id="cal-title">—</div>
+          <button class="btn-back btn-sm" onclick="calNext()">Suivant →</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-summary" id="cal-summary"></div>
+      </div>
+    </div>
+
+    <!-- IMPORTER -->
+    <div id="tab-import" class="tab-content">
+      <div class="section-badge">📥 Import CSV</div>
+      <div class="page-title">Importer des exécutions</div>
+      <div class="page-sub" id="import-sub">Les trades s'ajoutent à ton journal personnel</div>
+      <div style="font-size:11px;color:var(--text3);background:var(--cream2);border-radius:9px;padding:0.65rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+        <span class="storage-dot"></span>
+        Stockage local actif — données sauvegardées dans ce navigateur
+      </div>
+      <div style="font-size:11px;font-family:monospace;background:var(--cream2);border:1px solid var(--border);border-radius:9px;padding:0.85rem 1rem;margin-bottom:1rem;color:var(--text2);white-space:pre;overflow-x:auto;line-height:1.6;">Date/Time;Symbol;Side;Quantity;Price;Execution fee;Net P/L;...
+2026-06-02 10:25:56 AM;LOBO;Sell;1000;1.39;-7.50 USD;0 USD;...
+2026-06-02 10:30:18 AM;LOBO;Buy;3000;1.19;-7.50 USD;519.99 USD;...</div>
+      <div class="import-zone" id="import-zone" onclick="document.getElementById('csv-file').click()">
+        <input type="file" id="csv-file" accept=".csv,.txt" style="display:none;" onchange="handleFile(event)">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;color:var(--blue-light);">↑</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:0.25rem;font-weight:400;">Glissez un fichier CSV ou cliquez pour parcourir</div>
+        <div style="font-size:12px;color:var(--text3);font-style:italic;">Format : Date/Time;Symbol;Side;Quantity;Price;Execution fee;Net P/L</div>
+      </div>
+      <div class="import-ok" id="import-ok">
+        <div class="import-ok-title">✓ Import réussi — données sauvegardées</div>
+        <div style="font-size:13px;color:var(--text2);" id="import-ok-text"></div>
+      </div>
+      <div class="q-card">
+        <div class="q-card-title">Ou coller du texte CSV</div>
+        <textarea class="q-input" id="csv-text" rows="6" placeholder="Collez ici le contenu du CSV..."></textarea>
+        <div style="margin-top:0.75rem;text-align:right;">
+          <button class="btn-next btn-sm" onclick="parseCSVText()">Analyser &amp; Importer</button>
+        </div>
+      </div>
+      <div class="info-box">
+        <strong style="color:var(--navy);">Logique FIFO :</strong> Les exécutions multiples sur un même symbole sont regroupées en un seul trade fermé dès que la position revient à zéro. Le P&L net inclut la déduction de tous les frais d'exécution liés. Les doublons sont ignorés automatiquement.
+      </div>
+    </div>
+
+    <!-- ÉTUDIANTS (prof only) -->
+    <div id="tab-etudiants" class="tab-content">
+      <div class="section-badge">👥 Gestion</div>
+      <div class="page-title">Étudiants inscrits</div>
+      <div class="page-sub">Crée un accès journal pour chaque étudiant</div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <div class="q-card-title">Ajouter un étudiant</div>
+        <div class="input-row">
+          <div><label class="input-label">Prénom</label><input class="q-input" id="s-prenom" type="text" placeholder="Jean" onkeydown="if(event.key==='Enter')addStudent()"></div>
+          <div><label class="input-label">Nom</label><input class="q-input" id="s-nom" type="text" placeholder="Tremblay" onkeydown="if(event.key==='Enter')addStudent()"></div>
+        </div>
+        <div style="text-align:right;"><button class="btn-next btn-sm" onclick="addStudent()">Créer le journal</button></div>
+      </div>
+      <div class="info-box">
+        <strong style="color:var(--navy);">Comment l'étudiant accède à son journal :</strong><br>
+        Il ouvre cette page → choisit <em>Étudiant</em> → entre son prénom et nom exactement comme saisis ici → son journal personnel vierge s'ouvre.<br><br>
+        <strong style="color:var(--navy);">Important :</strong> Les données sont stockées dans le navigateur (<code>localStorage</code>). Chaque étudiant doit utiliser <strong>le même appareil et navigateur</strong> pour retrouver ses données.
+      </div>
+      <div id="student-list"><div class="loading-msg">Aucun étudiant ajouté</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var PROF_PASS = 'cmp2024';
+var currentUser = null, currentRole = null, currentSlug = null;
+var allTrades = [], allStudents = [], perfChart = null;
+var calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+var MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+var DAYS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+/* ---- UTILS ---- */
+function toSlug(s){
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+}
+function parseMoney(s){ if(!s)return 0; return parseFloat(s.replace(/[^0-9.\-]/g,''))||0; }
+function tradeKey(t){ return t.date+'|'+t.sym+'|'+t.dir+'|'+t.qty+'|'+t.avgEntry.toFixed(4); }
+function showError(msg,col){ var e=document.getElementById('login-error'); e.textContent=msg; e.style.color=col||'var(--red)'; e.style.display='block'; }
+function setSaveBadge(msg){ var el=document.getElementById('save-badge'); if(el)el.textContent=msg; }
+
+/* ---- STORAGE (localStorage) ---- */
+function lsGet(key){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsSet(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); return true; }catch(e){ return false; } }
+
+function tradesKey(){ return 'cmp_trades_'+currentSlug; }
+
+function saveTrades(){
+  if(lsSet(tradesKey(), allTrades)){ setSaveBadge('💾 Sauvegardé'); }
+  else { setSaveBadge('⚠ Erreur sauvegarde'); }
+}
+
+function saveStudents(){
+  if(lsSet('cmp_students', allStudents)){ setSaveBadge('💾 Étudiants sauvegardés'); }
+  else { setSaveBadge('⚠ Erreur sauvegarde'); }
+}
+
+function loadData(){
+  setSaveBadge('💾 Chargement...');
+  allTrades = lsGet(tradesKey()) || [];
+  if(currentRole==='prof'){ allStudents = lsGet('cmp_students') || []; }
+  renderAll();
+  setSaveBadge('💾 Chargé');
+}
+
+/* ---- AUTH ---- */
+function selectRole(r){
+  document.getElementById('role-prof').classList.toggle('selected', r==='prof');
+  document.getElementById('role-etudiant').classList.toggle('selected', r==='etudiant');
+  document.getElementById('login-prof-fields').style.display = r==='prof'?'block':'none';
+  document.getElementById('login-etu-fields').style.display = r==='etudiant'?'block':'none';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+function loginProf(){
+  var pass = document.getElementById('prof-pass').value;
+  if(pass !== PROF_PASS){ showError('Mot de passe incorrect.'); return; }
+  currentRole='prof'; currentUser='Professeur'; currentSlug='prof';
+  startApp();
+}
+
+function loginEtu(){
+  var p = document.getElementById('etu-prenom').value.trim();
+  var n = document.getElementById('etu-nom').value.trim();
+  if(!p||!n){ showError('Entre ton prénom et ton nom.'); return; }
+  var slug = toSlug(p+' '+n);
+  var students = lsGet('cmp_students') || [];
+  var found = students.find(function(s){ return s.slug===slug; });
+  if(!found){
+    showError('Aucun journal trouvé pour "'+p+' '+n+'". Vérifie l\'orthographe ou demande à ton professeur de t\'inscrire.');
+    return;
+  }
+  currentRole='etudiant'; currentUser=found.name; currentSlug=slug;
+  document.getElementById('login-error').style.display='none';
+  startApp();
+}
+
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  var parts = currentUser.split(' ');
+  var initials = parts.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+  document.getElementById('top-avatar').textContent = initials;
+  document.getElementById('top-name').textContent = currentUser;
+  document.getElementById('top-role-label').textContent = currentRole==='prof'?'Professeur':'Mon Journal';
+  document.getElementById('tab-etu-btn').style.display = currentRole==='prof'?'':'none';
+  if(currentRole==='etudiant'){
+    document.getElementById('db-title').textContent = 'Mon tableau de bord';
+    document.getElementById('db-sub').textContent = 'Ma performance — '+currentUser;
+    document.getElementById('import-sub').textContent = 'Données sauvegardées dans ton journal — '+currentUser;
+  }
+  loadData();
+}
+
+function logout(){
+  currentUser=null; currentRole=null; currentSlug=null; allTrades=[]; allStudents=[];
+  if(perfChart){ perfChart.destroy(); perfChart=null; }
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('prof-pass').value='';
+  document.getElementById('etu-prenom').value='';
+  document.getElementById('etu-nom').value='';
+  document.getElementById('login-prof-fields').style.display='none';
+  document.getElementById('login-etu-fields').style.display='none';
+  document.getElementById('role-prof').classList.remove('selected');
+  document.getElementById('role-etudiant').classList.remove('selected');
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('db-title').textContent='Tableau de bord';
+  document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
+  switchTabSilent('dashboard');
+}
+
+/* ---- TABS ---- */
+function switchTab(name){
+  var tabs=['dashboard','trades','calendrier','import','etudiants'];
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', tabs[i]===name); });
+  document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('active'); });
+  var el=document.getElementById('tab-'+name);
+  if(el) el.classList.add('active');
+  if(name==='calendrier') renderCalendar();
+}
+function switchTabSilent(name){
+  document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('active'); });
+  var el=document.getElementById('tab-'+name); if(el) el.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  var tabs=['dashboard','trades','calendrier','import','etudiants'];
+  var idx=tabs.indexOf(name);
+  var allTabs=document.querySelectorAll('.tab');
+  if(allTabs[idx]) allTabs[idx].classList.add('active');
+}
+
+/* ---- RENDER ---- */
+function renderAll(){ renderTrades(); renderDashboard(); if(currentRole==='prof') renderStudents(); }
+
+function renderTrades(){
+  var tbody=document.getElementById('trades-body');
+  if(!allTrades.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistré</td></tr>';
+  } else {
+    tbody.innerHTML=allTrades.slice().reverse().map(function(t){
+      var win=t.pnl>=0;
+      return '<tr>'
+        +'<td>'+t.date+'</td>'
+        +'<td style="font-weight:400;color:var(--navy);">'+t.sym+'</td>'
+        +'<td><span class="badge '+(t.dir==='SHORT'?'badge-short':'badge-long')+'">'+t.dir+'</span></td>'
+        +'<td>'+t.qty.toLocaleString()+'</td>'
+        +'<td>$'+t.avgEntry.toFixed(4)+'</td>'
+        +'<td>$'+t.avgExit.toFixed(4)+'</td>'
+        +'<td>-$'+t.fees.toFixed(2)+'</td>'
+        +'<td class="'+(win?'pnl-pos':'pnl-neg')+'">'+(win?'+':'')+' $'+t.pnl.toFixed(2)+'</td>'
+        +'<td><span class="badge '+(win?'badge-win':'badge-loss')+'">'+(win?'WIN':'LOSS')+'</span></td>'
+        +'</tr>';
+    }).join('');
+  }
+  var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
+  var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
+  document.getElementById('tr-count').textContent=allTrades.length;
+  document.getElementById('tr-wins').textContent=wins;
+  document.getElementById('tr-losses').textContent=allTrades.length-wins;
+  document.getElementById('tr-pnl').textContent=allTrades.length?(total>=0?'+':'')+' $'+total.toFixed(2):'—';
+}
+
+function getDayPnL(){
+  var map={};
+  allTrades.forEach(function(t){
+    if(!map[t.date])map[t.date]={pnl:0,count:0,wins:0};
+    map[t.date].pnl+=t.pnl; map[t.date].count++; if(t.pnl>=0)map[t.date].wins++;
+  });
+  return map;
+}
+
+function renderDashboard(){
+  var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
+  var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
+  var pnlEl=document.getElementById('db-pnl');
+  pnlEl.textContent=allTrades.length?(total>=0?'+':'')+' $'+total.toFixed(2):'—';
+  pnlEl.className='stat-val'+(allTrades.length?(total>=0?' green':' red'):'');
+  document.getElementById('db-trades').textContent=allTrades.length;
+  var wrEl=document.getElementById('db-wr');
+  wrEl.textContent=allTrades.length?Math.round(wins/allTrades.length*100)+'%':'—';
+  wrEl.className='stat-val'+(allTrades.length?(wins/allTrades.length>=0.5?' green':' red'):'');
+  var dayMap=getDayPnL(), bestDay=0;
+  Object.values(dayMap).forEach(function(d){ if(d.pnl>bestDay)bestDay=d.pnl; });
+  var bEl=document.getElementById('db-best');
+  bEl.textContent=bestDay>0?'+$'+bestDay.toFixed(2):'—';
+  bEl.className='stat-val'+(bestDay>0?' green':'');
+
+  renderPerfChart();
+
+  var bySymbol={};
+  allTrades.forEach(function(t){ if(!bySymbol[t.sym])bySymbol[t.sym]=0; bySymbol[t.sym]+=t.pnl; });
+  var chart=document.getElementById('db-chart');
+  if(!allTrades.length){ chart.innerHTML='<div class="loading-msg">Aucun trade enregistré</div>'; }
+  else {
+    var maxAbs=Math.max.apply(null,Object.values(bySymbol).map(Math.abs))||1;
+    chart.innerHTML=Object.keys(bySymbol).map(function(sym){
+      var val=bySymbol[sym], pct=Math.round(Math.abs(val)/maxAbs*100), win=val>=0;
+      return '<div class="chart-row">'
+        +'<div class="chart-label">'+sym+'</div>'
+        +'<div class="chart-track"><div class="chart-bar" style="width:'+pct+'%;background:'+(win?'rgba(26,122,74,0.3)':'rgba(176,48,48,0.3)')+'"></div></div>'
+        +'<div class="chart-val '+(win?'pnl-pos':'pnl-neg')+'">'+(win?'+':'')+'$'+val.toFixed(2)+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  var recent=document.getElementById('db-recent');
+  if(!allTrades.length){ recent.innerHTML='<div class="loading-msg">Aucun trade enregistré</div>'; }
+  else {
+    recent.innerHTML=allTrades.slice(-5).reverse().map(function(t){
+      var win=t.pnl>=0;
+      return '<div class="recent-row">'
+        +'<div><div style="font-size:13px;font-weight:400;color:var(--navy);">'+t.sym+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);">'+t.date+' · '+t.execCount+' exec.</div></div>'
+        +'<div style="text-align:right;">'
+        +'<div class="'+(win?'pnl-pos':'pnl-neg')+'" style="font-size:13px;">'+(win?'+':'')+'$'+t.pnl.toFixed(2)+'</div>'
+        +'<span class="badge '+(t.dir==='SHORT'?'badge-short':'badge-long')+'" style="font-size:10px;">'+t.dir+'</span>'
+        +'</div></div>';
+    }).join('');
+  }
+}
+
+function renderPerfChart(){
+  var canvas=document.getElementById('perf-chart');
+  if(!canvas)return;
+  if(perfChart){ perfChart.destroy(); perfChart=null; }
+  if(!allTrades.length)return;
+  var sorted=allTrades.slice().sort(function(a,b){ return a.date<b.date?-1:1; });
+  var labels=['Départ'], data=[0], cumul=0;
+  sorted.forEach(function(t){ cumul+=t.pnl; labels.push(t.date); data.push(parseFloat(cumul.toFixed(2))); });
+  var isPos=data[data.length-1]>=0;
+  var lc=isPos?'#1a7a4a':'#b03030', fc=isPos?'rgba(26,122,74,0.08)':'rgba(176,48,48,0.08)';
+  perfChart=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[{label:'P&L cumulé',data:data,borderColor:lc,backgroundColor:fc,borderWidth:2,pointRadius:3,pointBackgroundColor:lc,tension:0.3,fill:true}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+c.parsed.y.toFixed(2);}}}},
+      scales:{
+        x:{display:false},
+        y:{grid:{color:'rgba(26,39,68,0.06)'},ticks:{font:{family:'Lato',size:11},color:'#7a8599',callback:function(v){return '$'+v.toFixed(0);}}}
+      }
+    }
+  });
+}
+
+/* ---- CALENDRIER ---- */
+function renderCalendar(){
+  document.getElementById('cal-title').textContent=MONTHS[calMonth]+' '+calYear;
+  var dayMap=getDayPnL(), grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  DAYS.forEach(function(d){ var el=document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el); });
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var dim=new Date(calYear,calMonth+1,0).getDate();
+  var today=new Date(), mPnL=0, mTrades=0, mWins=0, mDays=0;
+  for(var i=0;i<firstDay;i++){ var e=document.createElement('div'); e.className='cal-day empty'; grid.appendChild(e); }
+  for(var d=1;d<=dim;d++){
+    var cell=document.createElement('div'); cell.className='cal-day';
+    var mm=String(calMonth+1).padStart(2,'0'), dd=String(d).padStart(2,'0');
+    var ds=calYear+'-'+mm+'-'+dd;
+    if(today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d) cell.className+=' today';
+    var numEl=document.createElement('div'); numEl.className='cal-day-num'; numEl.textContent=d; cell.appendChild(numEl);
+    if(dayMap[ds]){
+      var day=dayMap[ds]; mPnL+=day.pnl; mTrades+=day.count; mWins+=day.wins; mDays++;
+      var pe=document.createElement('div'); pe.className='cal-day-pnl '+(day.pnl>=0?'pos':'neg');
+      pe.textContent=(day.pnl>=0?'+':'')+' $'+day.pnl.toFixed(0); cell.appendChild(pe);
+      var ce=document.createElement('div'); ce.className='cal-day-trades';
+      ce.textContent=day.count+' trade'+(day.count>1?'s':''); cell.appendChild(ce);
+      cell.className+=(day.pnl>=0?' has-win':' has-loss');
+    }
+    grid.appendChild(cell);
+  }
+  var wr=mTrades>0?Math.round(mWins/mTrades*100):0;
+  document.getElementById('cal-summary').innerHTML=
+    '<div class="cal-sum-card"><div class="cal-sum-val" style="color:'+(mPnL>=0?'var(--green)':'var(--red)')+'">'+(mPnL>=0?'+':'')+' $'+mPnL.toFixed(2)+'</div><div class="cal-sum-lbl">Cumulatif du mois</div></div>'
+    +'<div class="cal-sum-card"><div class="cal-sum-val">'+mTrades+'</div><div class="cal-sum-lbl">Trades du mois</div></div>'
+    +'<div class="cal-sum-card"><div class="cal-sum-val">'+mDays+'</div><div class="cal-sum-lbl">Jours de trading</div></div>'
+    +'<div class="cal-sum-card"><div class="cal-sum-val" style="color:'+(wr>=50?'var(--green)':'var(--red)')+'">'+wr+'%</div><div class="cal-sum-lbl">Win Rate mois</div></div>';
+}
+function calPrev(){ if(calMonth===0){calMonth=11;calYear--;}else{calMonth--;} renderCalendar(); }
+function calNext(){ if(calMonth===11){calMonth=0;calYear++;}else{calMonth++;} renderCalendar(); }
+
+/* ---- ÉTUDIANTS ---- */
+function renderStudents(){
+  var el=document.getElementById('student-list');
+  if(!allStudents.length){ el.innerHTML='<div class="loading-msg">Aucun étudiant ajouté</div>'; return; }
+  el.innerHTML=allStudents.map(function(s,i){
+    var trades=lsGet('cmp_trades_'+s.slug)||[];
+    var total=trades.reduce(function(a,t){return a+t.pnl;},0);
+    var pnlStr=trades.length?(total>=0?'+':'')+'$'+total.toFixed(2):'Aucun trade';
+    var pnlColor=trades.length?(total>=0?'var(--green)':'var(--red)'):'var(--text3)';
+    return '<div class="student-item">'
+      +'<div class="student-info">'
+      +'<div class="student-avatar">'+s.initials+'</div>'
+      +'<div>'
+      +'<div style="font-size:14px;font-weight:400;color:var(--navy);">'+s.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">'+trades.length+' trade(s) · <span style="color:'+pnlColor+';font-weight:700;">'+pnlStr+'</span></div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;align-items:center;">'
+      +'<button class="btn-danger" style="padding:5px 10px;font-size:10px;" onclick="removeStudent('+i+')">Retirer</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function addStudent(){
+  var p=document.getElementById('s-prenom').value.trim();
+  var n=document.getElementById('s-nom').value.trim();
+  if(!p||!n){ alert('Entre un prénom et un nom.'); return; }
+  var slug=toSlug(p+' '+n);
+  if(allStudents.find(function(s){ return s.slug===slug; })){ alert('Cet étudiant existe déjà.'); return; }
+  allStudents.unshift({name:p+' '+n, slug:slug, initials:(p[0]+(n[0]||'')).toUpperCase()});
+  saveStudents();
+  renderStudents();
+  document.getElementById('s-prenom').value='';
+  document.getElementById('s-nom').value='';
+}
+
+function removeStudent(i){
+  if(!confirm('Retirer cet étudiant ? Son journal (ses trades) reste intact dans le navigateur.')) return;
+  allStudents.splice(i,1);
+  saveStudents();
+  renderStudents();
+}
+
+/* ---- CSV & FIFO ---- */
+function parseCSVRows(text){
+  var lines=text.trim().split('\n').filter(function(l){return l.trim();});
+  if(lines.length<2)return[];
+  var header=lines[0].split(';').map(function(h){return h.trim().replace(/\r/g,'');});
+  return lines.slice(1).map(function(l){
+    var cols=l.split(';'), obj={};
+    header.forEach(function(h,i){ obj[h]=(cols[i]||'').trim().replace(/\r/g,''); });
+    return obj;
+  });
+}
+
+function runFIFO(rows){
+  var bySymbol={};
+  rows.forEach(function(r){ var sym=r['Symbol']; if(!sym)return; if(!bySymbol[sym])bySymbol[sym]=[]; bySymbol[sym].push(r); });
+  var trades=[];
+  Object.keys(bySymbol).forEach(function(sym){
+    var execs=bySymbol[sym], pos=0, group=[], totalFees=0, totalRaw=0, firstSide=null;
+    execs.forEach(function(ex){
+      var side=(ex['Side']||'').toLowerCase();
+      var qty=parseInt(ex['Quantity'])||0;
+      var fee=Math.abs(parseMoney(ex['Execution fee']));
+      var pnl=parseMoney(ex['Net P/L']);
+      if(group.length===0) firstSide=side;
+      group.push(ex); totalFees+=fee; totalRaw+=pnl;
+      pos += side==='sell' ? -qty : qty;
+      if(pos===0 && group.length>0){
+        var dir=firstSide==='sell'?'SHORT':'LONG';
+        var eE=group.filter(function(e){return(e['Side']||'').toLowerCase()===(dir==='SHORT'?'sell':'buy');});
+        var eX=group.filter(function(e){return(e['Side']||'').toLowerCase()!==(dir==='SHORT'?'sell':'buy');});
+        var avg=function(a){ var s=0,q=0; a.forEach(function(e){var qq=parseInt(e['Quantity'])||0; s+=parseMoney(e['Price'])*qq; q+=qq;}); return q>0?s/q:0; };
+        var mq=Math.max.apply(null,group.map(function(e){return parseInt(e['Quantity'])||0;}));
+        trades.push({sym:sym,dir:dir,qty:mq,avgEntry:avg(eE),avgExit:avg(eX),fees:totalFees,pnl:totalRaw-totalFees,date:(group[0]['Date/Time']||'').split(' ')[0],execCount:group.length});
+        group=[]; pos=0; totalFees=0; totalRaw=0; firstSide=null;
+      }
+    });
+  });
+  return trades;
+}
+
+function processCSV(text){
+  var rows=parseCSVRows(text);
+  if(!rows.length){ alert('Aucune donnée trouvée dans le CSV.'); return; }
+  var newTrades=runFIFO(rows);
+  var existingKeys=allTrades.map(tradeKey), added=0;
+  newTrades.forEach(function(t){ if(existingKeys.indexOf(tradeKey(t))===-1){ allTrades.push(t); added++; } });
+  saveTrades(); renderAll();
+  var ok=document.getElementById('import-ok');
+  document.getElementById('import-ok-text').textContent=rows.length+' exécution(s) → '+newTrades.length+' trade(s) FIFO · '+added+' ajouté(s) · '+(newTrades.length-added)+' doublon(s) ignoré(s).';
+  ok.style.display='block';
+  switchTab('dashboard');
+}
+
+function handleFile(ev){
+  var f=ev.target.files[0]; if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(e){ processCSV(e.target.result); };
+  reader.readAsText(f,'utf-8');
+  ev.target.value='';
+}
+function parseCSVText(){
+  var t=document.getElementById('csv-text').value.trim(); if(!t)return;
+  processCSV(t);
+  document.getElementById('csv-text').value='';
+}
+function confirmReset(){
+  if(!confirm('Effacer TOUS tes trades ? Cette action est irréversible.'))return;
+  allTrades=[]; saveTrades(); renderAll();
+}
+
+/* ---- DRAG & DROP ---- */
+var dz=document.getElementById('import-zone');
+if(dz){
+  dz.addEventListener('dragover',function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave',function(){ dz.classList.remove('dragover'); });
+  dz.addEventListener('drop',function(e){
+    e.preventDefault(); dz.classList.remove('dragover');
+    var f=e.dataTransfer.files[0]; if(!f)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){ processCSV(ev.target.result); };
+    reader.readAsText(f,'utf-8');
+  });
+}
+</script>
+</body>
+</html>
