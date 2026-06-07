@@ -583,18 +583,35 @@ function renderCalendar(){
 function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else{calMonth--;}renderCalendar();}
 function calNext(){if(calMonth===11){calMonth=0;calYear++;}else{calMonth++;}renderCalendar();}
 
-function renderStudents(){
+async function renderStudents(){
   var el=document.getElementById('student-list');
   if(!allStudents.length){el.innerHTML='<div class="loading-msg">Aucun étudiant ajouté</div>';return;}
-  el.innerHTML=allStudents.map(function(s,i){
-    return '<div class="student-item"><div class="student-info">'
+  el.innerHTML='<div class="loading-msg">Chargement des résultats...</div>';
+  var rows=await Promise.all(allStudents.map(async function(s,i){
+    var data=await fsLoad('trades/'+s.slug);
+    var trades=data&&data.list?data.list:[];
+    var total=trades.reduce(function(a,t){return a+t.pnl;},0);
+    var wins=trades.filter(function(t){return t.pnl>=0;}).length;
+    var wr=trades.length?Math.round(wins/trades.length*100):null;
+    var pnlColor=trades.length?(total>=0?'var(--green)':'var(--red)'):'var(--text3)';
+    var pnlStr=trades.length?(total>=0?'+':'')+' $'+total.toFixed(2):'Aucun trade';
+    var wrStr=wr!==null?wr+'% win rate':'—';
+    return '<div class="student-item">'
+      +'<div class="student-info">'
       +'<div class="student-avatar">'+s.initials+'</div>'
-      +'<div><div style="font-size:14px;font-weight:400;color:var(--navy);">'+s.name+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);">Accès : prénom + nom exacts</div></div></div>'
-      +'<div style="display:flex;gap:8px;align-items:center;">'
+      +'<div>'
+      +'<div style="font-size:14px;font-weight:400;color:var(--navy);">'+s.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">'+trades.length+' trade(s) · '+wrStr+'</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:12px;align-items:center;">'
+      +'<div style="text-align:right;">'
+      +'<div style="font-size:15px;font-weight:700;color:'+pnlColor+';">'+pnlStr+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">P&L Net</div>'
+      +'</div>'
       +'<button class="btn-danger" style="padding:5px 10px;font-size:10px;" onclick="removeStudent('+i+')">Retirer</button>'
       +'</div></div>';
-  }).join('');
+  }));
+  el.innerHTML=rows.join('');
 }
 
 async function addStudent(){
