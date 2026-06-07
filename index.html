@@ -206,6 +206,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="tab" onclick="switchTab('trades')">Trades</div>
     <div class="tab" onclick="switchTab('calendrier')">Calendrier</div>
     <div class="tab" onclick="switchTab('import')">Importer</div>
+    <div class="tab" onclick="switchTab('details')">Détails</div>
     <div class="tab" id="tab-etu-btn" onclick="switchTab('etudiants')" style="display:none;">Étudiants</div>
   </div>
   <div class="body">
@@ -299,6 +300,43 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <div class="q-card-title">Ou coller du texte CSV</div>
         <textarea class="q-input" id="csv-text" rows="6" placeholder="Collez ici le contenu du CSV..."></textarea>
         <div style="margin-top:0.75rem;text-align:right;"><button class="btn-next btn-sm" onclick="parseCSVText()">Analyser &amp; Importer</button></div>
+      </div>
+    </div>
+
+
+    <div id="tab-details" class="tab-content">
+      <div class="section-badge">📈 Analyse</div>
+      <div class="page-title">Détails de performance</div>
+      <div class="page-sub">Statistiques avancées et analyses graphiques</div>
+
+      <!-- Tableau stats -->
+      <div class="q-card" style="margin-bottom:1rem;">
+        <div class="q-card-title">Statistiques générales</div>
+        <div id="details-stats-table">
+          <div class="loading-msg">Aucun trade enregistré</div>
+        </div>
+      </div>
+
+      <!-- Graphiques -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="q-card">
+          <div class="q-card-title">Performance par symbole — Top 10</div>
+          <div style="position:relative;height:280px;"><canvas id="chart-sym-top"></canvas></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-title">Performance par symbole — Bottom 10</div>
+          <div style="position:relative;height:280px;"><canvas id="chart-sym-bot"></canvas></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="q-card">
+          <div class="q-card-title">Performance par tranche de prix</div>
+          <div style="position:relative;height:280px;"><canvas id="chart-price"></canvas></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-title">Performance par heure de la journée</div>
+          <div style="position:relative;height:280px;"><canvas id="chart-hour"></canvas></div>
+        </div>
       </div>
     </div>
 
@@ -453,14 +491,15 @@ async function saveStudents(){
 }
 
 function switchTab(name){
-  var tabs=['dashboard','trades','calendrier','import','etudiants'];
+  var tabs=['dashboard','trades','calendrier','import','details','etudiants'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
   var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
   if(name==='calendrier')renderCalendar();
+  if(name==='details')renderDetails();
 }
 
-function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();}
+function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
 
 function renderTrades(){
   var tbody=document.getElementById('trades-body');
@@ -666,7 +705,12 @@ function runFIFO(rows){
             eX=group.filter(function(e){return(e['Side']||'').toLowerCase()!==(dir==='SHORT'?'sell':'buy');});
         var avg=function(a){var s=0,q=0;a.forEach(function(e){var qq=parseInt(e['Quantity'])||0;s+=parseMoney(e['Price'])*qq;q+=qq;});return q>0?s/q:0;};
         var mq=Math.max.apply(null,group.map(function(e){return parseInt(e['Quantity'])||0;}));
-        trades.push({sym:sym,dir:dir,qty:mq,avgEntry:avg(eE),avgExit:avg(eX),fees:totalFees,pnl:totalRaw-totalFees,date:(group[0]['Date/Time']||'').split(' ')[0],execCount:group.length});
+        var rawDT=group[0]['Date/Time']||'';
+        var trDate=rawDT.split(' ')[0];
+        var trHour=null;
+        var timePart=rawDT.split(' ')[1];
+        if(timePart){var hh=parseInt(timePart.split(':')[0]);var ampm=(rawDT.split(' ')[2]||'').toUpperCase();if(ampm==='PM'&&hh!==12)hh+=12;if(ampm==='AM'&&hh===12)hh=0;trHour=hh;}
+        trades.push({sym:sym,dir:dir,qty:mq,avgEntry:avg(eE),avgExit:avg(eX),fees:totalFees,pnl:totalRaw-totalFees,date:trDate,hour:trHour,execCount:group.length});
         group=[];pos=0;totalFees=0;totalRaw=0;firstSide=null;
       }
     });
@@ -700,6 +744,139 @@ if(dz){
     var r=new FileReader();r.onload=function(ev){processCSV(ev.target.result);};r.readAsText(f,'utf-8');
   });
 }
+
+var detailCharts={};
+
+function renderDetails(){
+  if(!allTrades.length){
+    document.getElementById('details-stats-table').innerHTML='<div class="loading-msg">Aucun trade enregistré</div>';
+    ['chart-sym-top','chart-sym-bot','chart-price','chart-hour'].forEach(function(id){
+      if(detailCharts[id]){detailCharts[id].destroy();delete detailCharts[id];}
+    });
+    return;
+  }
+
+  /* ---- STATS TABLE ---- */
+  var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
+  var wins=allTrades.filter(function(t){return t.pnl>=0;});
+  var losses=allTrades.filter(function(t){return t.pnl<0;});
+  var avgWin=wins.length?wins.reduce(function(s,t){return s+t.pnl;},0)/wins.length:0;
+  var avgLoss=losses.length?losses.reduce(function(s,t){return s+t.pnl;},0)/losses.length:0;
+  var avgTrade=allTrades.length?total/allTrades.length:0;
+  var pnlValues=allTrades.map(function(t){return t.pnl;});
+  var largestGain=Math.max.apply(null,pnlValues);
+  var largestLoss=Math.min.apply(null,pnlValues);
+  var wr=allTrades.length?Math.round(wins.length/allTrades.length*100):0;
+
+  var rows=[
+    ['Gain/Perte total',(total>=0?'+':'')+' $'+total.toFixed(2),total>=0,'Gain max','$'+largestGain.toFixed(2),true,'Perte max','-$'+Math.abs(largestLoss).toFixed(2),false],
+    ['Gain/Perte moyen par trade',(avgTrade>=0?'+':'')+' $'+avgTrade.toFixed(2),avgTrade>=0,'Gain moyen (gagnant)','$'+avgWin.toFixed(2),true,'Perte moyenne (perdant)','-$'+Math.abs(avgLoss).toFixed(2),false],
+    ['Nombre total de trades',allTrades.length,'neutral','Trades gagnants',wins.length+' ('+wr+'%)',true,'Trades perdants',losses.length+' ('+(100-wr)+'%)',false],
+  ];
+
+  document.getElementById('details-stats-table').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px;">'+
+    rows.map(function(r){
+      var c0=r[2]==='neutral'?'var(--text)':r[2]?'var(--green)':'var(--red)';
+      return '<tr style="border-bottom:1px solid var(--border);">'
+        +'<td style="padding:0.65rem 0.5rem;color:var(--text3);width:33%;">'+r[0]+'</td>'
+        +'<td style="padding:0.65rem 0.5rem;font-weight:700;color:'+c0+';width:16%;">'+r[1]+'</td>'
+        +'<td style="padding:0.65rem 0.5rem;color:var(--text3);width:24%;">'+r[3]+'</td>'
+        +'<td style="padding:0.65rem 0.5rem;font-weight:700;color:var(--green);width:12%;">'+r[4]+'</td>'
+        +'<td style="padding:0.65rem 0.5rem;color:var(--text3);width:7%;">'+r[6]+'</td>'
+        +'<td style="padding:0.65rem 0.5rem;font-weight:700;color:var(--red);">'+r[7]+'</td>'
+        +'</tr>';
+    }).join('')+'</table>';
+
+  /* ---- PAR SYMBOLE ---- */
+  var bySymbol={};
+  allTrades.forEach(function(t){if(!bySymbol[t.sym])bySymbol[t.sym]=0;bySymbol[t.sym]+=t.pnl;});
+  var syms=Object.keys(bySymbol).sort(function(a,b){return bySymbol[b]-bySymbol[a];});
+  var top10=syms.slice(0,10);
+  var bot10=syms.slice(-10).reverse();
+
+  function makeBarChart(id,labels,values,colors){
+    if(detailCharts[id]){detailCharts[id].destroy();}
+    var ctx=document.getElementById(id);if(!ctx)return;
+    detailCharts[id]=new Chart(ctx,{
+      type:'bar',
+      data:{labels:labels,datasets:[{data:values,backgroundColor:colors,borderRadius:4}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+c.parsed.x.toFixed(2);}}}},
+        scales:{
+          x:{grid:{color:'rgba(26,39,68,0.06)'},ticks:{font:{family:'Lato',size:10},color:'#7a8599',callback:function(v){return '$'+v;}}},
+          y:{ticks:{font:{family:'Lato',size:11},color:'#1a2744'}}
+        }
+      }
+    });
+  }
+
+  makeBarChart('chart-sym-top',top10,top10.map(function(s){return bySymbol[s];}),top10.map(function(){return 'rgba(26,122,74,0.7)';}));
+  makeBarChart('chart-sym-bot',bot10,bot10.map(function(s){return bySymbol[s];}),bot10.map(function(){return 'rgba(176,48,48,0.7)';}));
+
+  /* ---- PAR PRIX ---- */
+  var priceBuckets=[
+    {label:'< $2',min:0,max:2},{label:'$2 - $4.99',min:2,max:5},
+    {label:'$5 - $9.99',min:5,max:10},{label:'$10 - $19.99',min:10,max:20},
+    {label:'$20 - $49.99',min:20,max:50},{label:'$50 - $99.99',min:50,max:100},
+    {label:'$100 - $199.99',min:100,max:200},{label:'$200 - $499.99',min:200,max:500},
+    {label:'$500 - $999.99',min:500,max:1000}
+  ];
+  var priceVals=priceBuckets.map(function(b){
+    return allTrades.filter(function(t){return t.avgEntry>=b.min&&t.avgEntry<b.max;})
+      .reduce(function(s,t){return s+t.pnl;},0);
+  });
+  if(detailCharts['chart-price']){detailCharts['chart-price'].destroy();}
+  var ctxP=document.getElementById('chart-price');if(ctxP){
+    detailCharts['chart-price']=new Chart(ctxP,{
+      type:'bar',
+      data:{labels:priceBuckets.map(function(b){return b.label;}),
+        datasets:[{data:priceVals,backgroundColor:priceVals.map(function(v){return v>=0?'rgba(26,122,74,0.7)':'rgba(176,48,48,0.7)';}),borderRadius:4}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+c.parsed.x.toFixed(2);}}}},
+        scales:{
+          x:{grid:{color:'rgba(26,39,68,0.06)'},ticks:{font:{family:'Lato',size:10},color:'#7a8599',callback:function(v){return '$'+v;}}},
+          y:{ticks:{font:{family:'Lato',size:10},color:'#1a2744'}}
+        }
+      }
+    });
+  }
+
+  /* ---- PAR HEURE ---- */
+  var hourVals={};
+  allTrades.forEach(function(t){
+    if(!t.date)return;
+    var h=t.hour!==undefined?t.hour:null;
+    if(h===null)return;
+    if(!hourVals[h])hourVals[h]=0;
+    hourVals[h]+=t.pnl;
+  });
+
+  // Utiliser execTime si disponible, sinon grouper par date uniquement
+  var hourLabels=[],hourData=[];
+  for(var h=6;h<=20;h++){
+    hourLabels.push(h+':00');
+    hourData.push(hourVals[h]||0);
+  }
+  if(detailCharts['chart-hour']){detailCharts['chart-hour'].destroy();}
+  var ctxH=document.getElementById('chart-hour');if(ctxH){
+    detailCharts['chart-hour']=new Chart(ctxH,{
+      type:'bar',
+      data:{labels:hourLabels,
+        datasets:[{data:hourData,backgroundColor:hourData.map(function(v){return v>=0?'rgba(26,122,74,0.7)':'rgba(176,48,48,0.7)';}),borderRadius:4}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+c.parsed.x.toFixed(2);}}}},
+        scales:{
+          x:{grid:{color:'rgba(26,39,68,0.06)'},ticks:{font:{family:'Lato',size:10},color:'#7a8599',callback:function(v){return '$'+v;}}},
+          y:{ticks:{font:{family:'Lato',size:10},color:'#1a2744'}}
+        }
+      }
+    });
+  }
+}
+
 </script>
 </body>
 </html>
