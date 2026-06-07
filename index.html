@@ -205,8 +205,8 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="tab active" onclick="switchTab('dashboard')">Tableau de bord</div>
     <div class="tab" onclick="switchTab('trades')">Trades</div>
     <div class="tab" onclick="switchTab('calendrier')">Calendrier</div>
-    <div class="tab" onclick="switchTab('import')">Importer</div>
     <div class="tab" onclick="switchTab('details')">Détails</div>
+    <div class="tab" onclick="switchTab('import')">Importer</div>
     <div class="tab" id="tab-etu-btn" onclick="switchTab('etudiants')" style="display:none;">Étudiants</div>
   </div>
   <div class="body">
@@ -491,7 +491,7 @@ async function saveStudents(){
 }
 
 function switchTab(name){
-  var tabs=['dashboard','trades','calendrier','import','details','etudiants'];
+  var tabs=['dashboard','trades','calendrier','details','import','etudiants'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
   var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
@@ -791,8 +791,10 @@ function renderDetails(){
   var bySymbol={};
   allTrades.forEach(function(t){if(!bySymbol[t.sym])bySymbol[t.sym]=0;bySymbol[t.sym]+=t.pnl;});
   var syms=Object.keys(bySymbol).sort(function(a,b){return bySymbol[b]-bySymbol[a];});
-  var top10=syms.slice(0,10);
-  var bot10=syms.slice(-10).reverse();
+  var positifs=syms.filter(function(s){return bySymbol[s]>0;}).slice(0,10);
+  var negatifs=syms.filter(function(s){return bySymbol[s]<0;}).slice(-10).reverse();
+  var top10=positifs;
+  var bot10=negatifs;
 
   function makeBarChart(id,labels,values,colors){
     if(detailCharts[id]){detailCharts[id].destroy();}
