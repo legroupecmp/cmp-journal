@@ -642,12 +642,13 @@ async function renderStudents(){
       +'<div style="font-size:14px;font-weight:400;color:var(--navy);">'+s.name+'</div>'
       +'<div style="font-size:11px;color:var(--text3);">'+trades.length+' trade(s) · '+wrStr+'</div>'
       +'</div></div>'
-      +'<div style="display:flex;gap:12px;align-items:center;">'
-      +'<div style="text-align:right;">'
+      +'<div style="display:flex;gap:8px;align-items:center;">'
+      +'<div style="text-align:right;margin-right:4px;">'
       +'<div style="font-size:15px;font-weight:700;color:'+pnlColor+';">'+pnlStr+'</div>'
       +'<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">P&L Net</div>'
       +'</div>'
-      +'<button class="btn-danger" style="padding:5px 10px;font-size:10px;" onclick="removeStudent('+i+')">Retirer</button>'
+      +'<button class="btn-back btn-sm" onclick="removeStudent('+i+')" title="Retirer acces seulement">Retirer accès</button>'
+      +'<button class="btn-danger" style="padding:5px 10px;font-size:10px;" onclick="deleteStudent('+i+')" title="Supprimer acces et tous les trades">🗑 Supprimer</button>'
       +'</div></div>';
   }));
   el.innerHTML=rows.join('');
@@ -670,9 +671,22 @@ async function addStudent(){
 }
 
 async function removeStudent(i){
-  if(!confirm('Retirer cet étudiant ?'))return;
+  if(!confirm('Retirer acces de cet etudiant ? Ses trades restent conserves dans Firebase.'))return;
   allStudents.splice(i,1);
   await saveStudents();
+  renderStudents();
+}
+
+async function deleteStudent(i){
+  var s=allStudents[i];
+  if(!confirm('Supprimer definitivement le journal de '+s.name+' ? Cela va effacer son acces ET tous ses trades dans Firebase. Cette action est irreversible.'))return;
+  setSaveBadge('☁️ Suppression...');
+  // Effacer les trades dans Firebase
+  await fsSave('trades/'+s.slug,{list:[],updatedAt:new Date().toISOString(),deleted:true});
+  // Retirer de la liste
+  allStudents.splice(i,1);
+  await saveStudents();
+  setSaveBadge('☁️ Supprimé');
   renderStudents();
 }
 
