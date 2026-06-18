@@ -515,26 +515,43 @@ function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')re
 
 function renderTrades(){
   var tbody=document.getElementById('trades-body');
-  if(!allTrades.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistré</td></tr>';return;}
-  var reversedTrades=allTrades.slice().reverse();
-  tbody.innerHTML=reversedTrades.map(function(t,ri){
-    var idx=allTrades.length-1-ri;
+  if(!allTrades.length){
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistre</td></tr>';
+    document.getElementById('tr-count').textContent=0;
+    document.getElementById('tr-wins').textContent=0;
+    document.getElementById('tr-losses').textContent=0;
+    document.getElementById('tr-pnl').textContent='--';
+    return;
+  }
+  var html='';
+  for(var ri=0;ri<allTrades.length;ri++){
+    var realIdx=allTrades.length-1-ri;
+    var t=allTrades[realIdx];
     var win=t.pnl>=0;
-    return '<tr><td>'+t.date+'</td><td style="font-weight:400;color:var(--navy);">'+t.sym+'</td>'
-      +'<td><span class="badge '+(t.dir==='SHORT'?'badge-short':'badge-long')+'">'+t.dir+'</span></td>'
-      +'<td>'+t.qty.toLocaleString()+'</td><td>$'+t.avgEntry.toFixed(4)+'</td><td>$'+t.avgExit.toFixed(4)+'</td>'
-      +'<td>-$'+t.fees.toFixed(2)+'</td>'
-      +'<td class="'+(win?'pnl-pos':'pnl-neg')+'">'+(win?'+':'')+' $'+t.pnl.toFixed(2)+'</td>'
-      +'<td><span class="badge '+(win?'badge-win':'badge-loss')+'">'+(win?'WIN':'LOSS')+'</span></td>'
-      +'<td><button onclick="deleteTrade('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 6px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">🗑</button></td>'
-      +'</tr>';
-  }).join('');
+    var pnlStr=(win?'+ ':'-')+' $'+Math.abs(t.pnl).toFixed(2);
+    var dirClass=t.dir==='SHORT'?'badge-short':'badge-long';
+    var resClass=win?'badge-win':'badge-loss';
+    var pnlClass=win?'pnl-pos':'pnl-neg';
+    html+='<tr>';
+    html+='<td>'+t.date+'</td>';
+    html+='<td style="font-weight:400;color:var(--navy);">'+t.sym+'</td>';
+    html+='<td><span class="badge '+dirClass+'">'+t.dir+'</span></td>';
+    html+='<td>'+t.qty.toLocaleString()+'</td>';
+    html+='<td>$'+t.avgEntry.toFixed(4)+'</td>';
+    html+='<td>$'+t.avgExit.toFixed(4)+'</td>';
+    html+='<td>-$'+t.fees.toFixed(2)+'</td>';
+    html+='<td class="'+pnlClass+'">'+pnlStr+'</td>';
+    html+='<td><span class="badge '+resClass+'">'+(win?'WIN':'LOSS')+'</span></td>';
+    html+='<td><button onclick="deleteTrade('+realIdx+')" style="background:none;border:none;cursor:pointer;color:#b03030;font-size:14px;padding:2px 6px;">X</button></td>';
+    html+='</tr>';
+  }
+  tbody.innerHTML=html;
   var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
   var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
   document.getElementById('tr-count').textContent=allTrades.length;
   document.getElementById('tr-wins').textContent=wins;
   document.getElementById('tr-losses').textContent=allTrades.length-wins;
-  document.getElementById('tr-pnl').textContent=allTrades.length?(total>=0?'+':'')+' $'+total.toFixed(2):'—';
+  document.getElementById('tr-pnl').textContent=allTrades.length?(total>=0?'+ ':'-')+' $'+Math.abs(total).toFixed(2):'--';
 }
 
 function getDayPnL(){
@@ -827,8 +844,8 @@ function renderDetails(){
 }
 
 function renderDetailsWithTrades(trades){
-  var allTrades=trades;
-  if(!allTrades.length){
+  var localTrades=trades;
+  if(!localTrades.length){
     document.getElementById('details-stats-table').innerHTML='<div class="loading-msg">Aucun trade enregistré</div>';
     ['chart-sym-top','chart-sym-bot','chart-price','chart-hour'].forEach(function(id){
       if(detailCharts[id]){detailCharts[id].destroy();delete detailCharts[id];}
@@ -837,21 +854,21 @@ function renderDetailsWithTrades(trades){
   }
 
   /* ---- STATS TABLE ---- */
-  var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
-  var wins=allTrades.filter(function(t){return t.pnl>=0;});
-  var losses=allTrades.filter(function(t){return t.pnl<0;});
+  var total=localTrades.reduce(function(s,t){return s+t.pnl;},0);
+  var wins=localTrades.filter(function(t){return t.pnl>=0;});
+  var losses=localTrades.filter(function(t){return t.pnl<0;});
   var avgWin=wins.length?wins.reduce(function(s,t){return s+t.pnl;},0)/wins.length:0;
   var avgLoss=losses.length?losses.reduce(function(s,t){return s+t.pnl;},0)/losses.length:0;
-  var avgTrade=allTrades.length?total/allTrades.length:0;
+  var avgTrade=localTrades.length?total/localTrades.length:0;
   var pnlValues=allTrades.map(function(t){return t.pnl;});
   var largestGain=Math.max.apply(null,pnlValues);
   var largestLoss=Math.min.apply(null,pnlValues);
-  var wr=allTrades.length?Math.round(wins.length/allTrades.length*100):0;
+  var wr=localTrades.length?Math.round(wins.length/localTrades.length*100):0;
 
   var rows=[
     ['Gain/Perte total',(total>=0?'+':'')+' $'+total.toFixed(2),total>=0,'Gain max','$'+largestGain.toFixed(2),true,'Perte max','-$'+Math.abs(largestLoss).toFixed(2),false],
     ['Gain/Perte moyen par trade',(avgTrade>=0?'+':'')+' $'+avgTrade.toFixed(2),avgTrade>=0,'Gain moyen (gagnant)','$'+avgWin.toFixed(2),true,'Perte moyenne (perdant)','-$'+Math.abs(avgLoss).toFixed(2),false],
-    ['Nombre total de trades',allTrades.length,'neutral','Trades gagnants',wins.length+' ('+wr+'%)',true,'Trades perdants',losses.length+' ('+(100-wr)+'%)',false],
+    ['Nombre total de trades',localTrades.length,'neutral','Trades gagnants',wins.length+' ('+wr+'%)',true,'Trades perdants',losses.length+' ('+(100-wr)+'%)',false],
   ];
 
   document.getElementById('details-stats-table').innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px;">'+
@@ -869,7 +886,7 @@ function renderDetailsWithTrades(trades){
 
   /* ---- PAR SYMBOLE ---- */
   var bySymbol={};
-  allTrades.forEach(function(t){if(!bySymbol[t.sym])bySymbol[t.sym]=0;bySymbol[t.sym]+=t.pnl;});
+  localTrades.forEach(function(t){if(!bySymbol[t.sym])bySymbol[t.sym]=0;bySymbol[t.sym]+=t.pnl;});
   var syms=Object.keys(bySymbol).sort(function(a,b){return bySymbol[b]-bySymbol[a];});
   var positifs=syms.filter(function(s){return bySymbol[s]>0;}).slice(0,10);
   var negatifs=syms.filter(function(s){return bySymbol[s]<0;}).slice(-10).reverse();
@@ -905,7 +922,7 @@ function renderDetailsWithTrades(trades){
     {label:'$500 - $999.99',min:500,max:1000}
   ];
   var priceVals=priceBuckets.map(function(b){
-    return allTrades.filter(function(t){return t.avgEntry>=b.min&&t.avgEntry<b.max;})
+    return localTrades.filter(function(t){return t.avgEntry>=b.min&&t.avgEntry<b.max;})
       .reduce(function(s,t){return s+t.pnl;},0);
   });
   if(detailCharts['chart-price']){detailCharts['chart-price'].destroy();}
@@ -927,7 +944,7 @@ function renderDetailsWithTrades(trades){
 
   /* ---- PAR HEURE ---- */
   var hourVals={};
-  allTrades.forEach(function(t){
+  localTrades.forEach(function(t){
     if(!t.date)return;
     var h=t.hour!==undefined?t.hour:null;
     if(h===null)return;
