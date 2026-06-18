@@ -253,6 +253,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
               <th style="width:95px">Date</th><th style="width:70px">Symbole</th><th style="width:60px">Dir.</th>
               <th style="width:65px">Qté</th><th style="width:85px">Entrée moy.</th><th style="width:85px">Sortie moy.</th>
               <th style="width:70px">Frais</th><th style="width:85px">P&L Net</th><th style="width:60px">Résultat</th>
+              <th style="width:40px"></th>
             </tr></thead>
             <tbody id="trades-body"><tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade</td></tr></tbody>
           </table>
@@ -515,14 +516,18 @@ function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')re
 function renderTrades(){
   var tbody=document.getElementById('trades-body');
   if(!allTrades.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistré</td></tr>';return;}
-  tbody.innerHTML=allTrades.slice().reverse().map(function(t){
+  var reversedTrades=allTrades.slice().reverse();
+  tbody.innerHTML=reversedTrades.map(function(t,ri){
+    var idx=allTrades.length-1-ri;
     var win=t.pnl>=0;
     return '<tr><td>'+t.date+'</td><td style="font-weight:400;color:var(--navy);">'+t.sym+'</td>'
       +'<td><span class="badge '+(t.dir==='SHORT'?'badge-short':'badge-long')+'">'+t.dir+'</span></td>'
       +'<td>'+t.qty.toLocaleString()+'</td><td>$'+t.avgEntry.toFixed(4)+'</td><td>$'+t.avgExit.toFixed(4)+'</td>'
       +'<td>-$'+t.fees.toFixed(2)+'</td>'
       +'<td class="'+(win?'pnl-pos':'pnl-neg')+'">'+(win?'+':'')+' $'+t.pnl.toFixed(2)+'</td>'
-      +'<td><span class="badge '+(win?'badge-win':'badge-loss')+'">'+(win?'WIN':'LOSS')+'</span></td></tr>';
+      +'<td><span class="badge '+(win?'badge-win':'badge-loss')+'">'+(win?'WIN':'LOSS')+'</span></td>'
+      +'<td><button onclick="deleteTrade('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 6px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">🗑</button></td>'
+      +'</tr>';
   }).join('');
   var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
   var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
@@ -786,6 +791,15 @@ async function processCSV(text){
 function handleFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){processCSV(e.target.result);};r.readAsText(f,'utf-8');ev.target.value='';}
 function parseCSVText(){var t=document.getElementById('csv-text').value.trim();if(!t)return;processCSV(t);document.getElementById('csv-text').value='';}
 async function confirmReset(){if(!confirm('Effacer TOUS tes trades ?'))return;allTrades=[];await saveTrades();renderAll();}
+
+async function deleteTrade(idx){
+  var t=allTrades[idx];
+  if(!t)return;
+  if(!confirm('Supprimer ce trade ?\n'+t.date+' · '+t.sym+' · '+(t.pnl>=0?'+':'')+' $'+t.pnl.toFixed(2)))return;
+  allTrades.splice(idx,1);
+  await saveTrades();
+  renderAll();
+}
 
 var dz=document.getElementById('import-zone');
 if(dz){
