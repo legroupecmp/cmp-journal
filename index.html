@@ -741,23 +741,13 @@ async function removeStudent(i){
 
 async function viewStudentDetails(i){
   var s=allStudents[i];
-  setSaveBadge('☁️ Chargement...');
-  var data=await fsLoad('trades/'+s.slug);
-  var trades=data&&data.list?data.list:[];
   viewingStudent=s;
-  // Sauvegarder les trades actuels du prof et charger ceux de l'étudiant
-  var savedTrades=allTrades;
-  allTrades=trades;
-  renderDetails();
-  allTrades=savedTrades;
-  // Afficher l'onglet détails avec bandeau étudiant
   switchTab('details');
   var badge=document.getElementById('student-view-badge');
   if(badge){
     badge.style.display='flex';
     document.getElementById('student-view-name').textContent=s.name;
   }
-  setSaveBadge('☁️ Charge');
 }
 
 function closeStudentView(){
