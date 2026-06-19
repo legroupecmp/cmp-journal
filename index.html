@@ -424,6 +424,7 @@ function loginProf(){
   var pass=document.getElementById('prof-pass').value;
   if(pass!==PROF_PASS){showError('Mot de passe incorrect.');return;}
   currentRole='prof';currentUser='Professeur';currentSlug='prof';
+  saveSession();
   startApp();
 }
 
@@ -439,8 +440,30 @@ async function loginEtu(){
     currentRole='etudiant';currentUser=data.name;currentSlug=slug;
     document.getElementById('login-error').style.display='none';
     document.getElementById('login-info').style.display='none';
+    saveSession();
     startApp();
   }catch(e){showError('Erreur de connexion : '+e.message);}
+}
+
+function saveSession(){
+  try{
+    localStorage.setItem('cmp_session',JSON.stringify({role:currentRole,user:currentUser,slug:currentSlug}));
+  }catch(e){}
+}
+
+function loadSession(){
+  try{
+    var raw=localStorage.getItem('cmp_session');
+    if(!raw)return false;
+    var s=JSON.parse(raw);
+    if(!s||!s.role||!s.slug)return false;
+    currentRole=s.role;currentUser=s.user;currentSlug=s.slug;
+    return true;
+  }catch(e){return false;}
+}
+
+function clearSession(){
+  try{localStorage.removeItem('cmp_session');}catch(e){}
 }
 
 async function startApp(){
@@ -461,6 +484,7 @@ async function startApp(){
 
 function logout(){
   currentUser=null;currentRole=null;currentSlug=null;allTrades=[];allStudents=[];
+  clearSession();
   if(perfChart){perfChart.destroy();perfChart=null;}
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -503,6 +527,11 @@ async function saveStudents(){
 }
 
 function switchTab(name){
+  if(name!=='details'&&name!=='etudiants'){
+    viewingStudent=null;
+    var badge=document.getElementById('student-view-badge');
+    if(badge) badge.style.display='none';
+  }
   var tabs=['dashboard','trades','calendrier','details','import','etudiants'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
@@ -798,11 +827,12 @@ async function processCSV(text){
   if(!rows.length){alert('Aucune donnée trouvée.');return;}
   var newTrades=runFIFO(rows),existingKeys=allTrades.map(tradeKey),added=0;
   newTrades.forEach(function(t){if(existingKeys.indexOf(tradeKey(t))===-1){allTrades.push(t);added++;}});
-  await saveTrades();renderAll();
+  await saveTrades();
+  switchTab('dashboard');
+  renderAll();
   var ok=document.getElementById('import-ok');
   document.getElementById('import-ok-text').textContent=rows.length+' exécution(s) → '+newTrades.length+' trade(s) · '+added+' ajouté(s) · '+(newTrades.length-added)+' doublon(s) ignoré(s).';
   ok.style.display='block';
-  switchTab('dashboard');
 }
 
 function handleFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){processCSV(e.target.result);};r.readAsText(f,'utf-8');ev.target.value='';}
@@ -827,6 +857,11 @@ if(dz){
     var f=e.dataTransfer.files[0];if(!f)return;
     var r=new FileReader();r.onload=function(ev){processCSV(ev.target.result);};r.readAsText(f,'utf-8');
   });
+}
+
+/* ---- AUTO-RECONNEXION ---- */
+if(loadSession()){
+  startApp();
 }
 
 var detailCharts={};
