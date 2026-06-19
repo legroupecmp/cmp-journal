@@ -607,7 +607,7 @@ function renderDashboard(){
   var bEl=document.getElementById('db-best');
   bEl.textContent=bestDay>0?'+$'+bestDay.toFixed(2):'—';
   bEl.className='stat-val'+(bestDay>0?' green':'');
-  renderPerfChart();
+  try{renderPerfChart();}catch(e){console.error('renderPerfChart error:',e);}
   var bySymbol={};
   allTrades.forEach(function(t){if(!bySymbol[t.sym])bySymbol[t.sym]=0;bySymbol[t.sym]+=t.pnl;});
   var chart=document.getElementById('db-chart');
