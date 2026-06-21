@@ -884,7 +884,7 @@ function renderDetailsWithTrades(trades){
   var avgWin=wins.length?wins.reduce(function(s,t){return s+t.pnl;},0)/wins.length:0;
   var avgLoss=losses.length?losses.reduce(function(s,t){return s+t.pnl;},0)/losses.length:0;
   var avgTrade=localTrades.length?total/localTrades.length:0;
-  var pnlValues=allTrades.map(function(t){return t.pnl;});
+  var pnlValues=localTrades.map(function(t){return t.pnl;});
   var largestGain=Math.max.apply(null,pnlValues);
   var largestLoss=Math.min.apply(null,pnlValues);
   var wr=localTrades.length?Math.round(wins.length/localTrades.length*100):0;
