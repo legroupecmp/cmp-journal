@@ -224,6 +224,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="tab" onclick="switchTab('details')">Détails</div>
     <div class="tab" onclick="switchTab('import')">Importer</div>
     <div class="tab" id="tab-etu-btn" onclick="switchTab('etudiants')" style="display:none;">Étudiants</div>
+    <div class="tab" id="tab-upsell-btn" onclick="switchTab('upsell')" style="display:none;">Upsell</div>
   </div>
   <div class="body">
 
@@ -385,6 +386,74 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div id="student-list"><div class="loading-msg">Chargement...</div></div>
     </div>
 
+    <!-- UPSELL -->
+    <div id="tab-upsell" class="tab-content">
+      <div class="section-badge">📞 Upsell</div>
+      <div class="page-title">Suivi des appels</div>
+      <div class="page-sub">Stock → ElaveFX · Forex · Crypto — relance automatique à 10 jours</div>
+
+      <div class="stat-grid" style="margin-bottom:1.25rem;">
+        <div class="stat-card"><div class="stat-label">Appels loggés</div><div class="stat-val" id="up-total">—</div><div class="stat-sub">Depuis le début</div></div>
+        <div class="stat-card"><div class="stat-label">Ont répondu</div><div class="stat-val green" id="up-oui">—</div><div class="stat-sub" id="up-oui-pct">—</div></div>
+        <div class="stat-card"><div class="stat-label">En attente (&lt;10j)</div><div class="stat-val" id="up-attente">—</div><div class="stat-sub">Délai pas encore écoulé</div></div>
+        <div class="stat-card"><div class="stat-label">À rappeler aujourd'hui</div><div class="stat-val red" id="up-rappel">—</div><div class="stat-sub">10 jours sans réponse</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
+        <button class="btn-next" onclick="upOpenModal(null)">+ Nouvel appel</button>
+        <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upRender()">
+          <option value="">Tous les statuts</option>
+          <option value="oui">A répondu</option>
+          <option value="attente">En attente</option>
+          <option value="rappeler">À rappeler</option>
+        </select>
+        <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upRender()">
+          <option value="">Tous les cours</option>
+          <option value="ElaveFX">ElaveFX</option>
+          <option value="Forex">Forex</option>
+          <option value="Crypto">Crypto</option>
+        </select>
+        <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upRender()">
+      </div>
+
+      <div class="q-card" style="padding:0;overflow:hidden;">
+        <div id="up-rows"><div class="loading-msg">Chargement...</div></div>
+      </div>
+    </div>
+
+    <!-- MODAL UPSELL -->
+    <div id="up-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="up-modal-title">Nouvel appel</div>
+        <input type="hidden" id="up-edit-id">
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom de l'étudiant</label><input class="q-input" type="text" id="up-name" placeholder="Ex. Marc Tremblay"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><input class="q-input" type="email" id="up-email" placeholder="marc@courriel.com"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><input class="q-input" type="tel" id="up-phone" placeholder="819-555-0123"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Date de l'appel</label><input class="q-input" type="date" id="up-date"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Cours proposé</label>
+          <select class="q-input" id="up-course"><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
+        </div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">A répondu ?</label>
+          <select class="q-input" id="up-answered"><option value="Non">Non</option><option value="Oui">Oui</option></select>
+        </div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Vente closée ?</label>
+          <select class="q-input" id="up-closed">
+            <option value="">Pas encore déterminé</option>
+            <option value="closed">💰 Closé</option>
+            <option value="notclosed">💩 Non closé</option>
+          </select>
+        </div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="up-notes" rows="3" placeholder="Contexte, objections..."></textarea></div>
+        <div style="display:flex;justify-content:space-between;margin-top:1.25rem;gap:8px;">
+          <button class="btn-danger" id="up-btn-delete" style="display:none;" onclick="upDeleteCall()">🗑 Supprimer</button>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button class="btn-back btn-sm" onclick="upCloseModal()">Annuler</button>
+            <button class="btn-next btn-sm" onclick="upSaveCall()">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -491,6 +560,7 @@ async function startApp(){
   document.getElementById('top-name').textContent=currentUser;
   document.getElementById('top-role-label').textContent=currentRole==='prof'?'Professeur':'Mon Journal';
   document.getElementById('tab-etu-btn').style.display=currentRole==='prof'?'':'none';
+  document.getElementById('tab-upsell-btn').style.display=currentRole==='prof'?'':'none';
   if(currentRole==='etudiant'){
     document.getElementById('db-title').textContent='Mon tableau de bord';
     document.getElementById('db-sub').textContent='Ma performance — '+currentUser;
@@ -513,6 +583,7 @@ function logout(){
   document.getElementById('role-etudiant').classList.remove('selected');
   document.getElementById('login-error').style.display='none';
   document.getElementById('login-info').style.display='none';
+  document.getElementById('tab-upsell-btn').style.display='none';
   document.getElementById('db-title').textContent='Tableau de bord';
   document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
   switchTab('dashboard');
@@ -548,12 +619,13 @@ function switchTab(name){
   }
   var badge=document.getElementById('student-view-badge');
   if(badge) badge.style.display=(name==='details'&&viewingStudent)?'flex':'none';
-  var tabs=['dashboard','trades','calendrier','details','import','etudiants'];
+  var tabs=['dashboard','trades','calendrier','details','import','etudiants','upsell'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
   var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
   if(name==='calendrier')renderCalendar();
   if(name==='details')renderDetails();
+  if(name==='upsell')upLoadCalls();
 }
 
 function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
@@ -866,6 +938,183 @@ if(dz){
 }
 
 /* ---- AUTO-RECONNEXION ---- */
+/* ---- UPSELL ---- */
+var upCalls=[];
+
+async function upLoadCalls(){
+  try{
+    var data=await fsLoad('upsell/calls');
+    upCalls=data&&data.list?data.list:[];
+  }catch(e){upCalls=[];}
+  upRender();
+}
+
+async function upSaveCalls(){
+  setSaveBadge('☁️ Sauvegarde...');
+  var ok=await fsSave('upsell/calls',{list:upCalls,updatedAt:new Date().toISOString()});
+  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+}
+
+function upDaysBetween(dateStr){
+  var d=new Date(dateStr+'T00:00:00');
+  var today=new Date();today.setHours(0,0,0,0);
+  return Math.floor((today-d)/86400000);
+}
+
+function upState(c){
+  if(c.answered==='Oui')return 'oui';
+  var days=upDaysBetween(c.date);
+  return days>=10?'rappeler':'attente';
+}
+
+function upFollowup(dateStr){
+  var d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+10);
+  return d.toISOString().slice(0,10);
+}
+
+function upClosedBadge(v){
+  if(v==='closed')return '<span style="background:#e8f4ec;color:var(--green);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💰 Closé</span>';
+  if(v==='notclosed')return '<span style="background:#fceaea;color:var(--red);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💩 Non closé</span>';
+  return '<span style="background:var(--cream2);color:var(--text3);border-radius:999px;padding:2px 10px;font-size:11px;">—</span>';
+}
+
+function upRender(){
+  var statusF=document.getElementById('upFilterStatus')?document.getElementById('upFilterStatus').value:'';
+  var coursF=document.getElementById('upFilterCours')?document.getElementById('upFilterCours').value:'';
+  var q=(document.getElementById('upSearch')?document.getElementById('upSearch').value:'').trim().toLowerCase();
+
+  var enriched=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});});
+  var filtered=enriched.filter(function(c){
+    if(statusF&&c.state!==statusF)return false;
+    if(coursF&&c.course!==coursF)return false;
+    if(q&&!(c.name||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  filtered.sort(function(a,b){
+    var order={rappeler:0,attente:1,oui:2};
+    return (order[a.state]||0)-(order[b.state]||0)||(a.date||'').localeCompare(b.date||'');
+  });
+
+  var rowsEl=document.getElementById('up-rows');
+  if(!rowsEl)return;
+
+  if(!filtered.length){
+    rowsEl.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun appel — clique sur <strong>+ Nouvel appel</strong> pour commencer.</div>';
+  } else {
+    var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+      +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Email</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Téléphone</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Date appel</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Cours</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Répondu</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Relance</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Closé</th>'
+      +'</tr></thead><tbody>';
+
+    filtered.forEach(function(c){
+      var pillColor=c.state==='oui'?'var(--green)':c.state==='rappeler'?'var(--red)':'#b8862e';
+      var pillBg=c.state==='oui'?'#e8f4ec':c.state==='rappeler'?'#fceaea':'#f6eedd';
+      var pillLabel=c.state==='oui'?'A répondu':c.state==='rappeler'?'À rappeler':'En attente';
+      html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="upOpenModal(\''+c.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
+        +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(c.name||'—')+'</td>'
+        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.email||'—')+'</td>'
+        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.phone||'—')+'</td>'
+        +'<td style="padding:10px 14px;">'+(c.date||'—')+'</td>'
+        +'<td style="padding:10px 14px;">'+(c.course||'—')+'</td>'
+        +'<td style="padding:10px 14px;">'+(c.answered||'—')+'</td>'
+        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.date?upFollowup(c.date):'—')+'</td>'
+        +'<td style="padding:10px 14px;"><span style="background:'+pillBg+';color:'+pillColor+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+pillLabel+'</span></td>'
+        +'<td style="padding:10px 14px;">'+upClosedBadge(c.closed)+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table>';
+    rowsEl.innerHTML=html;
+  }
+
+  var total=enriched.length;
+  var oui=enriched.filter(function(c){return c.state==='oui';}).length;
+  var attente=enriched.filter(function(c){return c.state==='attente';}).length;
+  var rappeler=enriched.filter(function(c){return c.state==='rappeler';}).length;
+  var upTotal=document.getElementById('up-total');if(upTotal)upTotal.textContent=total;
+  var upOui=document.getElementById('up-oui');if(upOui)upOui.textContent=oui;
+  var upPct=document.getElementById('up-oui-pct');if(upPct)upPct.textContent=total?Math.round(oui/total*100)+'% du total':'—';
+  var upAtt=document.getElementById('up-attente');if(upAtt)upAtt.textContent=attente;
+  var upRap=document.getElementById('up-rappel');if(upRap)upRap.textContent=rappeler;
+}
+
+function upOpenModal(id){
+  document.getElementById('up-overlay').style.display='flex';
+  document.getElementById('up-edit-id').value=id||'';
+  if(id){
+    var c=upCalls.find(function(x){return x.id===id;});
+    if(!c)return;
+    document.getElementById('up-modal-title').textContent='Modifier — '+c.name;
+    document.getElementById('up-name').value=c.name||'';
+    document.getElementById('up-email').value=c.email||'';
+    document.getElementById('up-phone').value=c.phone||'';
+    document.getElementById('up-date').value=c.date||'';
+    document.getElementById('up-course').value=c.course||'ElaveFX';
+    document.getElementById('up-answered').value=c.answered||'Non';
+    document.getElementById('up-closed').value=c.closed||'';
+    document.getElementById('up-notes').value=c.notes||'';
+    document.getElementById('up-btn-delete').style.display='inline-flex';
+  } else {
+    document.getElementById('up-modal-title').textContent='Nouvel appel';
+    document.getElementById('up-name').value='';
+    document.getElementById('up-email').value='';
+    document.getElementById('up-phone').value='';
+    document.getElementById('up-date').value=new Date().toISOString().slice(0,10);
+    document.getElementById('up-course').value='ElaveFX';
+    document.getElementById('up-answered').value='Non';
+    document.getElementById('up-closed').value='';
+    document.getElementById('up-notes').value='';
+    document.getElementById('up-btn-delete').style.display='none';
+  }
+}
+
+function upCloseModal(){
+  document.getElementById('up-overlay').style.display='none';
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.id==='up-overlay')upCloseModal();
+});
+
+async function upSaveCall(){
+  var id=document.getElementById('up-edit-id').value||('up'+Date.now());
+  var name=document.getElementById('up-name').value.trim();
+  if(!name){alert('Le nom est requis.');return;}
+  var c={
+    id:id,name:name,
+    email:document.getElementById('up-email').value.trim(),
+    phone:document.getElementById('up-phone').value.trim(),
+    date:document.getElementById('up-date').value,
+    course:document.getElementById('up-course').value,
+    answered:document.getElementById('up-answered').value,
+    closed:document.getElementById('up-closed').value,
+    notes:document.getElementById('up-notes').value
+  };
+  var idx=upCalls.findIndex(function(x){return x.id===id;});
+  if(idx>=0)upCalls[idx]=c;else upCalls.push(c);
+  await upSaveCalls();
+  upCloseModal();
+  upRender();
+}
+
+async function upDeleteCall(){
+  var id=document.getElementById('up-edit-id').value;
+  if(!id)return;
+  if(!confirm('Supprimer cet appel ?'))return;
+  upCalls=upCalls.filter(function(x){return x.id!==id;});
+  await upSaveCalls();
+  upCloseModal();
+  upRender();
+}
+
 if(loadSession()){
   startApp();
 }
