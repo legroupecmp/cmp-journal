@@ -1429,16 +1429,20 @@ function upCalRender(){
 
   var summary=document.getElementById('up-cal-summary');
   if(summary){
-    summary.innerHTML=[
-      {l:'Appels',v:mCalls,c:'var(--navy)'},
-      {l:'Closes',v:mClosed,c:'var(--green)'},
-      {l:'À rappeler',v:mRappel,c:'var(--red)'},
-      {l:'Montant vendu',v:'$'+mSold.toFixed(2),c:'var(--green)'},
-      {l:'Montant collecté',v:'$'+mCollected.toFixed(2),c:'var(--blue)'}
-    ].map(function(s){
+    var closeRate=mCalls>0?Math.round(mClosed/mCalls*100):0;
+    var collectRate=mSold>0?Math.round(mCollected/mSold*100):0;
+    var cards=[
+      {l:'Appels',v:mCalls,c:'var(--navy)',sub:null},
+      {l:'Closes',v:mClosed,c:'var(--green)',sub:closeRate+'% des appels'},
+      {l:'À rappeler',v:mRappel,c:'var(--red)',sub:null},
+      {l:'Montant vendu',v:'$'+mSold.toFixed(2),c:'var(--green)',sub:null},
+      {l:'Montant collecté',v:'$'+mCollected.toFixed(2),c:'var(--blue)',sub:collectRate+'% du vendu'}
+    ];
+    summary.innerHTML=cards.map(function(s){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
         +'<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
+        +(s.sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;">'+s.sub+'</div>':'')
         +'</div>';
     }).join('');
   }
