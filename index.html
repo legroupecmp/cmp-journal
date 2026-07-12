@@ -388,40 +388,98 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
     <!-- UPSELL -->
     <div id="tab-upsell" class="tab-content">
-      <div class="section-badge">📞 Upsell</div>
-      <div class="page-title">Suivi des appels</div>
-      <div class="page-sub">Stock → ElaveFX · Forex · Crypto — relance automatique à 10 jours</div>
 
-      <div class="stat-grid" style="margin-bottom:1.25rem;">
-        <div class="stat-card"><div class="stat-label">Appels loggés</div><div class="stat-val" id="up-total">—</div><div class="stat-sub">Depuis le début</div></div>
-        <div class="stat-card"><div class="stat-label">Ont répondu</div><div class="stat-val green" id="up-oui">—</div><div class="stat-sub" id="up-oui-pct">—</div></div>
-        <div class="stat-card"><div class="stat-label">En attente (&lt;10j)</div><div class="stat-val" id="up-attente">—</div><div class="stat-sub">Délai pas encore écoulé</div></div>
-        <div class="stat-card"><div class="stat-label">À rappeler aujourd'hui</div><div class="stat-val red" id="up-rappel">—</div><div class="stat-sub">10 jours sans réponse</div></div>
+      <!-- Sous-navigation Upsell -->
+      <div style="display:flex;gap:0;background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow);">
+        <button id="up-sub-appels" onclick="upSubTab('appels')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:var(--navy);color:white;cursor:pointer;">📞 Appels</button>
+        <button id="up-sub-etudiants" onclick="upSubTab('etudiants')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--text3);cursor:pointer;border-left:1px solid var(--border);">🎓 Nouveaux étudiants</button>
+        <button id="up-sub-calendrier" onclick="upSubTab('calendrier')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--text3);cursor:pointer;border-left:1px solid var(--border);">📅 Calendrier</button>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
-        <button class="btn-next" onclick="upOpenModal(null)">+ Nouvel appel</button>
-        <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upRender()">
-          <option value="">Tous les statuts</option>
-          <option value="oui">A répondu</option>
-          <option value="attente">En attente</option>
-          <option value="rappeler">À rappeler</option>
-        </select>
-        <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upRender()">
-          <option value="">Tous les cours</option>
-          <option value="ElaveFX">ElaveFX</option>
-          <option value="Forex">Forex</option>
-          <option value="Crypto">Crypto</option>
-        </select>
-        <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upRender()">
+      <!-- === SECTION APPELS === -->
+      <div id="up-section-appels">
+        <div class="section-badge">📞 Appels Upsell</div>
+        <div class="page-title">Suivi des appels</div>
+        <div class="page-sub">Relance automatique à 10 jours · Nouveaux étudiants à contacter après 25 jours</div>
+
+        <div class="stat-grid" style="margin-bottom:1.25rem;">
+          <div class="stat-card"><div class="stat-label">Appels loggés</div><div class="stat-val" id="up-total">—</div><div class="stat-sub">Depuis le début</div></div>
+          <div class="stat-card"><div class="stat-label">Ont répondu</div><div class="stat-val green" id="up-oui">—</div><div class="stat-sub" id="up-oui-pct">—</div></div>
+          <div class="stat-card"><div class="stat-label">En attente (&lt;10j)</div><div class="stat-val" id="up-attente">—</div><div class="stat-sub">Délai pas encore écoulé</div></div>
+          <div class="stat-card"><div class="stat-label">À rappeler</div><div class="stat-val red" id="up-rappel">—</div><div class="stat-sub">10j sans réponse</div></div>
+        </div>
+
+        <!-- Alerte nouveaux étudiants à contacter -->
+        <div id="up-alert-box" style="display:none;background:#fef9ec;border:1px solid rgba(184,134,46,0.3);border-radius:var(--radius);padding:0.85rem 1.25rem;margin-bottom:1rem;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-bottom:0.4rem;">⏰ Nouveaux étudiants — 25 jours écoulés</div>
+          <div id="up-alert-list" style="font-size:13px;color:var(--text2);"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
+          <button class="btn-next" onclick="upOpenModal(null)">+ Nouvel appel</button>
+          <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upRender()">
+            <option value="">Tous les statuts</option>
+            <option value="oui">A répondu</option>
+            <option value="attente">En attente</option>
+            <option value="rappeler">À rappeler</option>
+            <option value="a-contacter">À contacter (25j)</option>
+          </select>
+          <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upRender()">
+            <option value="">Tous les cours</option>
+            <option value="ElaveFX">ElaveFX</option>
+            <option value="Forex">Forex</option>
+            <option value="Crypto">Crypto</option>
+          </select>
+          <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upRender()">
+        </div>
+
+        <div class="q-card" style="padding:0;overflow:hidden;">
+          <div id="up-rows"><div class="loading-msg">Chargement...</div></div>
+        </div>
       </div>
 
-      <div class="q-card" style="padding:0;overflow:hidden;">
-        <div id="up-rows"><div class="loading-msg">Chargement...</div></div>
+      <!-- === SECTION NOUVEAUX ÉTUDIANTS === -->
+      <div id="up-section-etudiants" style="display:none;">
+        <div class="section-badge">🎓 Formation</div>
+        <div class="page-title">Nouveaux étudiants</div>
+        <div class="page-sub">Notification automatique après 25 jours — passage en "À contacter"</div>
+
+        <div class="stat-grid" style="margin-bottom:1.25rem;">
+          <div class="stat-card"><div class="stat-label">Total inscrits</div><div class="stat-val" id="nstu-total">—</div><div class="stat-sub">Depuis le début</div></div>
+          <div class="stat-card"><div class="stat-label">À contacter</div><div class="stat-val red" id="nstu-alert">—</div><div class="stat-sub">25 jours écoulés</div></div>
+          <div class="stat-card"><div class="stat-label">En formation</div><div class="stat-val" id="nstu-encours">—</div><div class="stat-sub">Moins de 25 jours</div></div>
+          <div class="stat-card"><div class="stat-label">Frontsell total</div><div class="stat-val green" id="nstu-frontsell">—</div><div class="stat-sub">Montants collectés</div></div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <button class="btn-next" onclick="nsOpenModal(null)">+ Nouvel étudiant</button>
+        </div>
+
+        <div class="q-card" style="padding:0;overflow:hidden;">
+          <div id="nstu-rows"><div class="loading-msg">Chargement...</div></div>
+        </div>
       </div>
+
+      <!-- === SECTION CALENDRIER === -->
+      <div id="up-section-calendrier" style="display:none;">
+        <div class="section-badge">📅 Performance</div>
+        <div class="page-title">Calendrier Upsell</div>
+        <div class="page-sub">Appels, closes, montants — vue mensuelle</div>
+
+        <div class="q-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <button class="btn-back btn-sm" onclick="upCalPrev()">← Précédent</button>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);" id="up-cal-title">—</div>
+            <button class="btn-back btn-sm" onclick="upCalNext()">Suivant →</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;" id="up-cal-grid"></div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:1.25rem;" id="up-cal-summary"></div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- MODAL UPSELL -->
+    <!-- MODAL APPEL UPSELL -->
     <div id="up-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="up-modal-title">Nouvel appel</div>
@@ -431,17 +489,24 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><input class="q-input" type="tel" id="up-phone" placeholder="819-555-0123"></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Date de l'appel</label><input class="q-input" type="date" id="up-date"></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Cours proposé</label>
-          <select class="q-input" id="up-course"><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
+          <select class="q-input" id="up-course"><option>Stock</option><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
         </div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">A répondu ?</label>
           <select class="q-input" id="up-answered"><option value="Non">Non</option><option value="Oui">Oui</option></select>
         </div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Vente closée ?</label>
-          <select class="q-input" id="up-closed">
+          <select class="q-input" id="up-closed" onchange="upToggleCloseFields()">
             <option value="">Pas encore déterminé</option>
             <option value="closed">💰 Closé</option>
             <option value="notclosed">💩 Non closé</option>
           </select>
+        </div>
+        <div id="up-close-fields" style="display:none;background:var(--cream2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:0.75rem;">💰 Détails de la vente</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><label class="input-label">Montant vendu $</label><input class="q-input" type="number" id="up-amount" placeholder="0.00" min="0" step="0.01"></div>
+            <div><label class="input-label">Montant collecté $</label><input class="q-input" type="number" id="up-collected" placeholder="0.00" min="0" step="0.01"></div>
+          </div>
         </div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="up-notes" rows="3" placeholder="Contexte, objections..."></textarea></div>
         <div style="display:flex;justify-content:space-between;margin-top:1.25rem;gap:8px;">
@@ -449,6 +514,37 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
           <div style="display:flex;gap:8px;margin-left:auto;">
             <button class="btn-back btn-sm" onclick="upCloseModal()">Annuler</button>
             <button class="btn-next btn-sm" onclick="upSaveCall()">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NOUVEL ÉTUDIANT -->
+    <div id="ns-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:420px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="ns-modal-title">Nouvel étudiant</div>
+        <input type="hidden" id="ns-edit-id">
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><input class="q-input" type="text" id="ns-name" placeholder="Ex. Marc Tremblay"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><input class="q-input" type="email" id="ns-email" placeholder="marc@courriel.com"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><input class="q-input" type="tel" id="ns-phone" placeholder="819-555-0123"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Date d'arrivée en formation</label><input class="q-input" type="date" id="ns-date"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Formation inscrite</label>
+          <select class="q-input" id="ns-course"><option>Stock</option><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
+        </div>
+        <div style="margin-bottom:0.85rem;background:var(--cream2);border-radius:9px;padding:0.85rem;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">💵 Frontsell</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><label class="input-label">Prix de vente $</label><input class="q-input" type="number" id="ns-price" placeholder="0.00" min="0" step="0.01"></div>
+            <div><label class="input-label">Montant collecté $</label><input class="q-input" type="number" id="ns-frontsell" placeholder="0.00" min="0" step="0.01"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic;">Montant comptant payé à l'inscription (le reste est financé)</div>
+        </div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="ns-notes" rows="2" placeholder="Contexte, source, objections..."></textarea></div>
+        <div style="display:flex;justify-content:space-between;margin-top:1.25rem;gap:8px;">
+          <button class="btn-danger" id="ns-btn-delete" style="display:none;" onclick="nsDeleteStudent()">🗑 Supprimer</button>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button class="btn-back btn-sm" onclick="nsCloseModal()">Annuler</button>
+            <button class="btn-next btn-sm" onclick="nsSaveStudent()">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -939,73 +1035,114 @@ if(dz){
 
 /* ---- AUTO-RECONNEXION ---- */
 /* ---- UPSELL ---- */
-var upCalls=[];
+var upCalls=[], upNstu=[], upCalYear=new Date().getFullYear(), upCalMonth=new Date().getMonth();
 
-async function upLoadCalls(){
-  try{
-    var data=await fsLoad('upsell/calls');
-    upCalls=data&&data.list?data.list:[];
-  }catch(e){upCalls=[];}
-  upRender();
+/* Sous-onglets */
+function upSubTab(name){
+  ['appels','etudiants','calendrier'].forEach(function(s){
+    var sec=document.getElementById('up-section-'+s);
+    var btn=document.getElementById('up-sub-'+s);
+    if(sec)sec.style.display=s===name?'block':'none';
+    if(btn){btn.style.background=s===name?'var(--navy)':'white';btn.style.color=s===name?'white':'var(--text3)';}
+  });
+  if(name==='appels')upRender();
+  if(name==='etudiants')nsRender();
+  if(name==='calendrier')upCalRender();
 }
 
+/* Firebase */
+async function upLoadCalls(){
+  try{var d=await fsLoad('upsell/calls');upCalls=d&&d.list?d.list:[];}catch(e){upCalls=[];}
+  try{var d2=await fsLoad('upsell/nstu');upNstu=d2&&d2.list?d2.list:[];}catch(e){upNstu=[];}
+  upRender();
+  nsRender();
+}
 async function upSaveCalls(){
   setSaveBadge('☁️ Sauvegarde...');
-  var ok=await fsSave('upsell/calls',{list:upCalls,updatedAt:new Date().toISOString()});
-  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+  await fsSave('upsell/calls',{list:upCalls,updatedAt:new Date().toISOString()});
+  setSaveBadge('☁️ Sauvegardé');
+}
+async function upSaveNstu(){
+  setSaveBadge('☁️ Sauvegarde...');
+  await fsSave('upsell/nstu',{list:upNstu,updatedAt:new Date().toISOString()});
+  setSaveBadge('☁️ Sauvegardé');
 }
 
-function upDaysBetween(dateStr){
-  var d=new Date(dateStr+'T00:00:00');
-  var today=new Date();today.setHours(0,0,0,0);
-  return Math.floor((today-d)/86400000);
+/* Utilitaires */
+function upDays(dateStr){
+  var d=new Date(dateStr+'T00:00:00'),t=new Date();
+  t.setHours(0,0,0,0);
+  return Math.floor((t-d)/86400000);
 }
-
-function upState(c){
-  if(c.answered==='Oui')return 'oui';
-  var days=upDaysBetween(c.date);
-  return days>=10?'rappeler':'attente';
-}
-
 function upFollowup(dateStr){
-  var d=new Date(dateStr+'T00:00:00');
-  d.setDate(d.getDate()+10);
+  var d=new Date(dateStr+'T00:00:00');d.setDate(d.getDate()+10);
   return d.toISOString().slice(0,10);
 }
-
+function upState(c){
+  if(c.answered==='Oui')return 'oui';
+  return upDays(c.date)>=10?'rappeler':'attente';
+}
 function upClosedBadge(v){
   if(v==='closed')return '<span style="background:#e8f4ec;color:var(--green);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💰 Closé</span>';
   if(v==='notclosed')return '<span style="background:#fceaea;color:var(--red);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💩 Non closé</span>';
   return '<span style="background:var(--cream2);color:var(--text3);border-radius:999px;padding:2px 10px;font-size:11px;">—</span>';
 }
+function upToggleCloseFields(){
+  var v=document.getElementById('up-closed').value;
+  var f=document.getElementById('up-close-fields');
+  if(f)f.style.display=v==='closed'?'block':'none';
+}
+function fmt$(n){return n!=null&&n!==''?'$'+parseFloat(n).toFixed(2):'—';}
 
+/* Alerte 25j */
+function upCheckAlerts(){
+  var toContact=upNstu.filter(function(s){return upDays(s.date)>=25&&!s.contacted;});
+  var box=document.getElementById('up-alert-box');
+  var list=document.getElementById('up-alert-list');
+  if(!box||!list)return;
+  if(toContact.length){
+    box.style.display='block';
+    list.innerHTML=toContact.map(function(s){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(184,134,46,0.15);">'
+        +'<span><strong>'+s.name+'</strong> — '+s.course+' — inscrit le '+s.date+'</span>'
+        +'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 10px;" onclick="nsMarkContacted(\''+s.id+'\')">✓ Contacté</button>'
+        +'</div>';
+    }).join('');
+  } else {
+    box.style.display='none';
+  }
+}
+
+/* Rendu tableau appels */
 function upRender(){
+  upCheckAlerts();
   var statusF=document.getElementById('upFilterStatus')?document.getElementById('upFilterStatus').value:'';
   var coursF=document.getElementById('upFilterCours')?document.getElementById('upFilterCours').value:'';
   var q=(document.getElementById('upSearch')?document.getElementById('upSearch').value:'').trim().toLowerCase();
 
-  var enriched=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});});
-  var filtered=enriched.filter(function(c){
+  /* Fusionner appels normaux + étudiants à contacter (25j) */
+  var fromNstu=upNstu.filter(function(s){return upDays(s.date)>=25&&!s.contacted;}).map(function(s){
+    return {id:'nstu_'+s.id,name:s.name,email:s.email,phone:s.phone,date:s.date,course:s.course,answered:'Non',closed:'',notes:'[Formation] Pas encore contacté',_fromNstu:true,state:'a-contacter'};
+  });
+  var allRows=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});}).concat(fromNstu);
+
+  var filtered=allRows.filter(function(c){
     if(statusF&&c.state!==statusF)return false;
     if(coursF&&c.course!==coursF)return false;
     if(q&&!(c.name||'').toLowerCase().includes(q))return false;
     return true;
   });
-  filtered.sort(function(a,b){
-    var order={rappeler:0,attente:1,oui:2};
-    return (order[a.state]||0)-(order[b.state]||0)||(a.date||'').localeCompare(b.date||'');
-  });
+  var order={rappeler:0,'a-contacter':1,attente:2,oui:3};
+  filtered.sort(function(a,b){return (order[a.state]||4)-(order[b.state]||4)||(a.date||'').localeCompare(b.date||'');});
 
   var rowsEl=document.getElementById('up-rows');
   if(!rowsEl)return;
-
   if(!filtered.length){
     rowsEl.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun appel — clique sur <strong>+ Nouvel appel</strong> pour commencer.</div>';
   } else {
     var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
       +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Email</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Téléphone</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Date appel</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Cours</th>'
@@ -1013,42 +1150,48 @@ function upRender(){
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Relance</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Closé</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Vendu</th>'
+      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Collecté</th>'
       +'</tr></thead><tbody>';
-
     filtered.forEach(function(c){
-      var pillColor=c.state==='oui'?'var(--green)':c.state==='rappeler'?'var(--red)':'#b8862e';
-      var pillBg=c.state==='oui'?'#e8f4ec':c.state==='rappeler'?'#fceaea':'#f6eedd';
-      var pillLabel=c.state==='oui'?'A répondu':c.state==='rappeler'?'À rappeler':'En attente';
-      html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="upOpenModal(\''+c.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
+      var sc={oui:'var(--green)',rappeler:'var(--red)','a-contacter':'#b8862e',attente:'#b8862e'};
+      var sb={oui:'#e8f4ec',rappeler:'#fceaea','a-contacter':'#fef9ec',attente:'#fef9ec'};
+      var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (25j)',attente:'En attente'};
+      var click=c._fromNstu?'':'onclick="upOpenModal(\''+c.id+'\')"';
+      html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" '+click+' onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
         +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(c.name||'—')+'</td>'
-        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.email||'—')+'</td>'
         +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.phone||'—')+'</td>'
         +'<td style="padding:10px 14px;">'+(c.date||'—')+'</td>'
         +'<td style="padding:10px 14px;">'+(c.course||'—')+'</td>'
         +'<td style="padding:10px 14px;">'+(c.answered||'—')+'</td>'
         +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.date?upFollowup(c.date):'—')+'</td>'
-        +'<td style="padding:10px 14px;"><span style="background:'+pillBg+';color:'+pillColor+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+pillLabel+'</span></td>'
+        +'<td style="padding:10px 14px;"><span style="background:'+(sb[c.state]||'#eee')+';color:'+(sc[c.state]||'#666')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(sl[c.state]||c.state)+'</span></td>'
         +'<td style="padding:10px 14px;">'+upClosedBadge(c.closed)+'</td>'
+        +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(c.amount?fmt$(c.amount):'—')+'</td>'
+        +'<td style="padding:10px 14px;font-weight:700;color:var(--blue);">'+(c.collected?fmt$(c.collected):'—')+'</td>'
         +'</tr>';
     });
     html+='</tbody></table>';
     rowsEl.innerHTML=html;
   }
 
-  var total=enriched.length;
-  var oui=enriched.filter(function(c){return c.state==='oui';}).length;
-  var attente=enriched.filter(function(c){return c.state==='attente';}).length;
-  var rappeler=enriched.filter(function(c){return c.state==='rappeler';}).length;
-  var upTotal=document.getElementById('up-total');if(upTotal)upTotal.textContent=total;
-  var upOui=document.getElementById('up-oui');if(upOui)upOui.textContent=oui;
-  var upPct=document.getElementById('up-oui-pct');if(upPct)upPct.textContent=total?Math.round(oui/total*100)+'% du total':'—';
-  var upAtt=document.getElementById('up-attente');if(upAtt)upAtt.textContent=attente;
-  var upRap=document.getElementById('up-rappel');if(upRap)upRap.textContent=rappeler;
+  var base=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});});
+  var total=base.length, oui=base.filter(function(c){return c.state==='oui';}).length;
+  var attente=base.filter(function(c){return c.state==='attente';}).length;
+  var rappeler=base.filter(function(c){return c.state==='rappeler';}).length;
+  var el;
+  el=document.getElementById('up-total');if(el)el.textContent=total;
+  el=document.getElementById('up-oui');if(el)el.textContent=oui;
+  el=document.getElementById('up-oui-pct');if(el)el.textContent=total?Math.round(oui/total*100)+'% du total':'—';
+  el=document.getElementById('up-attente');if(el)el.textContent=attente;
+  el=document.getElementById('up-rappel');if(el)el.textContent=rappeler;
 }
 
+/* Modal appel */
 function upOpenModal(id){
   document.getElementById('up-overlay').style.display='flex';
   document.getElementById('up-edit-id').value=id||'';
+  var cf=document.getElementById('up-close-fields');
   if(id){
     var c=upCalls.find(function(x){return x.id===id;});
     if(!c)return;
@@ -1060,29 +1203,23 @@ function upOpenModal(id){
     document.getElementById('up-course').value=c.course||'ElaveFX';
     document.getElementById('up-answered').value=c.answered||'Non';
     document.getElementById('up-closed').value=c.closed||'';
+    document.getElementById('up-amount').value=c.amount||'';
+    document.getElementById('up-collected').value=c.collected||'';
     document.getElementById('up-notes').value=c.notes||'';
     document.getElementById('up-btn-delete').style.display='inline-flex';
+    if(cf)cf.style.display=c.closed==='closed'?'block':'none';
   } else {
     document.getElementById('up-modal-title').textContent='Nouvel appel';
-    document.getElementById('up-name').value='';
-    document.getElementById('up-email').value='';
-    document.getElementById('up-phone').value='';
+    ['up-name','up-email','up-phone','up-notes','up-amount','up-collected'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('up-date').value=new Date().toISOString().slice(0,10);
     document.getElementById('up-course').value='ElaveFX';
     document.getElementById('up-answered').value='Non';
     document.getElementById('up-closed').value='';
-    document.getElementById('up-notes').value='';
     document.getElementById('up-btn-delete').style.display='none';
+    if(cf)cf.style.display='none';
   }
 }
-
-function upCloseModal(){
-  document.getElementById('up-overlay').style.display='none';
-}
-
-document.addEventListener('click',function(e){
-  if(e.target.id==='up-overlay')upCloseModal();
-});
+function upCloseModal(){document.getElementById('up-overlay').style.display='none';}
 
 async function upSaveCall(){
   var id=document.getElementById('up-edit-id').value||('up'+Date.now());
@@ -1096,24 +1233,219 @@ async function upSaveCall(){
     course:document.getElementById('up-course').value,
     answered:document.getElementById('up-answered').value,
     closed:document.getElementById('up-closed').value,
+    amount:document.getElementById('up-amount').value,
+    collected:document.getElementById('up-collected').value,
     notes:document.getElementById('up-notes').value
   };
   var idx=upCalls.findIndex(function(x){return x.id===id;});
   if(idx>=0)upCalls[idx]=c;else upCalls.push(c);
   await upSaveCalls();
-  upCloseModal();
-  upRender();
+  upCloseModal();upRender();
 }
-
 async function upDeleteCall(){
   var id=document.getElementById('up-edit-id').value;
-  if(!id)return;
-  if(!confirm('Supprimer cet appel ?'))return;
+  if(!id||!confirm('Supprimer cet appel ?'))return;
   upCalls=upCalls.filter(function(x){return x.id!==id;});
-  await upSaveCalls();
-  upCloseModal();
-  upRender();
+  await upSaveCalls();upCloseModal();upRender();
 }
+
+/* ---- NOUVEAUX ÉTUDIANTS ---- */
+function nsRender(){
+  var rows=document.getElementById('nstu-rows');
+  if(!rows)return;
+  var total=upNstu.length;
+  var alert25=upNstu.filter(function(s){return upDays(s.date)>=25&&!s.contacted;}).length;
+  var encours=upNstu.filter(function(s){return upDays(s.date)<25;}).length;
+  var frontsellTotal=upNstu.reduce(function(sum,s){return sum+(parseFloat(s.frontsell)||0);},0);
+  var el;
+  el=document.getElementById('nstu-total');if(el)el.textContent=total;
+  el=document.getElementById('nstu-alert');if(el)el.textContent=alert25;
+  el=document.getElementById('nstu-encours');if(el)el.textContent=encours;
+  el=document.getElementById('nstu-frontsell');if(el)el.textContent=frontsellTotal>0?'$'+frontsellTotal.toFixed(2):'—';
+
+  if(!upNstu.length){
+    rows.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun étudiant — clique sur <strong>+ Nouvel étudiant</strong> pour commencer.</div>';
+    return;
+  }
+  var sorted=upNstu.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+  var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+    +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Téléphone</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Arrivée</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Formation</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Jours</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Prix vente</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell collecté</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
+    +'</tr></thead><tbody>';
+  sorted.forEach(function(s){
+    var days=upDays(s.date);
+    var ready=days>=25&&!s.contacted;
+    var contacted=s.contacted;
+    var statusBg=ready?'#fef9ec':contacted?'#e8f4ec':'#e8eef7';
+    var statusColor=ready?'#b8862e':contacted?'var(--green)':'var(--blue)';
+    var statusLabel=ready?'⏰ À contacter':contacted?'✓ Contacté':'En formation';
+    html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
+      +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(s.name||'—')+'</td>'
+      +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(s.phone||'—')+'</td>'
+      +'<td style="padding:10px 14px;">'+(s.date||'—')+'</td>'
+      +'<td style="padding:10px 14px;">'+(s.course||'—')+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:'+(days>=25?'var(--red)':'var(--navy)')+';">'+days+'j</td>'
+      +'<td style="padding:10px 14px;color:var(--text2);">'+(s.price?fmt$(s.price):'—')+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
+      +'<td style="padding:10px 14px;"><span style="background:'+statusBg+';color:'+statusColor+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+statusLabel+'</span></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table>';
+  rows.innerHTML=html;
+}
+
+function nsOpenModal(id){
+  document.getElementById('ns-overlay').style.display='flex';
+  document.getElementById('ns-edit-id').value=id||'';
+  if(id){
+    var s=upNstu.find(function(x){return x.id===id;});
+    if(!s)return;
+    document.getElementById('ns-modal-title').textContent='Modifier — '+s.name;
+    document.getElementById('ns-name').value=s.name||'';
+    document.getElementById('ns-email').value=s.email||'';
+    document.getElementById('ns-phone').value=s.phone||'';
+    document.getElementById('ns-date').value=s.date||'';
+    document.getElementById('ns-course').value=s.course||'ElaveFX';
+    document.getElementById('ns-price').value=s.price||'';
+    document.getElementById('ns-frontsell').value=s.frontsell||'';
+    document.getElementById('ns-notes').value=s.notes||'';
+    document.getElementById('ns-btn-delete').style.display='inline-flex';
+  } else {
+    document.getElementById('ns-modal-title').textContent='Nouvel étudiant';
+    ['ns-name','ns-email','ns-phone','ns-price','ns-frontsell','ns-notes'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
+    document.getElementById('ns-date').value=new Date().toISOString().slice(0,10);
+    document.getElementById('ns-course').value='ElaveFX';
+    document.getElementById('ns-btn-delete').style.display='none';
+  }
+}
+function nsCloseModal(){document.getElementById('ns-overlay').style.display='none';}
+
+async function nsSaveStudent(){
+  var id=document.getElementById('ns-edit-id').value||('ns'+Date.now());
+  var name=document.getElementById('ns-name').value.trim();
+  if(!name){alert('Le nom est requis.');return;}
+  var s={
+    id:id,name:name,
+    email:document.getElementById('ns-email').value.trim(),
+    phone:document.getElementById('ns-phone').value.trim(),
+    date:document.getElementById('ns-date').value,
+    course:document.getElementById('ns-course').value,
+    price:document.getElementById('ns-price').value,
+    frontsell:document.getElementById('ns-frontsell').value,
+    notes:document.getElementById('ns-notes').value,
+    contacted:upNstu.find(function(x){return x.id===id;})?upNstu.find(function(x){return x.id===id;}).contacted:false
+  };
+  var idx=upNstu.findIndex(function(x){return x.id===id;});
+  if(idx>=0)upNstu[idx]=s;else upNstu.push(s);
+  await upSaveNstu();nsCloseModal();nsRender();upCheckAlerts();
+}
+async function nsDeleteStudent(){
+  var id=document.getElementById('ns-edit-id').value;
+  if(!id||!confirm('Supprimer cet étudiant ?'))return;
+  upNstu=upNstu.filter(function(x){return x.id!==id;});
+  await upSaveNstu();nsCloseModal();nsRender();upCheckAlerts();
+}
+async function nsMarkContacted(id){
+  var s=upNstu.find(function(x){return x.id===id;});
+  if(s){s.contacted=true;await upSaveNstu();nsRender();upCheckAlerts();}
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.id==='up-overlay')upCloseModal();
+  if(e.target.id==='ns-overlay')nsCloseModal();
+});
+
+/* ---- CALENDRIER UPSELL ---- */
+function upCalRender(){
+  var title=document.getElementById('up-cal-title');
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var DAYS_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  if(title)title.textContent=MONTHS_FR[upCalMonth]+' '+upCalYear;
+
+  var grid=document.getElementById('up-cal-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+
+  DAYS_FR.forEach(function(d){
+    var el=document.createElement('div');
+    el.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 0;';
+    el.textContent=d;grid.appendChild(el);
+  });
+
+  var firstDay=new Date(upCalYear,upCalMonth,1).getDay();
+  var dim=new Date(upCalYear,upCalMonth+1,0).getDate();
+  var today=new Date();
+
+  /* Construire map par date */
+  var dayMap={};
+  upCalls.forEach(function(c){
+    if(!c.date)return;
+    var d=c.date;
+    if(!dayMap[d])dayMap[d]={calls:0,closed:0,rappeler:0,amountSold:0,amountCollected:0};
+    dayMap[d].calls++;
+    var st=upState(c);
+    if(c.closed==='closed')dayMap[d].closed++;
+    if(st==='rappeler')dayMap[d].rappeler++;
+    dayMap[d].amountSold+=parseFloat(c.amount)||0;
+    dayMap[d].amountCollected+=parseFloat(c.collected)||0;
+  });
+
+  var mCalls=0,mClosed=0,mRappel=0,mSold=0,mCollected=0;
+
+  for(var i=0;i<firstDay;i++){
+    var e=document.createElement('div');e.style.cssText='background:transparent;border-color:transparent;min-height:70px;';
+    grid.appendChild(e);
+  }
+
+  for(var day=1;day<=dim;day++){
+    var cell=document.createElement('div');
+    var mm=String(upCalMonth+1).padStart(2,'0'),dd=String(day).padStart(2,'0');
+    var ds=upCalYear+'-'+mm+'-'+dd;
+    var isToday=today.getFullYear()===upCalYear&&today.getMonth()===upCalMonth&&today.getDate()===day;
+    var hasTrade=!!dayMap[ds];
+    cell.style.cssText='background:white;border:1px solid var(--border);border-radius:8px;padding:5px 6px;min-height:70px;'+(isToday?'border-color:var(--blue-light);':'')+(hasTrade&&dayMap[ds].closed>0?'background:#f7fcf9;border-color:rgba(26,122,74,0.25);':'');
+
+    var numEl=document.createElement('div');
+    numEl.style.cssText='font-size:11px;font-weight:700;color:'+(isToday?'var(--blue)':'var(--text3)')+';margin-bottom:3px;';
+    numEl.textContent=day;cell.appendChild(numEl);
+
+    if(hasTrade){
+      var d=dayMap[ds];
+      mCalls+=d.calls;mClosed+=d.closed;mRappel+=d.rappeler;mSold+=d.amountSold;mCollected+=d.amountCollected;
+      if(d.calls){var el2=document.createElement('div');el2.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el2.textContent=d.calls+' appel'+(d.calls>1?'s':'');cell.appendChild(el2);}
+      if(d.closed){var el3=document.createElement('div');el3.style.cssText='font-size:10px;color:var(--green);font-weight:700;';el3.textContent='💰 '+d.closed+' closé'+(d.closed>1?'s':'');cell.appendChild(el3);}
+      if(d.rappeler){var el4=document.createElement('div');el4.style.cssText='font-size:10px;color:var(--red);';el4.textContent='🔔 '+d.rappeler;cell.appendChild(el4);}
+      if(d.amountSold>0){var el5=document.createElement('div');el5.style.cssText='font-size:9px;color:var(--green);margin-top:2px;';el5.textContent='$'+d.amountSold.toFixed(0);cell.appendChild(el5);}
+    }
+    grid.appendChild(cell);
+  }
+
+  var summary=document.getElementById('up-cal-summary');
+  if(summary){
+    summary.innerHTML=[
+      {l:'Appels',v:mCalls,c:'var(--navy)'},
+      {l:'Closes',v:mClosed,c:'var(--green)'},
+      {l:'À rappeler',v:mRappel,c:'var(--red)'},
+      {l:'Montant vendu',v:'$'+mSold.toFixed(2),c:'var(--green)'},
+      {l:'Montant collecté',v:'$'+mCollected.toFixed(2),c:'var(--blue)'}
+    ].map(function(s){
+      return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
+        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
+        +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
+        +'</div>';
+    }).join('');
+  }
+}
+function upCalPrev(){if(upCalMonth===0){upCalMonth=11;upCalYear--;}else{upCalMonth--;}upCalRender();}
+function upCalNext(){if(upCalMonth===11){upCalMonth=0;upCalYear++;}else{upCalMonth++;}upCalRender();}
+
 
 if(loadSession()){
   startApp();
