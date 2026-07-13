@@ -499,6 +499,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
             <option value="">Pas encore déterminé</option>
             <option value="closed">💰 Closé</option>
             <option value="notclosed">💩 Non closé</option>
+            <option value="tryagain">⏰ Try Again</option>
           </select>
         </div>
         <div id="up-close-fields" style="display:none;background:var(--cream2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
@@ -1079,18 +1080,20 @@ function upFollowup(dateStr){
   return d.toISOString().slice(0,10);
 }
 function upState(c){
+  if(c.closed==='tryagain')return 'rappeler';
   if(c.answered==='Oui')return 'oui';
   return upDays(c.date)>=10?'rappeler':'attente';
 }
 function upClosedBadge(v){
   if(v==='closed')return '<span style="background:#e8f4ec;color:var(--green);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💰 Closé</span>';
   if(v==='notclosed')return '<span style="background:#fceaea;color:var(--red);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💩 Non closé</span>';
+  if(v==='tryagain')return '<span style="background:#fef9ec;color:#b8862e;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">⏰ Try Again</span>';
   return '<span style="background:var(--cream2);color:var(--text3);border-radius:999px;padding:2px 10px;font-size:11px;">—</span>';
 }
 function upToggleCloseFields(){
   var v=document.getElementById('up-closed').value;
   var f=document.getElementById('up-close-fields');
-  if(f)f.style.display=v==='closed'?'block':'none';
+  if(f)f.style.display=(v==='closed'||v==='tryagain')?'block':'none';
 }
 function fmt$(n){return n!=null&&n!==''?'$'+parseFloat(n).toFixed(2):'—';}
 
