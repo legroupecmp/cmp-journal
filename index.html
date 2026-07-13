@@ -1492,7 +1492,7 @@ function upCalRender(){
     ];
     summary.innerHTML=cards.map(function(s){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
-        +'<div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
+        +'<div style="font-family:&quot;Playfair Display&quot;,serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
         +(s.sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;">'+s.sub+'</div>':'')
         +'</div>';
@@ -1508,25 +1508,33 @@ function upOpenDayPanel(ds){
   var parts=ds.split('-');
   var MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   titleEl.textContent=parseInt(parts[2])+' '+MONTHS[parseInt(parts[1])-1]+' '+parts[0];
-  var html='';
+  contentEl.innerHTML='';
 
+  /* Appels du jour */
   var dayAppels=upCalls.filter(function(c){return c.date===ds;});
   if(dayAppels.length){
-    html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">📞 Appels ('+dayAppels.length+')</div>';
-    html+=dayAppels.map(function(c){
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;';
+    hdr.textContent='📞 Appels ('+dayAppels.length+')';
+    contentEl.appendChild(hdr);
+    dayAppels.forEach(function(c){
       var st=upState(c);
       var sc={oui:'var(--green)',rappeler:'var(--red)',attente:'#b8862e'};
       var sl={oui:'A répondu',rappeler:'À rappeler',attente:'En attente'};
       var closedStr=c.closed==='closed'?'💰 Closé':c.closed==='notclosed'?'💩 Non closé':c.closed==='tryagain'?'⏰ Try Again':'—';
-      return '<div style="background:var(--cream);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;" onclick="upOpenModal(''+c.id+'')">'
-        +'<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+      var row=document.createElement('div');
+      row.style.cssText='background:var(--cream);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
+      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
         +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+c.course+' · '+closedStr+'</div>'
         +'<div style="margin-top:4px;"><span style="font-size:10px;font-weight:700;color:'+(sc[st]||'var(--text3)')+';">'+(sl[st]||st)+'</span>'
         +(c.amount?'<span style="font-size:10px;color:var(--green);margin-left:8px;">$'+parseFloat(c.amount).toFixed(2)+'</span>':'')
-        +'</div></div>';
-    }).join('');
+        +'</div>';
+      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      contentEl.appendChild(row);
+    });
   }
 
+  /* Alertes cloches */
   var bells25=upNstu.filter(function(s){
     if(s.contacted)return false;
     var ad=new Date(s.date+'T00:00:00');ad.setDate(ad.getDate()+25);
@@ -1539,24 +1547,39 @@ function upOpenDayPanel(ds){
   });
 
   if(bells25.length||bells10.length){
-    html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:12px;margin-bottom:8px;">🔔 Alertes ce jour</div>';
+    var hdr2=document.createElement('div');
+    hdr2.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:12px;margin-bottom:8px;';
+    hdr2.textContent='🔔 Alertes ce jour';
+    contentEl.appendChild(hdr2);
+
     bells25.forEach(function(s){
-      html+='<div style="background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
-        +'<div><div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
-        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 25 jours en formation — '+s.course+'</div></div>'
-        +'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 8px;flex-shrink:0;" onclick="nsMarkContacted(\'"+s.id+"\')">✓</button>'
-        +'</div>';
+      var row=document.createElement('div');
+      row.style.cssText='background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
+      var info=document.createElement('div');
+      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
+        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 25 jours en formation — '+s.course+'</div>';
+      var btn=document.createElement('button');
+      btn.className='btn-next btn-sm';
+      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;';
+      btn.textContent='✓';
+      btn.addEventListener('click',(function(id){return function(){nsMarkContacted(id);};})(s.id));
+      row.appendChild(info);row.appendChild(btn);
+      contentEl.appendChild(row);
     });
+
     bells10.forEach(function(c){
-      html+='<div style="background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;" onclick="upOpenModal(\'"+c.id+"\')">'  
-        +'<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
-        +'<div style="font-size:11px;color:var(--red);margin-top:2px;">🔔 10 jours sans réponse — '+c.course+'</div>'
-        +'</div>';
+      var row=document.createElement('div');
+      row.style.cssText='background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
+      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:var(--red);margin-top:2px;">🔔 10 jours sans réponse — '+c.course+'</div>';
+      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      contentEl.appendChild(row);
     });
   }
 
-  if(!html)html='<div style="text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun appel ni alerte ce jour</div>';
-  contentEl.innerHTML=html;
+  if(!contentEl.children.length){
+    contentEl.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun appel ni alerte ce jour</div>';
+  }
   panel.style.display='block';
 }
 
