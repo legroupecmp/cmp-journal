@@ -464,16 +464,30 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div id="up-section-calendrier" style="display:none;">
         <div class="section-badge">📅 Performance</div>
         <div class="page-title">Calendrier Upsell</div>
-        <div class="page-sub">Appels, closes, montants — vue mensuelle</div>
+        <div class="page-sub">Appels, closes, montants — vue mensuelle · Clique sur un jour pour voir le détail</div>
 
-        <div class="q-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-            <button class="btn-back btn-sm" onclick="upCalPrev()">← Précédent</button>
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);" id="up-cal-title">—</div>
-            <button class="btn-back btn-sm" onclick="upCalNext()">Suivant →</button>
+        <!-- Alertes cloches -->
+        <div id="up-cal-alerts" style="display:none;margin-bottom:1rem;"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start;">
+          <div class="q-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+              <button class="btn-back btn-sm" onclick="upCalPrev()">← Précédent</button>
+              <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);" id="up-cal-title">—</div>
+              <button class="btn-back btn-sm" onclick="upCalNext()">Suivant →</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;" id="up-cal-grid"></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:1.25rem;" id="up-cal-summary"></div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;" id="up-cal-grid"></div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:1.25rem;" id="up-cal-summary"></div>
+
+          <!-- Panneau détail du jour -->
+          <div class="q-card" id="up-day-panel" style="display:none;position:sticky;top:120px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+              <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);" id="up-day-title">—</div>
+              <button onclick="upCloseDayPanel()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px;">✕</button>
+            </div>
+            <div id="up-day-content"></div>
+          </div>
         </div>
       </div>
 
@@ -1367,64 +1381,99 @@ document.addEventListener('click',function(e){
 
 /* ---- CALENDRIER UPSELL ---- */
 function upCalRender(){
-  var title=document.getElementById('up-cal-title');
   var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   var DAYS_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var title=document.getElementById('up-cal-title');
   if(title)title.textContent=MONTHS_FR[upCalMonth]+' '+upCalYear;
+
+  /* ALERTES CLOCHES */
+  var alertBox=document.getElementById('up-cal-alerts');
+  if(alertBox){
+    var alerts=[];
+    upNstu.forEach(function(s){var d=upDays(s.date);if(d>=25&&!s.contacted)alerts.push({type:'25j',name:s.name,course:s.course,days:d,id:s.id});});
+    upCalls.forEach(function(c){if(c.answered==='Oui'||c.closed==='closed')return;var d=upDays(c.date);if(d>=10)alerts.push({type:'10j',name:c.name,course:c.course,days:d,id:c.id});});
+    if(alerts.length){
+      alertBox.style.display='block';
+      alertBox.innerHTML='<div style="display:flex;flex-direction:column;gap:6px;">'+alerts.map(function(a){
+        var is25=a.type==='25j';
+        var bg=is25?'#fef9ec':'#fceaea';
+        var col=is25?'#b8862e':'var(--red)';
+        var bc=is25?'rgba(184,134,46,0.25)':'rgba(176,48,48,0.2)';
+        var label=is25?'🔔 25 jours en formation — prêt à contacter':'🔔 10 jours sans réponse — à rappeler';
+        return '<div style="background:'+bg+';border:1px solid '+bc+';border-radius:9px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;">'
+          +'<div><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+col+';">'+label+'</span>'
+          +'<div style="font-size:13px;color:var(--navy);margin-top:2px;"><strong>'+a.name+'</strong> — '+a.course+' — '+a.days+' jours</div></div>'
+          +(is25?'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 10px;flex-shrink:0;" onclick="nsMarkContacted(''+a.id+'')">✓ Contacté</button>':'')
+          +'</div>';
+      }).join('')+'</div>';
+    } else {alertBox.style.display='none';}
+  }
 
   var grid=document.getElementById('up-cal-grid');
   if(!grid)return;
   grid.innerHTML='';
-
-  DAYS_FR.forEach(function(d){
-    var el=document.createElement('div');
-    el.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 0;';
-    el.textContent=d;grid.appendChild(el);
-  });
+  DAYS_FR.forEach(function(d){var el=document.createElement('div');el.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 0;';el.textContent=d;grid.appendChild(el);});
 
   var firstDay=new Date(upCalYear,upCalMonth,1).getDay();
   var dim=new Date(upCalYear,upCalMonth+1,0).getDate();
   var today=new Date();
 
-  /* Construire map par date */
   var dayMap={};
   upCalls.forEach(function(c){
     if(!c.date)return;
-    var d=c.date;
-    if(!dayMap[d])dayMap[d]={calls:0,closed:0,rappeler:0,amountSold:0,amountCollected:0};
-    dayMap[d].calls++;
-    var st=upState(c);
-    if(c.closed==='closed')dayMap[d].closed++;
-    if(st==='rappeler')dayMap[d].rappeler++;
-    dayMap[d].amountSold+=parseFloat(c.amount)||0;
-    dayMap[d].amountCollected+=parseFloat(c.collected)||0;
+    if(!dayMap[c.date])dayMap[c.date]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0};
+    dayMap[c.date].calls.push(c);
+    if(c.closed==='closed')dayMap[c.date].closed++;
+    if(upState(c)==='rappeler')dayMap[c.date].rappeler++;
+    dayMap[c.date].amountSold+=parseFloat(c.amount)||0;
+    dayMap[c.date].amountCollected+=parseFloat(c.collected)||0;
+  });
+
+  var bellMap={};
+  upNstu.forEach(function(s){
+    if(!s.date||s.contacted)return;
+    var ad=new Date(s.date+'T00:00:00');ad.setDate(ad.getDate()+25);
+    var ds=ad.toISOString().slice(0,10);
+    if(!bellMap[ds])bellMap[ds]=[];
+    bellMap[ds].push({type:'25j',name:s.name,course:s.course,id:s.id});
+  });
+  upCalls.forEach(function(c){
+    if(!c.date||c.answered==='Oui'||c.closed==='closed')return;
+    var ad=new Date(c.date+'T00:00:00');ad.setDate(ad.getDate()+10);
+    var ds=ad.toISOString().slice(0,10);
+    if(!bellMap[ds])bellMap[ds]=[];
+    bellMap[ds].push({type:'10j',name:c.name,course:c.course,id:c.id});
   });
 
   var mCalls=0,mClosed=0,mRappel=0,mSold=0,mCollected=0;
-
-  for(var i=0;i<firstDay;i++){
-    var e=document.createElement('div');e.style.cssText='background:transparent;border-color:transparent;min-height:70px;';
-    grid.appendChild(e);
-  }
+  for(var i=0;i<firstDay;i++){var e=document.createElement('div');e.style.cssText='background:transparent;border-color:transparent;min-height:74px;';grid.appendChild(e);}
 
   for(var day=1;day<=dim;day++){
     var cell=document.createElement('div');
     var mm=String(upCalMonth+1).padStart(2,'0'),dd=String(day).padStart(2,'0');
     var ds=upCalYear+'-'+mm+'-'+dd;
     var isToday=today.getFullYear()===upCalYear&&today.getMonth()===upCalMonth&&today.getDate()===day;
-    var hasTrade=!!dayMap[ds];
-    cell.style.cssText='background:white;border:1px solid var(--border);border-radius:8px;padding:5px 6px;min-height:70px;'+(isToday?'border-color:var(--blue-light);':'')+(hasTrade&&dayMap[ds].closed>0?'background:#f7fcf9;border-color:rgba(26,122,74,0.25);':'');
+    var hasCalls=dayMap[ds]&&dayMap[ds].calls.length>0;
+    var hasBells=bellMap[ds]&&bellMap[ds].length>0;
+    var hasClose=hasCalls&&dayMap[ds].closed>0;
+    var borderColor=isToday?'var(--blue-light)':hasClose?'rgba(26,122,74,0.3)':hasBells?'rgba(184,134,46,0.35)':'var(--border)';
+    var bgColor=hasClose?'#f7fcf9':hasBells?'#fefbf3':'white';
+    cell.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:8px;padding:5px 6px;min-height:74px;cursor:pointer;transition:opacity 0.15s;';
+    cell.onmouseover=function(){this.style.opacity='0.8';};
+    cell.onmouseout=function(){this.style.opacity='1';};
+    cell.onclick=(function(d){return function(){upOpenDayPanel(d);};})(ds);
 
     var numEl=document.createElement('div');
-    numEl.style.cssText='font-size:11px;font-weight:700;color:'+(isToday?'var(--blue)':'var(--text3)')+';margin-bottom:3px;';
-    numEl.textContent=day;cell.appendChild(numEl);
+    numEl.style.cssText='font-size:11px;font-weight:700;color:'+(isToday?'var(--blue)':'var(--text3)')+';margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;';
+    numEl.innerHTML='<span>'+day+'</span>'+(hasBells?'<span style="font-size:12px;">🔔</span>':'');
+    cell.appendChild(numEl);
 
-    if(hasTrade){
+    if(hasCalls){
       var d=dayMap[ds];
-      mCalls+=d.calls;mClosed+=d.closed;mRappel+=d.rappeler;mSold+=d.amountSold;mCollected+=d.amountCollected;
-      if(d.calls){var el2=document.createElement('div');el2.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el2.textContent=d.calls+' appel'+(d.calls>1?'s':'');cell.appendChild(el2);}
-      if(d.closed){var el3=document.createElement('div');el3.style.cssText='font-size:10px;color:var(--green);font-weight:700;';el3.textContent='💰 '+d.closed+' closé'+(d.closed>1?'s':'');cell.appendChild(el3);}
-      if(d.rappeler){var el4=document.createElement('div');el4.style.cssText='font-size:10px;color:var(--red);';el4.textContent='🔔 '+d.rappeler;cell.appendChild(el4);}
+      mCalls+=d.calls.length;mClosed+=d.closed;mRappel+=d.rappeler;mSold+=d.amountSold;mCollected+=d.amountCollected;
+      var el2=document.createElement('div');el2.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el2.textContent=d.calls.length+' appel'+(d.calls.length>1?'s':'');cell.appendChild(el2);
+      if(d.closed){var el3=document.createElement('div');el3.style.cssText='font-size:10px;color:var(--green);font-weight:700;';el3.textContent='💰 '+d.closed;cell.appendChild(el3);}
+      if(d.rappeler){var el4=document.createElement('div');el4.style.cssText='font-size:10px;color:var(--red);';el4.textContent='⏰ '+d.rappeler;cell.appendChild(el4);}
       if(d.amountSold>0){var el5=document.createElement('div');el5.style.cssText='font-size:9px;color:var(--green);margin-top:2px;';el5.textContent='$'+d.amountSold.toFixed(0);cell.appendChild(el5);}
     }
     grid.appendChild(cell);
@@ -1443,15 +1492,77 @@ function upCalRender(){
     ];
     summary.innerHTML=cards.map(function(s){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
-        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
+        +'<div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
         +(s.sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;">'+s.sub+'</div>':'')
         +'</div>';
     }).join('');
   }
 }
-function upCalPrev(){if(upCalMonth===0){upCalMonth=11;upCalYear--;}else{upCalMonth--;}upCalRender();}
-function upCalNext(){if(upCalMonth===11){upCalMonth=0;upCalYear++;}else{upCalMonth++;}upCalRender();}
+
+function upOpenDayPanel(ds){
+  var panel=document.getElementById('up-day-panel');
+  var titleEl=document.getElementById('up-day-title');
+  var contentEl=document.getElementById('up-day-content');
+  if(!panel||!titleEl||!contentEl)return;
+  var parts=ds.split('-');
+  var MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  titleEl.textContent=parseInt(parts[2])+' '+MONTHS[parseInt(parts[1])-1]+' '+parts[0];
+  var html='';
+
+  var dayAppels=upCalls.filter(function(c){return c.date===ds;});
+  if(dayAppels.length){
+    html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">📞 Appels ('+dayAppels.length+')</div>';
+    html+=dayAppels.map(function(c){
+      var st=upState(c);
+      var sc={oui:'var(--green)',rappeler:'var(--red)',attente:'#b8862e'};
+      var sl={oui:'A répondu',rappeler:'À rappeler',attente:'En attente'};
+      var closedStr=c.closed==='closed'?'💰 Closé':c.closed==='notclosed'?'💩 Non closé':c.closed==='tryagain'?'⏰ Try Again':'—';
+      return '<div style="background:var(--cream);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;" onclick="upOpenModal(''+c.id+'')">'
+        +'<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+c.course+' · '+closedStr+'</div>'
+        +'<div style="margin-top:4px;"><span style="font-size:10px;font-weight:700;color:'+(sc[st]||'var(--text3)')+';">'+(sl[st]||st)+'</span>'
+        +(c.amount?'<span style="font-size:10px;color:var(--green);margin-left:8px;">$'+parseFloat(c.amount).toFixed(2)+'</span>':'')
+        +'</div></div>';
+    }).join('');
+  }
+
+  var bells25=upNstu.filter(function(s){
+    if(s.contacted)return false;
+    var ad=new Date(s.date+'T00:00:00');ad.setDate(ad.getDate()+25);
+    return ad.toISOString().slice(0,10)===ds;
+  });
+  var bells10=upCalls.filter(function(c){
+    if(c.answered==='Oui'||c.closed==='closed')return false;
+    var ad=new Date(c.date+'T00:00:00');ad.setDate(ad.getDate()+10);
+    return ad.toISOString().slice(0,10)===ds;
+  });
+
+  if(bells25.length||bells10.length){
+    html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:12px;margin-bottom:8px;">🔔 Alertes ce jour</div>';
+    bells25.forEach(function(s){
+      html+='<div style="background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
+        +'<div><div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
+        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 25 jours en formation — '+s.course+'</div></div>'
+        +'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 8px;flex-shrink:0;" onclick="nsMarkContacted(''+s.id+'')">✓</button>'
+        +'</div>';
+    });
+    bells10.forEach(function(c){
+      html+='<div style="background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;" onclick="upOpenModal(''+c.id+'')">'
+        +'<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:var(--red);margin-top:2px;">🔔 10 jours sans réponse — '+c.course+'</div>'
+        +'</div>';
+    });
+  }
+
+  if(!html)html='<div style="text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun appel ni alerte ce jour</div>';
+  contentEl.innerHTML=html;
+  panel.style.display='block';
+}
+
+function upCloseDayPanel(){var p=document.getElementById('up-day-panel');if(p)p.style.display='none';}
+function upCalPrev(){if(upCalMonth===0){upCalMonth=11;upCalYear--;}else{upCalMonth--;}upCloseDayPanel();upCalRender();}
+function upCalNext(){if(upCalMonth===11){upCalMonth=0;upCalYear++;}else{upCalMonth++;}upCloseDayPanel();upCalRender();}
 
 
 if(loadSession()){
