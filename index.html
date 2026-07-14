@@ -1533,8 +1533,9 @@ function upCalRender(){
   if(summary){
     var closeRate=mCalls>0?Math.round(mClosed/mCalls*100):0;
     var collectRate=mSold>0?Math.round(mCollected/mSold*100):0;
+    var perCall=mCalls>0?'$'+(mSold/mCalls).toFixed(2)+'/appel':null;
     var cards=[
-      {l:'Appels',v:mCalls,c:'var(--navy)',sub:null},
+      {l:'Appels',v:mCalls,c:'var(--navy)',sub:perCall},
       {l:'Closes',v:mClosed,c:'var(--green)',sub:closeRate+'% des appels'},
       {l:'À rappeler',v:mRappel,c:'var(--red)',sub:null},
       {l:'Montant vendu',v:'$'+mSold.toFixed(2),c:'var(--green)',sub:null},
