@@ -514,8 +514,29 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
             <option value="closed">💰 Closé</option>
             <option value="notclosed">💩 Non closé</option>
             <option value="tryagain">⏰ Try Again</option>
+            <option value="closercall">📅 Closer Call</option>
           </select>
         </div>
+        <!-- Champs Try Again -->
+        <div id="up-tryagain-fields" style="display:none;background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-bottom:0.75rem;">⏰ Try Again — date de relance</div>
+          <div><label class="input-label">Date du prochain appel</label><input class="q-input" type="date" id="up-tryagain-date" placeholder=""></div>
+        </div>
+        <!-- Champs Closer Call -->
+        <div id="up-closercall-fields" style="display:none;background:#e8eef7;border:1px solid rgba(45,74,138,0.2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">📅 Closer Call — suivi</div>
+          <div style="margin-bottom:0.75rem;"><label class="input-label">Date du Closer Call booké</label><input class="q-input" type="date" id="up-closercall-date"></div>
+          <div><label class="input-label">Résultat du Closer Call</label>
+            <select class="q-input" id="up-closercall-result">
+              <option value="">En attente (pas encore eu lieu)</option>
+              <option value="closed">💰 Closé lors du Closer Call</option>
+              <option value="notclosed">💩 Non closé</option>
+              <option value="noshow">👻 No Show</option>
+              <option value="reschedule">🔄 Reprogrammé</option>
+            </select>
+          </div>
+        </div>
+        <!-- Champs vente closée -->
         <div id="up-close-fields" style="display:none;background:var(--cream2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
           <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:0.75rem;">💰 Détails de la vente</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -1095,6 +1116,7 @@ function upFollowup(dateStr){
 }
 function upState(c){
   if(c.closed==='tryagain')return 'rappeler';
+  if(c.closed==='closercall')return 'closer-call';
   if(c.answered==='Oui')return 'oui';
   return upDays(c.date)>=10?'rappeler':'attente';
 }
@@ -1102,12 +1124,17 @@ function upClosedBadge(v){
   if(v==='closed')return '<span style="background:#e8f4ec;color:var(--green);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💰 Closé</span>';
   if(v==='notclosed')return '<span style="background:#fceaea;color:var(--red);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💩 Non closé</span>';
   if(v==='tryagain')return '<span style="background:#fef9ec;color:#b8862e;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">⏰ Try Again</span>';
+  if(v==='closercall')return '<span style="background:#e8eef7;color:var(--blue);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">📅 Closer Call</span>';
   return '<span style="background:var(--cream2);color:var(--text3);border-radius:999px;padding:2px 10px;font-size:11px;">—</span>';
 }
 function upToggleCloseFields(){
   var v=document.getElementById('up-closed').value;
-  var f=document.getElementById('up-close-fields');
-  if(f)f.style.display=(v==='closed'||v==='tryagain')?'block':'none';
+  var fc=document.getElementById('up-close-fields');
+  var ft=document.getElementById('up-tryagain-fields');
+  var fcc=document.getElementById('up-closercall-fields');
+  if(fc)fc.style.display=v==='closed'?'block':'none';
+  if(ft)ft.style.display=v==='tryagain'?'block':'none';
+  if(fcc)fcc.style.display=v==='closercall'?'block':'none';
 }
 function fmt$(n){return n!=null&&n!==''?'$'+parseFloat(n).toFixed(2):'—';}
 
@@ -1171,9 +1198,9 @@ function upRender(){
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Collecté</th>'
       +'</tr></thead><tbody>';
     filtered.forEach(function(c){
-      var sc={oui:'var(--green)',rappeler:'var(--red)','a-contacter':'#b8862e',attente:'#b8862e'};
-      var sb={oui:'#e8f4ec',rappeler:'#fceaea','a-contacter':'#fef9ec',attente:'#fef9ec'};
-      var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (25j)',attente:'En attente'};
+      var sc={oui:'var(--green)',rappeler:'var(--red)','a-contacter':'#b8862e',attente:'#b8862e','closer-call':'var(--blue)'};
+      var sb={oui:'#e8f4ec',rappeler:'#fceaea','a-contacter':'#fef9ec',attente:'#fef9ec','closer-call':'#e8eef7'};
+      var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (25j)',attente:'En attente','closer-call':'📅 Closer Call'};
       var click=c._fromNstu?'':'onclick="upOpenModal(\''+c.id+'\')"';
       html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" '+click+' onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
         +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(c.name||'—')+'</td>'
@@ -1208,7 +1235,6 @@ function upRender(){
 function upOpenModal(id){
   document.getElementById('up-overlay').style.display='flex';
   document.getElementById('up-edit-id').value=id||'';
-  var cf=document.getElementById('up-close-fields');
   if(id){
     var c=upCalls.find(function(x){return x.id===id;});
     if(!c)return;
@@ -1217,23 +1243,29 @@ function upOpenModal(id){
     document.getElementById('up-email').value=c.email||'';
     document.getElementById('up-phone').value=c.phone||'';
     document.getElementById('up-date').value=c.date||'';
-    document.getElementById('up-course').value=c.course||'ElaveFX';
+    document.getElementById('up-course').value=c.course||'Stock';
     document.getElementById('up-answered').value=c.answered||'Non';
     document.getElementById('up-closed').value=c.closed||'';
     document.getElementById('up-amount').value=c.amount||'';
     document.getElementById('up-collected').value=c.collected||'';
+    document.getElementById('up-tryagain-date').value=c.tryagainDate||'';
+    document.getElementById('up-closercall-date').value=c.closercallDate||'';
+    document.getElementById('up-closercall-result').value=c.closercallResult||'';
     document.getElementById('up-notes').value=c.notes||'';
     document.getElementById('up-btn-delete').style.display='inline-flex';
-    if(cf)cf.style.display=c.closed==='closed'?'block':'none';
+    upToggleCloseFields();
   } else {
     document.getElementById('up-modal-title').textContent='Nouvel appel';
-    ['up-name','up-email','up-phone','up-notes','up-amount','up-collected'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    ['up-name','up-email','up-phone','up-notes','up-amount','up-collected','up-tryagain-date','up-closercall-date'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
     document.getElementById('up-date').value=new Date().toISOString().slice(0,10);
-    document.getElementById('up-course').value='ElaveFX';
+    document.getElementById('up-course').value='Stock';
     document.getElementById('up-answered').value='Non';
     document.getElementById('up-closed').value='';
+    document.getElementById('up-closercall-result').value='';
     document.getElementById('up-btn-delete').style.display='none';
-    if(cf)cf.style.display='none';
+    document.getElementById('up-close-fields').style.display='none';
+    document.getElementById('up-tryagain-fields').style.display='none';
+    document.getElementById('up-closercall-fields').style.display='none';
   }
 }
 function upCloseModal(){document.getElementById('up-overlay').style.display='none';}
@@ -1252,6 +1284,9 @@ async function upSaveCall(){
     closed:document.getElementById('up-closed').value,
     amount:document.getElementById('up-amount').value,
     collected:document.getElementById('up-collected').value,
+    tryagainDate:document.getElementById('up-tryagain-date').value,
+    closercallDate:document.getElementById('up-closercall-date').value,
+    closercallResult:document.getElementById('up-closercall-result').value,
     notes:document.getElementById('up-notes').value
   };
   var idx=upCalls.findIndex(function(x){return x.id===id;});
@@ -1421,12 +1456,25 @@ function upCalRender(){
   var dayMap={};
   upCalls.forEach(function(c){
     if(!c.date)return;
-    if(!dayMap[c.date])dayMap[c.date]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0};
+    if(!dayMap[c.date])dayMap[c.date]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0};
     dayMap[c.date].calls.push(c);
     if(c.closed==='closed')dayMap[c.date].closed++;
     if(upState(c)==='rappeler')dayMap[c.date].rappeler++;
     dayMap[c.date].amountSold+=parseFloat(c.amount)||0;
     dayMap[c.date].amountCollected+=parseFloat(c.collected)||0;
+    /* Try Again : apparaît sur sa date de relance */
+    if(c.closed==='tryagain'&&c.tryagainDate){
+      if(!dayMap[c.tryagainDate])dayMap[c.tryagainDate]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0,tryagains:[]};
+      if(!dayMap[c.tryagainDate].tryagains)dayMap[c.tryagainDate].tryagains=[];
+      dayMap[c.tryagainDate].tryagains.push(c);
+    }
+    /* Closer Call : apparaît sur la date du closer call */
+    if(c.closed==='closercall'&&c.closercallDate){
+      if(!dayMap[c.closercallDate])dayMap[c.closercallDate]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0};
+      dayMap[c.closercallDate].closercall=(dayMap[c.closercallDate].closercall||0)+1;
+      if(!dayMap[c.closercallDate].closercalls)dayMap[c.closercallDate].closercalls=[];
+      dayMap[c.closercallDate].closercalls.push(c);
+    }
   });
 
   var bellMap={};
@@ -1474,6 +1522,8 @@ function upCalRender(){
       var el2=document.createElement('div');el2.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el2.textContent=d.calls.length+' appel'+(d.calls.length>1?'s':'');cell.appendChild(el2);
       if(d.closed){var el3=document.createElement('div');el3.style.cssText='font-size:10px;color:var(--green);font-weight:700;';el3.textContent='💰 '+d.closed;cell.appendChild(el3);}
       if(d.rappeler){var el4=document.createElement('div');el4.style.cssText='font-size:10px;color:var(--red);';el4.textContent='⏰ '+d.rappeler;cell.appendChild(el4);}
+      if(d.closercall){var el6=document.createElement('div');el6.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el6.textContent='📅 '+d.closercall+' closer';cell.appendChild(el6);}
+      if(d.tryagains&&d.tryagains.length){var el7=document.createElement('div');el7.style.cssText='font-size:10px;color:#b8862e;font-weight:700;';el7.textContent='⏰ '+d.tryagains.length+' try again';cell.appendChild(el7);}
       if(d.amountSold>0){var el5=document.createElement('div');el5.style.cssText='font-size:9px;color:var(--green);margin-top:2px;';el5.textContent='$'+d.amountSold.toFixed(0);cell.appendChild(el5);}
     }
     grid.appendChild(cell);
@@ -1580,6 +1630,44 @@ function upOpenDayPanel(ds){
   if(!contentEl.children.length){
     contentEl.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun appel ni alerte ce jour</div>';
   }
+
+  /* Try Again prévus ce jour */
+  var tryagains=upCalls.filter(function(c){return c.closed==='tryagain'&&c.tryagainDate===ds;});
+  if(tryagains.length){
+    var hdrTa=document.createElement('div');
+    hdrTa.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-top:12px;margin-bottom:8px;';
+    hdrTa.textContent='⏰ Try Again prévus ('+tryagains.length+')';
+    contentEl.appendChild(hdrTa);
+    tryagains.forEach(function(c){
+      var row=document.createElement('div');
+      row.style.cssText='background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
+      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">'+c.course+' · Appelé le '+c.date+'</div>';
+      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      contentEl.appendChild(row);
+    });
+  }
+
+  /* Closer Calls prévus ce jour */
+  var closercalls=upCalls.filter(function(c){return c.closed==='closercall'&&c.closercallDate===ds;});
+  if(closercalls.length){
+    var hdrCc=document.createElement('div');
+    hdrCc.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-top:12px;margin-bottom:8px;';
+    hdrCc.textContent='📅 Closer Calls ('+closercalls.length+')';
+    contentEl.appendChild(hdrCc);
+    closercalls.forEach(function(c){
+      var res=c.closercallResult;
+      var resTxt=res==='closed'?'💰 Closé':res==='notclosed'?'💩 Non closé':res==='noshow'?'👻 No Show':res==='reschedule'?'🔄 Reprogrammé':'⏳ En attente';
+      var resBg=res==='closed'?'#e8f4ec':res==='notclosed'?'#fceaea':'#e8eef7';
+      var row=document.createElement('div');
+      row.style.cssText='background:'+resBg+';border:1px solid rgba(45,74,138,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
+      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+c.course+' · '+resTxt+'</div>';
+      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      contentEl.appendChild(row);
+    });
+  }
+
   panel.style.display='block';
 }
 
