@@ -276,6 +276,9 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
           </table>
         </div>
       </div>
+      <div style="text-align:center;margin-top:0.75rem;">
+        <button id="tr-more-btn" onclick="trLoadMore()" class="btn-back btn-sm" style="display:none;">Voir plus</button>
+      </div>
     </div>
 
     <div id="tab-calendrier" class="tab-content">
@@ -762,7 +765,10 @@ function switchTab(name){
 
 function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
 
-function renderTrades(){
+var trVisibleCount=10;
+
+function renderTrades(reset){
+  if(reset)trVisibleCount=10;
   var tbody=document.getElementById('trades-body');
   if(!allTrades.length){
     tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistre</td></tr>';
@@ -770,10 +776,12 @@ function renderTrades(){
     document.getElementById('tr-wins').textContent=0;
     document.getElementById('tr-losses').textContent=0;
     document.getElementById('tr-pnl').textContent='--';
+    var mb=document.getElementById('tr-more-btn');if(mb)mb.style.display='none';
     return;
   }
   var html='';
-  for(var ri=0;ri<allTrades.length;ri++){
+  var visible=Math.min(trVisibleCount,allTrades.length);
+  for(var ri=0;ri<visible;ri++){
     var realIdx=allTrades.length-1-ri;
     var t=allTrades[realIdx];
     var win=t.pnl>=0;
@@ -795,12 +803,27 @@ function renderTrades(){
     html+='</tr>';
   }
   tbody.innerHTML=html;
+  /* Bouton "Voir plus" */
+  var mb=document.getElementById('tr-more-btn');
+  if(mb){
+    if(visible<allTrades.length){
+      mb.style.display='block';
+      mb.textContent='Voir plus ('+( allTrades.length-visible)+' restants)';
+    } else {
+      mb.style.display='none';
+    }
+  }
   var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
   var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
   document.getElementById('tr-count').textContent=allTrades.length;
   document.getElementById('tr-wins').textContent=wins;
   document.getElementById('tr-losses').textContent=allTrades.length-wins;
   document.getElementById('tr-pnl').textContent=allTrades.length?(total>=0?'+ ':'-')+' $'+Math.abs(total).toFixed(2):'--';
+}
+
+function trLoadMore(){
+  trVisibleCount+=10;
+  renderTrades(false);
 }
 
 function getDayPnL(){
@@ -833,8 +856,12 @@ function renderDashboard(){
   var chart=document.getElementById('db-chart');
   if(!allTrades.length){chart.innerHTML='<div class="loading-msg">Aucun trade</div>';}
   else{
-    var maxAbs=Math.max.apply(null,Object.values(bySymbol).map(Math.abs))||1;
-    chart.innerHTML=Object.keys(bySymbol).map(function(sym){
+    /* Trier par P&L absolu et garder les 10 plus grands */
+    var top10=Object.keys(bySymbol)
+      .sort(function(a,b){return Math.abs(bySymbol[b])-Math.abs(bySymbol[a]);})
+      .slice(0,10);
+    var maxAbs=Math.max.apply(null,top10.map(function(s){return Math.abs(bySymbol[s]);}));
+    chart.innerHTML=top10.map(function(sym){
       var val=bySymbol[sym],pct=Math.round(Math.abs(val)/maxAbs*100),win=val>=0;
       return '<div class="chart-row"><div class="chart-label">'+sym+'</div>'
         +'<div class="chart-track"><div class="chart-bar" style="width:'+pct+'%;background:'+(win?'rgba(26,122,74,0.3)':'rgba(176,48,48,0.3)')+'"></div></div>'
