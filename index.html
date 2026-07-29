@@ -501,9 +501,9 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="up-modal-title">Nouvel appel</div>
         <input type="hidden" id="up-edit-id">
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom de l'étudiant</label><input class="q-input" type="text" id="up-name" placeholder="Ex. Marc Tremblay"></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><input class="q-input" type="email" id="up-email" placeholder="marc@courriel.com"></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><input class="q-input" type="tel" id="up-phone" placeholder="819-555-0123"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom de l'étudiant</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="up-name" placeholder="Ex. Marc Tremblay" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier le nom">📋</button></div></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="email" id="up-email" placeholder="marc@courriel.com" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-email').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier l'email">📋</button></div></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="up-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier le téléphone">📋</button></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Date de l'appel</label><input class="q-input" type="date" id="up-date"></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Cours proposé</label>
           <select class="q-input" id="up-course"><option>Stock</option><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
@@ -1173,12 +1173,23 @@ function upCheckAlerts(){
   if(!box||!list)return;
   if(toContact.length){
     box.style.display='block';
-    list.innerHTML=toContact.map(function(s){
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(184,134,46,0.15);">'
-        +'<span><strong>'+s.name+'</strong> — '+s.course+' — inscrit le '+s.date+'</span>'
-        +'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 10px;" onclick="nsMarkContacted(\''+s.id+'\')">✓ Contacté</button>'
-        +'</div>';
-    }).join('');
+    list.innerHTML='';
+    toContact.forEach(function(s){
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(184,134,46,0.15);';
+      var nameSpan=document.createElement('span');
+      nameSpan.style.cssText='cursor:pointer;';
+      nameSpan.innerHTML='<strong style="text-decoration:underline;text-underline-offset:2px;">'+s.name+'</strong> — '+s.course+' — inscrit le '+s.date;
+      nameSpan.addEventListener('click',(function(sid){return function(){nsOpenModal(sid);};})(s.id));
+      var btn=document.createElement('button');
+      btn.className='btn-next btn-sm';
+      btn.style.cssText='font-size:10px;padding:4px 10px;';
+      btn.textContent='✓ Contacter';
+      btn.title='Marquer contacté et créer un appel aujourd\'hui';
+      btn.addEventListener('click',(function(sid){return function(){nsMarkContacted(sid);};})(s.id));
+      row.appendChild(nameSpan);row.appendChild(btn);
+      list.appendChild(row);
+    });
   } else {
     box.style.display='none';
   }
@@ -1230,8 +1241,8 @@ function upRender(){
       var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (25j)',attente:'En attente','closer-call':'📅 Closer Call'};
       var click=c._fromNstu?'':'onclick="upOpenModal(\''+c.id+'\')"';
       html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" '+click+' onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
-        +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(c.name||'—')+'</td>'
-        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.phone||'—')+'</td>'
+        +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+'<span style="display:flex;align-items:center;gap:5px;">'+(c.name||'—')+(c.name?'<button onclick="event.stopPropagation();upCopyText(this.dataset.v,this)" data-v="'+(c.name||'')+'" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:1px 4px;opacity:0.6;" title="Copier">📋</button>':'')+'</span></td>'
+        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+'<span style="display:flex;align-items:center;gap:5px;">'+(c.phone||'—')+(c.phone?'<button onclick="event.stopPropagation();upCopyText(this.dataset.v,this)" data-v="'+(c.phone||'')+'" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:1px 4px;opacity:0.6;" title="Copier">📋</button>':'')+'</span></td>'
         +'<td style="padding:10px 14px;">'+(c.date||'—')+'</td>'
         +'<td style="padding:10px 14px;">'+(c.course||'—')+'</td>'
         +'<td style="padding:10px 14px;">'+(c.answered||'—')+'</td>'
@@ -1326,6 +1337,32 @@ async function upDeleteCall(){
   if(!id||!confirm('Supprimer cet appel ?'))return;
   upCalls=upCalls.filter(function(x){return x.id!==id;});
   await upSaveCalls();upCloseModal();upRender();
+}
+
+function upCopyText(textOrBtn,btn){
+  /* Accepte soit une string directe, soit le btn lui-même (data-v) */
+  var text=typeof textOrBtn==='string'?textOrBtn:(btn&&btn.dataset?btn.dataset.v:'');
+  if(!btn&&typeof textOrBtn!=='string')btn=textOrBtn;
+  if(!text||text==='—')return;
+  var doFeedback=function(){
+    if(!btn)return;
+    var orig=btn.textContent;
+    btn.textContent='✓';btn.style.color='var(--green)';btn.style.opacity='1';
+    setTimeout(function(){btn.textContent=orig;btn.style.color='';btn.style.opacity='0.6';},1200);
+  };
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(doFeedback).catch(function(){
+      var ta=document.createElement('textarea');
+      ta.value=text;document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      doFeedback();
+    });
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    doFeedback();
+  }
 }
 
 /* ---- NOUVEAUX ÉTUDIANTS ---- */
@@ -1433,7 +1470,38 @@ async function nsDeleteStudent(){
 }
 async function nsMarkContacted(id){
   var s=upNstu.find(function(x){return x.id===id;});
-  if(s){s.contacted=true;await upSaveNstu();nsRender();upCheckAlerts();}
+  if(!s)return;
+  s.contacted=true;
+  await upSaveNstu();
+
+  /* Créer automatiquement un appel pour aujourd'hui */
+  var today=new Date().toISOString().slice(0,10);
+  var newCall={
+    id:'up'+Date.now(),
+    name:s.name,
+    email:s.email||'',
+    phone:s.phone||'',
+    date:today,
+    course:s.course,
+    answered:'Non',
+    closed:'',
+    amount:'',
+    collected:'',
+    tryagainDate:'',
+    closercallDate:'',
+    closercallResult:'',
+    notes:'[Auto] Premier contact upsell — étudiant depuis '+s.date
+  };
+  upCalls.push(newCall);
+  await upSaveCalls();
+
+  nsRender();
+  upRender();
+  upCheckAlerts();
+  upCalRender();
+
+  /* Ouvrir directement la fiche du nouvel appel pour compléter */
+  upOpenModal(newCall.id);
 }
 
 document.addEventListener('click',function(e){
@@ -1634,13 +1702,17 @@ function upOpenDayPanel(ds){
       var row=document.createElement('div');
       row.style.cssText='background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
       var info=document.createElement('div');
-      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
-        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 25 jours en formation — '+s.course+'</div>';
+      info.style.cssText='cursor:pointer;flex:1;';
+      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);text-decoration:underline;text-underline-offset:2px;">'+s.name+'</div>'
+        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 25 jours en formation — '+s.course+' · Inscrit le '+s.date+'</div>';
+      /* Clic sur le nom = ouvrir la fiche étudiant */
+      info.addEventListener('click',(function(sid){return function(){nsOpenModal(sid);};})(s.id));
       var btn=document.createElement('button');
       btn.className='btn-next btn-sm';
-      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;';
-      btn.textContent='✓';
-      btn.addEventListener('click',(function(id){return function(){nsMarkContacted(id);};})(s.id));
+      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;margin-left:8px;';
+      btn.title='Marquer comme contacté et créer un appel pour aujourd\'hui';
+      btn.textContent='✓ Contacter';
+      btn.addEventListener('click',(function(id){return function(e){e.stopPropagation();nsMarkContacted(id);};})(s.id));
       row.appendChild(info);row.appendChild(btn);
       contentEl.appendChild(row);
     });
