@@ -420,24 +420,27 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
           <button class="btn-next" onclick="upOpenModal(null)">+ Nouvel appel</button>
-          <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upRender()">
+          <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upVisibleCount=10;upRender()">
             <option value="">Tous les statuts</option>
             <option value="oui">A répondu</option>
             <option value="attente">En attente</option>
             <option value="rappeler">À rappeler</option>
             <option value="a-contacter">À contacter (20j)</option>
           </select>
-          <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upRender()">
+          <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upVisibleCount=10;upRender()">
             <option value="">Tous les cours</option>
             <option value="ElaveFX">ElaveFX</option>
             <option value="Forex">Forex</option>
             <option value="Crypto">Crypto</option>
           </select>
-          <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upRender()">
+          <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upVisibleCount=10;upRender()">
         </div>
 
         <div class="q-card" style="padding:0;overflow:hidden;">
           <div id="up-rows"><div class="loading-msg">Chargement...</div></div>
+        </div>
+        <div style="text-align:center;margin-top:0.75rem;">
+          <button id="up-more-btn" onclick="upLoadMore()" class="btn-back btn-sm" style="display:none;">Voir plus</button>
         </div>
       </div>
 
@@ -1196,13 +1199,17 @@ function upCheckAlerts(){
 }
 
 /* Rendu tableau appels */
-function upRender(){
+var upVisibleCount=10;
+
+function upRender(reset){
+  if(reset===undefined)reset=false;
+  if(reset)upVisibleCount=10;
   upCheckAlerts();
   var statusF=document.getElementById('upFilterStatus')?document.getElementById('upFilterStatus').value:'';
   var coursF=document.getElementById('upFilterCours')?document.getElementById('upFilterCours').value:'';
   var q=(document.getElementById('upSearch')?document.getElementById('upSearch').value:'').trim().toLowerCase();
 
-  /* Fusionner appels normaux + étudiants à contacter (25j) */
+  /* Fusionner appels normaux + étudiants à contacter (20j) */
   var fromNstu=upNstu.filter(function(s){return upDays(s.date)>=20&&!s.contacted;}).map(function(s){
     return {id:'nstu_'+s.id,name:s.name,email:s.email,phone:s.phone,date:s.date,course:s.course,answered:'Non',closed:'',notes:'[Formation] Pas encore contacté',_fromNstu:true,state:'a-contacter'};
   });
@@ -1222,6 +1229,7 @@ function upRender(){
   if(!filtered.length){
     rowsEl.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun appel — clique sur <strong>+ Nouvel appel</strong> pour commencer.</div>';
   } else {
+    var visible=Math.min(upVisibleCount,filtered.length);
     var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
       +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
@@ -1235,7 +1243,8 @@ function upRender(){
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Vendu</th>'
       +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Collecté</th>'
       +'</tr></thead><tbody>';
-    filtered.forEach(function(c){
+    for(var ri=0;ri<visible;ri++){
+      var c=filtered[ri];
       var sc={oui:'var(--green)',rappeler:'var(--red)','a-contacter':'#b8862e',attente:'#b8862e','closer-call':'var(--blue)'};
       var sb={oui:'#e8f4ec',rappeler:'#fceaea','a-contacter':'#fef9ec',attente:'#fef9ec','closer-call':'#e8eef7'};
       var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (20j)',attente:'En attente','closer-call':'📅 Closer Call'};
@@ -1252,9 +1261,20 @@ function upRender(){
         +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(c.amount?fmt$(c.amount):'—')+'</td>'
         +'<td style="padding:10px 14px;font-weight:700;color:var(--blue);">'+(c.collected?fmt$(c.collected):'—')+'</td>'
         +'</tr>';
-    });
+    }
     html+='</tbody></table>';
     rowsEl.innerHTML=html;
+
+    /* Bouton Voir plus */
+    var mb=document.getElementById('up-more-btn');
+    if(mb){
+      if(visible<filtered.length){
+        mb.style.display='block';
+        mb.textContent='Voir plus ('+(filtered.length-visible)+' restants)';
+      } else {
+        mb.style.display='none';
+      }
+    }
   }
 
   var base=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});});
@@ -1267,6 +1287,11 @@ function upRender(){
   el=document.getElementById('up-oui-pct');if(el)el.textContent=total?Math.round(oui/total*100)+'% du total':'—';
   el=document.getElementById('up-attente');if(el)el.textContent=attente;
   el=document.getElementById('up-rappel');if(el)el.textContent=rappeler;
+}
+
+function upLoadMore(){
+  upVisibleCount+=10;
+  upRender(false);
 }
 
 /* Modal appel */
