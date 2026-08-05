@@ -464,6 +464,9 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <div class="q-card" style="padding:0;overflow:hidden;">
           <div id="nstu-rows"><div class="loading-msg">Chargement...</div></div>
         </div>
+        <div style="text-align:center;margin-top:0.75rem;">
+          <button id="ns-more-btn" onclick="nsLoadMore()" class="btn-back btn-sm" style="display:none;">Voir plus</button>
+        </div>
       </div>
 
       <!-- === SECTION CALENDRIER === -->
@@ -1391,7 +1394,11 @@ function upCopyText(textOrBtn,btn){
 }
 
 /* ---- NOUVEAUX ÉTUDIANTS ---- */
-function nsRender(){
+var nsVisibleCount=10;
+
+function nsRender(reset){
+  if(reset===undefined)reset=false;
+  if(reset)nsVisibleCount=10;
   var rows=document.getElementById('nstu-rows');
   if(!rows)return;
   var total=upNstu.length;
@@ -1406,9 +1413,11 @@ function nsRender(){
 
   if(!upNstu.length){
     rows.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun étudiant — clique sur <strong>+ Nouvel étudiant</strong> pour commencer.</div>';
+    var mb2=document.getElementById('ns-more-btn');if(mb2)mb2.style.display='none';
     return;
   }
   var sorted=upNstu.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+  var visible=Math.min(nsVisibleCount,sorted.length);
   var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
     +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
@@ -1420,7 +1429,8 @@ function nsRender(){
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell collecté</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
     +'</tr></thead><tbody>';
-  sorted.forEach(function(s){
+  for(var ri=0;ri<visible;ri++){
+    var s=sorted[ri];
     var days=upDays(s.date);
     var ready=days>=20&&!s.contacted;
     var contacted=s.contacted;
@@ -1437,9 +1447,24 @@ function nsRender(){
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
       +'<td style="padding:10px 14px;"><span style="background:'+statusBg+';color:'+statusColor+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+statusLabel+'</span></td>'
       +'</tr>';
-  });
+  }
   html+='</tbody></table>';
   rows.innerHTML=html;
+
+  var mb=document.getElementById('ns-more-btn');
+  if(mb){
+    if(visible<sorted.length){
+      mb.style.display='block';
+      mb.textContent='Voir plus ('+(sorted.length-visible)+' restants)';
+    } else {
+      mb.style.display='none';
+    }
+  }
+}
+
+function nsLoadMore(){
+  nsVisibleCount+=10;
+  nsRender(false);
 }
 
 function nsOpenModal(id){
