@@ -1416,7 +1416,7 @@ function nsRender(reset){
     var mb2=document.getElementById('ns-more-btn');if(mb2)mb2.style.display='none';
     return;
   }
-  var sorted=upNstu.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+  var sorted=upNstu.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
   var visible=Math.min(nsVisibleCount,sorted.length);
   var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
     +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
