@@ -1606,7 +1606,7 @@ function upCalRender(){
   var alertBox=document.getElementById('up-cal-alerts');
   if(alertBox){
     var alerts=[];
-    upNstu.forEach(function(s){var d=upDays(s.date);if(d>=25&&!s.contacted)alerts.push({type:'40j',name:s.name,course:s.course,days:d,id:s.id});});
+    upNstu.forEach(function(s){var d=upDays(s.date);if(d>=40&&!s.contacted)alerts.push({type:'40j',name:s.name,course:s.course,days:d,id:s.id});});
     upCalls.forEach(function(c){if(c.answered==='Oui'||c.closed==='closed')return;var d=upDays(c.date);if(d>=10)alerts.push({type:'10j',name:c.name,course:c.course,days:d,id:c.id});});
     if(alerts.length){
       alertBox.style.display='block';
