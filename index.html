@@ -1554,6 +1554,42 @@ async function nsMarkContacted(id){
   upOpenModal(newCall.id);
 }
 
+async function upMarkRecontacted(id){
+  var c=upCalls.find(function(x){return x.id===id;});
+  if(!c)return;
+
+  /* Créer un nouvel appel pour aujourd'hui en relance */
+  var today=new Date().toISOString().slice(0,10);
+  var newCall={
+    id:'up'+Date.now(),
+    name:c.name,
+    email:c.email||'',
+    phone:c.phone||'',
+    date:today,
+    course:c.course,
+    answered:'Non',
+    closed:'',
+    amount:'',
+    collected:'',
+    tryagainDate:'',
+    closercallDate:'',
+    closercallResult:'',
+    notes:'[Auto] Relance 10 jours — appel original du '+c.date
+  };
+  upCalls.push(newCall);
+
+  /* Marquer l'appel original comme répondu pour le retirer des alertes */
+  c.answered='Oui';
+  await upSaveCalls();
+
+  upRender();
+  upCheckAlerts();
+  upCalRender();
+
+  /* Ouvrir la fiche du nouvel appel */
+  upOpenModal(newCall.id);
+}
+
 document.addEventListener('click',function(e){
   if(e.target.id==='up-overlay')upCloseModal();
   if(e.target.id==='ns-overlay')nsCloseModal();
@@ -1574,18 +1610,34 @@ function upCalRender(){
     upCalls.forEach(function(c){if(c.answered==='Oui'||c.closed==='closed')return;var d=upDays(c.date);if(d>=10)alerts.push({type:'10j',name:c.name,course:c.course,days:d,id:c.id});});
     if(alerts.length){
       alertBox.style.display='block';
-      alertBox.innerHTML='<div style="display:flex;flex-direction:column;gap:6px;">'+alerts.map(function(a){
-        var is25=a.type==='40j';
-        var bg=is25?'#fef9ec':'#fceaea';
-        var col=is25?'#b8862e':'var(--red)';
-        var bc=is25?'rgba(184,134,46,0.25)':'rgba(176,48,48,0.2)';
-        var label=is25?'🔔 40 jours en formation — prêt à contacter':'🔔 10 jours sans réponse — à rappeler';
-        return '<div style="background:'+bg+';border:1px solid '+bc+';border-radius:9px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;">'
-          +'<div><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+col+';">'+label+'</span>'
-          +'<div style="font-size:13px;color:var(--navy);margin-top:2px;"><strong>'+a.name+'</strong> — '+a.course+' — '+a.days+' jours</div></div>'
-          +(is25?'<button class="btn-next btn-sm" style="font-size:10px;padding:4px 10px;flex-shrink:0;" onclick="nsMarkContacted(\'"+a.id+"\')">✓ Contacté</button>':'')
-          +'</div>';
-      }).join('')+'</div>';
+      var wrapper=document.createElement('div');
+      wrapper.style.cssText='display:flex;flex-direction:column;gap:6px;';
+      alerts.forEach(function(a){
+        var is40=a.type==='40j';
+        var bg=is40?'#fef9ec':'#fceaea';
+        var col=is40?'#b8862e':'var(--red)';
+        var bc=is40?'rgba(184,134,46,0.25)':'rgba(176,48,48,0.2)';
+        var label=is40?'🔔 40 jours en formation — prêt à contacter':'🔔 10 jours sans réponse — à rappeler';
+        var row=document.createElement('div');
+        row.style.cssText='background:'+bg+';border:1px solid '+bc+';border-radius:9px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;';
+        var info=document.createElement('div');
+        info.innerHTML='<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+col+';">'+label+'</span>'
+          +'<div style="font-size:13px;color:var(--navy);margin-top:2px;"><strong>'+a.name+'</strong> — '+a.course+' — '+a.days+' jours</div>';
+        var btn=document.createElement('button');
+        btn.className='btn-next btn-sm';
+        btn.style.cssText='font-size:10px;padding:4px 10px;flex-shrink:0;'+(is40?'':'background:var(--red);');
+        btn.textContent=is40?'✓ Contacter':'✓ Relancer';
+        if(is40){
+          btn.addEventListener('click',(function(id){return function(){nsMarkContacted(id);};})(a.id));
+        } else {
+          btn.addEventListener('click',(function(id){return function(){upMarkRecontacted(id);};})(a.id));
+        }
+        row.appendChild(info);
+        row.appendChild(btn);
+        wrapper.appendChild(row);
+      });
+      alertBox.innerHTML='';
+      alertBox.appendChild(wrapper);
     } else {alertBox.style.display='none';}
   }
 
@@ -1769,10 +1821,19 @@ function upOpenDayPanel(ds){
 
     bells10.forEach(function(c){
       var row=document.createElement('div');
-      row.style.cssText='background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
-      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
+      row.style.cssText='background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
+      var info=document.createElement('div');
+      info.style.cssText='cursor:pointer;flex:1;';
+      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
         +'<div style="font-size:11px;color:var(--red);margin-top:2px;">🔔 10 jours sans réponse — '+c.course+'</div>';
-      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      info.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
+      var btn=document.createElement('button');
+      btn.className='btn-next btn-sm';
+      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;margin-left:8px;background:var(--red);';
+      btn.textContent='✓ Relancer';
+      btn.title='Créer un nouvel appel de relance pour aujourd\'hui';
+      btn.addEventListener('click',(function(id){return function(e){e.stopPropagation();upMarkRecontacted(id);};})(c.id));
+      row.appendChild(info);row.appendChild(btn);
       contentEl.appendChild(row);
     });
   }
