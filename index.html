@@ -223,8 +223,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="tab" onclick="switchTab('calendrier')">Calendrier</div>
     <div class="tab" onclick="switchTab('details')">Détails</div>
     <div class="tab" onclick="switchTab('import')">Importer</div>
-    <div class="tab" id="tab-etu-btn" onclick="switchTab('etudiants')" style="display:none;">Étudiants</div>
-    <div class="tab" id="tab-upsell-btn" onclick="switchTab('upsell')" style="display:none;">Upsell</div>
+    <div class="tab" id="tab-upsell-btn" onclick="switchTab('upsell')" style="display:none;">Étudiants</div>
   </div>
   <div class="body">
 
@@ -392,73 +391,31 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <!-- UPSELL -->
     <div id="tab-upsell" class="tab-content">
 
-      <!-- Sous-navigation Upsell -->
+      <!-- Sous-navigation -->
       <div style="display:flex;gap:0;background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow);">
-        <button id="up-sub-appels" onclick="upSubTab('appels')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:var(--navy);color:white;cursor:pointer;">📞 Appels</button>
-        <button id="up-sub-etudiants" onclick="upSubTab('etudiants')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--text3);cursor:pointer;border-left:1px solid var(--border);">🎓 Nouveaux étudiants</button>
+        <button id="up-sub-etudiants" onclick="upSubTab('etudiants')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:var(--navy);color:white;cursor:pointer;">🎓 Étudiants CMP</button>
         <button id="up-sub-calendrier" onclick="upSubTab('calendrier')" style="flex:1;padding:0.75rem;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--text3);cursor:pointer;border-left:1px solid var(--border);">📅 Calendrier</button>
       </div>
 
-      <!-- === SECTION APPELS === -->
-      <div id="up-section-appels">
-        <div class="section-badge">📞 Appels Upsell</div>
-        <div class="page-title">Suivi des appels</div>
-        <div class="page-sub">Relance automatique à 10 jours · Nouveaux étudiants à contacter après 40 jours</div>
+      <!-- === SECTION ÉTUDIANTS CMP === -->
+      <div id="up-section-etudiants">
+        <div class="section-badge">🎓 Formation CMP</div>
+        <div class="page-title">Étudiants CMP</div>
+        <div class="page-sub">Cohortes : 1er janvier · 1er mai · 1er septembre</div>
 
         <div class="stat-grid" style="margin-bottom:1.25rem;">
-          <div class="stat-card"><div class="stat-label">Appels loggés</div><div class="stat-val" id="up-total">—</div><div class="stat-sub">Depuis le début</div></div>
-          <div class="stat-card"><div class="stat-label">Ont répondu</div><div class="stat-val green" id="up-oui">—</div><div class="stat-sub" id="up-oui-pct">—</div></div>
-          <div class="stat-card"><div class="stat-label">En attente (&lt;10j)</div><div class="stat-val" id="up-attente">—</div><div class="stat-sub">Délai pas encore écoulé</div></div>
-          <div class="stat-card"><div class="stat-label">À rappeler</div><div class="stat-val red" id="up-rappel">—</div><div class="stat-sub">10j sans réponse</div></div>
+          <div class="stat-card"><div class="stat-label">Total inscrits</div><div class="stat-val" id="nstu-total">—</div><div class="stat-sub">Tous temps</div></div>
+          <div class="stat-card"><div class="stat-label">En cours ce mois</div><div class="stat-val" id="nstu-encours">—</div><div class="stat-sub">Actifs maintenant</div></div>
+          <div class="stat-card"><div class="stat-label">Montant vendu</div><div class="stat-val green" id="nstu-vendu">—</div><div class="stat-sub">Total</div></div>
+          <div class="stat-card"><div class="stat-label">Frontsell collecté</div><div class="stat-val green" id="nstu-frontsell">—</div><div class="stat-sub">Total encaissé</div></div>
         </div>
 
-        <!-- Alerte nouveaux étudiants à contacter -->
-        <div id="up-alert-box" style="display:none;background:#fef9ec;border:1px solid rgba(184,134,46,0.3);border-radius:var(--radius);padding:0.85rem 1.25rem;margin-bottom:1rem;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-bottom:0.4rem;">⏰ Nouveaux étudiants — 40 jours écoulés</div>
-          <div id="up-alert-list" style="font-size:13px;color:var(--text2);"></div>
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
-          <button class="btn-next" onclick="upOpenModal(null)">+ Nouvel appel</button>
-          <select class="q-input" style="width:auto;" id="upFilterStatus" onchange="upVisibleCount=10;upRender()">
-            <option value="">Tous les statuts</option>
-            <option value="oui">A répondu</option>
-            <option value="attente">En attente</option>
-            <option value="rappeler">À rappeler</option>
-            <option value="a-contacter">À contacter (40j)</option>
-          </select>
-          <select class="q-input" style="width:auto;" id="upFilterCours" onchange="upVisibleCount=10;upRender()">
-            <option value="">Tous les cours</option>
-            <option value="ElaveFX">ElaveFX</option>
-            <option value="Forex">Forex</option>
-            <option value="Crypto">Crypto</option>
-          </select>
-          <input class="q-input" style="width:180px;" type="text" id="upSearch" placeholder="Rechercher un nom..." oninput="upVisibleCount=10;upRender()">
-        </div>
-
-        <div class="q-card" style="padding:0;overflow:hidden;">
-          <div id="up-rows"><div class="loading-msg">Chargement...</div></div>
-        </div>
-        <div style="text-align:center;margin-top:0.75rem;">
-          <button id="up-more-btn" onclick="upLoadMore()" class="btn-back btn-sm" style="display:none;">Voir plus</button>
-        </div>
-      </div>
-
-      <!-- === SECTION NOUVEAUX ÉTUDIANTS === -->
-      <div id="up-section-etudiants" style="display:none;">
-        <div class="section-badge">🎓 Formation</div>
-        <div class="page-title">Nouveaux étudiants</div>
-        <div class="page-sub">Notification automatique après 40 jours — passage en "À contacter"</div>
-
-        <div class="stat-grid" style="margin-bottom:1.25rem;">
-          <div class="stat-card"><div class="stat-label">Total inscrits</div><div class="stat-val" id="nstu-total">—</div><div class="stat-sub">Depuis le début</div></div>
-          <div class="stat-card"><div class="stat-label">À contacter</div><div class="stat-val red" id="nstu-alert">—</div><div class="stat-sub">40 jours écoulés</div></div>
-          <div class="stat-card"><div class="stat-label">En formation</div><div class="stat-val" id="nstu-encours">—</div><div class="stat-sub">Moins de 40 jours</div></div>
-          <div class="stat-card"><div class="stat-label">Frontsell total</div><div class="stat-val green" id="nstu-frontsell">—</div><div class="stat-sub">Montants collectés</div></div>
-        </div>
-
-        <div style="margin-bottom:1rem;">
+        <div style="margin-bottom:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-next" onclick="nsOpenModal(null)">+ Nouvel étudiant</button>
+          <select class="q-input" style="width:auto;" id="ns-filter-cohorte" onchange="nsVisibleCount=10;nsRender()">
+            <option value="">Toutes les cohortes</option>
+          </select>
+          <input class="q-input" style="width:180px;" type="text" id="ns-search" placeholder="Rechercher un nom..." oninput="nsVisibleCount=10;nsRender()">
         </div>
 
         <div class="q-card" style="padding:0;overflow:hidden;">
@@ -471,120 +428,59 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
       <!-- === SECTION CALENDRIER === -->
       <div id="up-section-calendrier" style="display:none;">
-        <div class="section-badge">📅 Performance</div>
-        <div class="page-title">Calendrier Upsell</div>
-        <div class="page-sub">Appels, closes, montants — vue mensuelle · Clique sur un jour pour voir le détail</div>
+        <div class="section-badge">📅 Calendrier</div>
+        <div class="page-title">Calendrier des cohortes CMP</div>
+        <div class="page-sub">Étudiants actifs par mois · Vue mensuelle</div>
 
-        <!-- Alertes cloches -->
-        <div id="up-cal-alerts" style="display:none;margin-bottom:1rem;"></div>
-
-        <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start;">
-          <div class="q-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-              <button class="btn-back btn-sm" onclick="upCalPrev()">← Précédent</button>
-              <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);" id="up-cal-title">—</div>
-              <button class="btn-back btn-sm" onclick="upCalNext()">Suivant →</button>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;" id="up-cal-grid"></div>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:1.25rem;" id="up-cal-summary"></div>
+        <div class="q-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <button class="btn-back btn-sm" onclick="upCalPrev()">← Précédent</button>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);" id="up-cal-title">—</div>
+            <button class="btn-back btn-sm" onclick="upCalNext()">Suivant →</button>
           </div>
-
-          <!-- Panneau détail du jour -->
-          <div class="q-card" id="up-day-panel" style="display:none;position:sticky;top:120px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-              <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);" id="up-day-title">—</div>
-              <button onclick="upCloseDayPanel()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px;">✕</button>
-            </div>
-            <div id="up-day-content"></div>
+          <!-- Vue par mois de l'année -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="up-cal-grid"></div>
+          <!-- Résumé du mois sélectionné -->
+          <div id="up-cal-month-detail" style="display:none;margin-top:1.25rem;background:var(--cream2);border-radius:var(--radius);padding:1rem;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:0.75rem;" id="up-cal-detail-title">—</div>
+            <div id="up-cal-detail-list"></div>
           </div>
+          <!-- Cartes stats année -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:1.25rem;" id="up-cal-summary"></div>
         </div>
       </div>
 
     </div>
 
-    <!-- MODAL APPEL UPSELL -->
-    <div id="up-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
-      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="up-modal-title">Nouvel appel</div>
-        <input type="hidden" id="up-edit-id">
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom de l'étudiant</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="up-name" placeholder="Ex. Marc Tremblay" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier le nom">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="email" id="up-email" placeholder="marc@courriel.com" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-email').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier l'email">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="up-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('up-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier le téléphone">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Date de l'appel</label><input class="q-input" type="date" id="up-date"></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Cours proposé</label>
-          <select class="q-input" id="up-course"><option>Stock</option><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
-        </div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">A répondu ?</label>
-          <select class="q-input" id="up-answered"><option value="Non">Non</option><option value="Oui">Oui</option></select>
-        </div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Vente closée ?</label>
-          <select class="q-input" id="up-closed" onchange="upToggleCloseFields()">
-            <option value="">Pas encore déterminé</option>
-            <option value="closed">💰 Closé</option>
-            <option value="notclosed">💩 Non closé</option>
-            <option value="tryagain">⏰ Try Again</option>
-            <option value="closercall">📅 Closer Call</option>
-          </select>
-        </div>
-        <!-- Champs Try Again -->
-        <div id="up-tryagain-fields" style="display:none;background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-bottom:0.75rem;">⏰ Try Again — date de relance</div>
-          <div><label class="input-label">Date du prochain appel</label><input class="q-input" type="date" id="up-tryagain-date" placeholder=""></div>
-        </div>
-        <!-- Champs Closer Call -->
-        <div id="up-closercall-fields" style="display:none;background:#e8eef7;border:1px solid rgba(45,74,138,0.2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">📅 Closer Call — suivi</div>
-          <div style="margin-bottom:0.75rem;"><label class="input-label">Date du Closer Call booké</label><input class="q-input" type="date" id="up-closercall-date"></div>
-          <div><label class="input-label">Résultat du Closer Call</label>
-            <select class="q-input" id="up-closercall-result">
-              <option value="">En attente (pas encore eu lieu)</option>
-              <option value="closed">💰 Closé lors du Closer Call</option>
-              <option value="notclosed">💩 Non closé</option>
-              <option value="noshow">👻 No Show</option>
-              <option value="reschedule">🔄 Reprogrammé</option>
-            </select>
-          </div>
-        </div>
-        <!-- Champs vente closée -->
-        <div id="up-close-fields" style="display:none;background:var(--cream2);border-radius:9px;padding:0.85rem;margin-bottom:0.85rem;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:0.75rem;">💰 Détails de la vente</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div><label class="input-label">Montant vendu $</label><input class="q-input" type="number" id="up-amount" placeholder="0.00" min="0" step="0.01"></div>
-            <div><label class="input-label">Montant collecté $</label><input class="q-input" type="number" id="up-collected" placeholder="0.00" min="0" step="0.01"></div>
-          </div>
-        </div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="up-notes" rows="3" placeholder="Contexte, objections..."></textarea></div>
-        <div style="display:flex;justify-content:space-between;margin-top:1.25rem;gap:8px;">
-          <button class="btn-danger" id="up-btn-delete" style="display:none;" onclick="upDeleteCall()">🗑 Supprimer</button>
-          <div style="display:flex;gap:8px;margin-left:auto;">
-            <button class="btn-back btn-sm" onclick="upCloseModal()">Annuler</button>
-            <button class="btn-next btn-sm" onclick="upSaveCall()">Enregistrer</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL NOUVEL ÉTUDIANT -->
+    <!-- MODAL ÉTUDIANT CMP -->
     <div id="ns-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
-      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:420px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:440px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="ns-modal-title">Nouvel étudiant</div>
         <input type="hidden" id="ns-edit-id">
         <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Ex. Marc Tremblay" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Email</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="email" id="ns-email" placeholder="marc@courriel.com" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-email').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="ns-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Date d'arrivée en formation</label><input class="q-input" type="date" id="ns-date"></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Formation inscrite</label>
-          <select class="q-input" id="ns-course"><option>Stock</option><option>ElaveFX</option><option>Forex</option><option>Crypto</option></select>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Cohorte de départ</label>
+          <select class="q-input" id="ns-cohorte">
+            <option value="2027-01-01">Cohorte 1 — 1er janvier 2027</option>
+            <option value="2027-05-01">Cohorte 2 — 1er mai 2027</option>
+            <option value="2027-09-01">Cohorte 3 — 1er septembre 2027</option>
+            <option value="2028-01-01">Cohorte 1 — 1er janvier 2028</option>
+            <option value="2028-05-01">Cohorte 2 — 1er mai 2028</option>
+            <option value="2028-09-01">Cohorte 3 — 1er septembre 2028</option>
+          </select>
         </div>
         <div style="margin-bottom:0.85rem;background:var(--cream2);border-radius:9px;padding:0.85rem;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">💵 Frontsell</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div><label class="input-label">Prix de vente $</label><input class="q-input" type="number" id="ns-price" placeholder="0.00" min="0" step="0.01"></div>
-            <div><label class="input-label">Montant collecté $</label><input class="q-input" type="number" id="ns-frontsell" placeholder="0.00" min="0" step="0.01"></div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">💵 Vente</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0.5rem;">
+            <div><label class="input-label">Prix de vente $</label><input class="q-input" type="number" id="ns-price" placeholder="0.00" min="0" step="0.01" oninput="nsCalcTTF()"></div>
+            <div><label class="input-label">Frontsell collecté $</label><input class="q-input" type="number" id="ns-frontsell" placeholder="0.00" min="0" step="0.01" oninput="nsCalcTTF()"></div>
           </div>
-          <div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic;">Montant comptant payé à l'inscription (le reste est financé)</div>
+          <div style="background:white;border-radius:7px;padding:0.6rem 0.85rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:var(--text3);">40% Trading Floor :</span>
+            <span style="font-size:13px;font-weight:700;color:var(--red);" id="ns-ttf-display">$0.00</span>
+          </div>
         </div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="ns-notes" rows="2" placeholder="Contexte, source, objections..."></textarea></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="ns-notes" rows="2" placeholder="Contexte, source..."></textarea></div>
         <div style="display:flex;justify-content:space-between;margin-top:1.25rem;gap:8px;">
           <button class="btn-danger" id="ns-btn-delete" style="display:none;" onclick="nsDeleteStudent()">🗑 Supprimer</button>
           <div style="display:flex;gap:8px;margin-left:auto;">
@@ -700,7 +596,7 @@ async function startApp(){
   document.getElementById('top-avatar').textContent=initials;
   document.getElementById('top-name').textContent=currentUser;
   document.getElementById('top-role-label').textContent=currentRole==='prof'?'Professeur':'Mon Journal';
-  document.getElementById('tab-etu-btn').style.display=currentRole==='prof'?'':'none';
+  
   document.getElementById('tab-upsell-btn').style.display=currentRole==='prof'?'':'none';
   if(currentRole==='etudiant'){
     document.getElementById('db-title').textContent='Mon tableau de bord';
@@ -760,13 +656,13 @@ function switchTab(name){
   }
   var badge=document.getElementById('student-view-badge');
   if(badge) badge.style.display=(name==='details'&&viewingStudent)?'flex':'none';
-  var tabs=['dashboard','trades','calendrier','details','import','etudiants','upsell'];
+  var tabs=['dashboard','trades','calendrier','details','import','upsell'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
   var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
   if(name==='calendrier')renderCalendar();
   if(name==='details')renderDetails();
-  if(name==='upsell')upLoadCalls();
+  if(name==='upsell'){upLoadCalls();}
 }
 
 function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
@@ -1103,34 +999,27 @@ if(dz){
 }
 
 /* ---- AUTO-RECONNEXION ---- */
-/* ---- UPSELL ---- */
-var upCalls=[], upNstu=[], upCalYear=new Date().getFullYear(), upCalMonth=new Date().getMonth();
+/* ---- UPSELL CMP ---- */
+var upNstu=[], upCalYear=new Date().getFullYear(), nsVisibleCount=10;
 
 /* Sous-onglets */
 function upSubTab(name){
-  ['appels','etudiants','calendrier'].forEach(function(s){
+  ['etudiants','calendrier'].forEach(function(s){
     var sec=document.getElementById('up-section-'+s);
     var btn=document.getElementById('up-sub-'+s);
     if(sec)sec.style.display=s===name?'block':'none';
     if(btn){btn.style.background=s===name?'var(--navy)':'white';btn.style.color=s===name?'white':'var(--text3)';}
   });
-  if(name==='appels')upRender();
-  if(name==='etudiants')nsRender();
+  if(name==='etudiants'){nsPopulateFilter();nsRender();}
   if(name==='calendrier')upCalRender();
 }
 
 /* Firebase */
 async function upLoadCalls(){
-  try{var d=await fsLoad('upsell/calls');upCalls=d&&d.list?d.list:[];}catch(e){upCalls=[];}
-  try{var d2=await fsLoad('upsell/nstu');upNstu=d2&&d2.list?d2.list:[];}catch(e){upNstu=[];}
-  upRender();
-  nsRender();
+  try{var d=await fsLoad('upsell/nstu');upNstu=d&&d.list?d.list:[];}catch(e){upNstu=[];}
+  nsPopulateFilter();nsRender();
 }
-async function upSaveCalls(){
-  setSaveBadge('☁️ Sauvegarde...');
-  await fsSave('upsell/calls',{list:upCalls,updatedAt:new Date().toISOString()});
-  setSaveBadge('☁️ Sauvegardé');
-}
+
 async function upSaveNstu(){
   setSaveBadge('☁️ Sauvegarde...');
   await fsSave('upsell/nstu',{list:upNstu,updatedAt:new Date().toISOString()});
@@ -1138,237 +1027,9 @@ async function upSaveNstu(){
 }
 
 /* Utilitaires */
-function upDays(dateStr){
-  var d=new Date(dateStr+'T00:00:00'),t=new Date();
-  t.setHours(0,0,0,0);
-  return Math.floor((t-d)/86400000);
-}
-function upFollowup(dateStr){
-  var d=new Date(dateStr+'T00:00:00');d.setDate(d.getDate()+10);
-  return d.toISOString().slice(0,10);
-}
-function upState(c){
-  if(c.closed==='tryagain')return 'rappeler';
-  if(c.closed==='closercall')return 'closer-call';
-  if(c.answered==='Oui')return 'oui';
-  return upDays(c.date)>=10?'rappeler':'attente';
-}
-function upClosedBadge(v){
-  if(v==='closed')return '<span style="background:#e8f4ec;color:var(--green);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💰 Closé</span>';
-  if(v==='notclosed')return '<span style="background:#fceaea;color:var(--red);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">💩 Non closé</span>';
-  if(v==='tryagain')return '<span style="background:#fef9ec;color:#b8862e;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">⏰ Try Again</span>';
-  if(v==='closercall')return '<span style="background:#e8eef7;color:var(--blue);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;">📅 Closer Call</span>';
-  return '<span style="background:var(--cream2);color:var(--text3);border-radius:999px;padding:2px 10px;font-size:11px;">—</span>';
-}
-function upToggleCloseFields(){
-  var v=document.getElementById('up-closed').value;
-  var fc=document.getElementById('up-close-fields');
-  var ft=document.getElementById('up-tryagain-fields');
-  var fcc=document.getElementById('up-closercall-fields');
-  if(fc)fc.style.display=v==='closed'?'block':'none';
-  if(ft)ft.style.display=v==='tryagain'?'block':'none';
-  if(fcc)fcc.style.display=v==='closercall'?'block':'none';
-}
 function fmt$(n){return n!=null&&n!==''?'$'+parseFloat(n).toFixed(2):'—';}
 
-/* Alerte 20j */
-function upCheckAlerts(){
-  var toContact=upNstu.filter(function(s){return upDays(s.date)>=40&&!s.contacted;});
-  var box=document.getElementById('up-alert-box');
-  var list=document.getElementById('up-alert-list');
-  if(!box||!list)return;
-  if(toContact.length){
-    box.style.display='block';
-    list.innerHTML='';
-    toContact.forEach(function(s){
-      var row=document.createElement('div');
-      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(184,134,46,0.15);';
-      var nameSpan=document.createElement('span');
-      nameSpan.style.cssText='cursor:pointer;';
-      nameSpan.innerHTML='<strong style="text-decoration:underline;text-underline-offset:2px;">'+s.name+'</strong> — '+s.course+' — inscrit le '+s.date;
-      nameSpan.addEventListener('click',(function(sid){return function(){nsOpenModal(sid);};})(s.id));
-      var btn=document.createElement('button');
-      btn.className='btn-next btn-sm';
-      btn.style.cssText='font-size:10px;padding:4px 10px;';
-      btn.textContent='✓ Contacter';
-      btn.title='Marquer contacté et créer un appel aujourd\'hui';
-      btn.addEventListener('click',(function(sid){return function(){nsMarkContacted(sid);};})(s.id));
-      row.appendChild(nameSpan);row.appendChild(btn);
-      list.appendChild(row);
-    });
-  } else {
-    box.style.display='none';
-  }
-}
-
-/* Rendu tableau appels */
-var upVisibleCount=10;
-
-function upRender(reset){
-  if(reset===undefined)reset=false;
-  if(reset)upVisibleCount=10;
-  upCheckAlerts();
-  var statusF=document.getElementById('upFilterStatus')?document.getElementById('upFilterStatus').value:'';
-  var coursF=document.getElementById('upFilterCours')?document.getElementById('upFilterCours').value:'';
-  var q=(document.getElementById('upSearch')?document.getElementById('upSearch').value:'').trim().toLowerCase();
-
-  /* Fusionner appels normaux + étudiants à contacter (20j) */
-  var fromNstu=upNstu.filter(function(s){return upDays(s.date)>=40&&!s.contacted;}).map(function(s){
-    return {id:'nstu_'+s.id,name:s.name,email:s.email,phone:s.phone,date:s.date,course:s.course,answered:'Non',closed:'',notes:'[Formation] Pas encore contacté',_fromNstu:true,state:'a-contacter'};
-  });
-  var allRows=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});}).concat(fromNstu);
-
-  var filtered=allRows.filter(function(c){
-    if(statusF&&c.state!==statusF)return false;
-    if(coursF&&c.course!==coursF)return false;
-    if(q&&!(c.name||'').toLowerCase().includes(q))return false;
-    return true;
-  });
-  var order={rappeler:0,'a-contacter':1,attente:2,oui:3};
-  filtered.sort(function(a,b){return (order[a.state]||4)-(order[b.state]||4)||(a.date||'').localeCompare(b.date||'');});
-
-  var rowsEl=document.getElementById('up-rows');
-  if(!rowsEl)return;
-  if(!filtered.length){
-    rowsEl.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun appel — clique sur <strong>+ Nouvel appel</strong> pour commencer.</div>';
-  } else {
-    var visible=Math.min(upVisibleCount,filtered.length);
-    var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
-      +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Téléphone</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Date appel</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Cours</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Répondu</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Relance</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Closé</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Vendu</th>'
-      +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Collecté</th>'
-      +'</tr></thead><tbody>';
-    for(var ri=0;ri<visible;ri++){
-      var c=filtered[ri];
-      var sc={oui:'var(--green)',rappeler:'var(--red)','a-contacter':'#b8862e',attente:'#b8862e','closer-call':'var(--blue)'};
-      var sb={oui:'#e8f4ec',rappeler:'#fceaea','a-contacter':'#fef9ec',attente:'#fef9ec','closer-call':'#e8eef7'};
-      var sl={oui:'A répondu',rappeler:'À rappeler','a-contacter':'À contacter (40j)',attente:'En attente','closer-call':'📅 Closer Call'};
-      var click=c._fromNstu?'':'onclick="upOpenModal(\''+c.id+'\')"';
-      html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" '+click+' onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
-        +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(c.name||'—')+'</td>'
-        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.phone||'—')+'</td>'
-        +'<td style="padding:10px 14px;">'+(c.date||'—')+'</td>'
-        +'<td style="padding:10px 14px;">'+(c.course||'—')+'</td>'
-        +'<td style="padding:10px 14px;">'+(c.answered||'—')+'</td>'
-        +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(c.date?upFollowup(c.date):'—')+'</td>'
-        +'<td style="padding:10px 14px;"><span style="background:'+(sb[c.state]||'#eee')+';color:'+(sc[c.state]||'#666')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(sl[c.state]||c.state)+'</span></td>'
-        +'<td style="padding:10px 14px;">'+upClosedBadge(c.closed)+'</td>'
-        +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(c.amount?fmt$(c.amount):'—')+'</td>'
-        +'<td style="padding:10px 14px;font-weight:700;color:var(--blue);">'+(c.collected?fmt$(c.collected):'—')+'</td>'
-        +'</tr>';
-    }
-    html+='</tbody></table>';
-    rowsEl.innerHTML=html;
-
-    /* Bouton Voir plus */
-    var mb=document.getElementById('up-more-btn');
-    if(mb){
-      if(visible<filtered.length){
-        mb.style.display='block';
-        mb.textContent='Voir plus ('+(filtered.length-visible)+' restants)';
-      } else {
-        mb.style.display='none';
-      }
-    }
-  }
-
-  var base=upCalls.map(function(c){return Object.assign({},c,{state:upState(c)});});
-  var total=base.length, oui=base.filter(function(c){return c.state==='oui';}).length;
-  var attente=base.filter(function(c){return c.state==='attente';}).length;
-  var rappeler=base.filter(function(c){return c.state==='rappeler';}).length;
-  var el;
-  el=document.getElementById('up-total');if(el)el.textContent=total;
-  el=document.getElementById('up-oui');if(el)el.textContent=oui;
-  el=document.getElementById('up-oui-pct');if(el)el.textContent=total?Math.round(oui/total*100)+'% du total':'—';
-  el=document.getElementById('up-attente');if(el)el.textContent=attente;
-  el=document.getElementById('up-rappel');if(el)el.textContent=rappeler;
-}
-
-function upLoadMore(){
-  upVisibleCount+=10;
-  upRender(false);
-}
-
-/* Modal appel */
-function upOpenModal(id){
-  document.getElementById('up-overlay').style.display='flex';
-  document.getElementById('up-edit-id').value=id||'';
-  if(id){
-    var c=upCalls.find(function(x){return x.id===id;});
-    if(!c)return;
-    document.getElementById('up-modal-title').textContent='Modifier — '+c.name;
-    document.getElementById('up-name').value=c.name||'';
-    document.getElementById('up-email').value=c.email||'';
-    document.getElementById('up-phone').value=c.phone||'';
-    document.getElementById('up-date').value=c.date||'';
-    document.getElementById('up-course').value=c.course||'Stock';
-    document.getElementById('up-answered').value=c.answered||'Non';
-    document.getElementById('up-closed').value=c.closed||'';
-    document.getElementById('up-amount').value=c.amount||'';
-    document.getElementById('up-collected').value=c.collected||'';
-    document.getElementById('up-tryagain-date').value=c.tryagainDate||'';
-    document.getElementById('up-closercall-date').value=c.closercallDate||'';
-    document.getElementById('up-closercall-result').value=c.closercallResult||'';
-    document.getElementById('up-notes').value=c.notes||'';
-    document.getElementById('up-btn-delete').style.display='inline-flex';
-    upToggleCloseFields();
-  } else {
-    document.getElementById('up-modal-title').textContent='Nouvel appel';
-    ['up-name','up-email','up-phone','up-notes','up-amount','up-collected','up-tryagain-date','up-closercall-date'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
-    document.getElementById('up-date').value=new Date().toISOString().slice(0,10);
-    document.getElementById('up-course').value='Stock';
-    document.getElementById('up-answered').value='Non';
-    document.getElementById('up-closed').value='';
-    document.getElementById('up-closercall-result').value='';
-    document.getElementById('up-btn-delete').style.display='none';
-    document.getElementById('up-close-fields').style.display='none';
-    document.getElementById('up-tryagain-fields').style.display='none';
-    document.getElementById('up-closercall-fields').style.display='none';
-  }
-}
-function upCloseModal(){document.getElementById('up-overlay').style.display='none';}
-
-async function upSaveCall(){
-  var id=document.getElementById('up-edit-id').value||('up'+Date.now());
-  var name=document.getElementById('up-name').value.trim();
-  if(!name){alert('Le nom est requis.');return;}
-  var c={
-    id:id,name:name,
-    email:document.getElementById('up-email').value.trim(),
-    phone:document.getElementById('up-phone').value.trim(),
-    date:document.getElementById('up-date').value,
-    course:document.getElementById('up-course').value,
-    answered:document.getElementById('up-answered').value,
-    closed:document.getElementById('up-closed').value,
-    amount:document.getElementById('up-amount').value,
-    collected:document.getElementById('up-collected').value,
-    tryagainDate:document.getElementById('up-tryagain-date').value,
-    closercallDate:document.getElementById('up-closercall-date').value,
-    closercallResult:document.getElementById('up-closercall-result').value,
-    notes:document.getElementById('up-notes').value
-  };
-  var idx=upCalls.findIndex(function(x){return x.id===id;});
-  if(idx>=0)upCalls[idx]=c;else upCalls.push(c);
-  await upSaveCalls();
-  upCloseModal();upRender();
-}
-async function upDeleteCall(){
-  var id=document.getElementById('up-edit-id').value;
-  if(!id||!confirm('Supprimer cet appel ?'))return;
-  upCalls=upCalls.filter(function(x){return x.id!==id;});
-  await upSaveCalls();upCloseModal();upRender();
-}
-
 function upCopyText(textOrBtn,btn){
-  /* Accepte soit une string directe, soit le btn lui-même (data-v) */
   var text=typeof textOrBtn==='string'?textOrBtn:(btn&&btn.dataset?btn.dataset.v:'');
   if(!btn&&typeof textOrBtn!=='string')btn=textOrBtn;
   if(!text||text==='—')return;
@@ -1378,117 +1039,137 @@ function upCopyText(textOrBtn,btn){
     btn.textContent='✓';btn.style.color='var(--green)';btn.style.opacity='1';
     setTimeout(function(){btn.textContent=orig;btn.style.color='';btn.style.opacity='0.6';},1200);
   };
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(doFeedback).catch(function(){
-      var ta=document.createElement('textarea');
-      ta.value=text;document.body.appendChild(ta);ta.select();
-      document.execCommand('copy');document.body.removeChild(ta);
-      doFeedback();
-    });
-  } else {
-    var ta=document.createElement('textarea');
-    ta.value=text;document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-    doFeedback();
-  }
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(doFeedback).catch(doFeedback);}
+  else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);doFeedback();}
 }
 
-/* ---- NOUVEAUX ÉTUDIANTS ---- */
-var nsVisibleCount=10;
+/* Cohorte active ce mois */
+function nsIsActive(s, year, month){
+  /* Actif si la cohorte a commencé et que 4 mois ne sont pas encore écoulés */
+  if(!s.cohorte)return false;
+  var start=new Date(s.cohorte+'T00:00:00');
+  var end=new Date(start);end.setMonth(end.getMonth()+4);
+  var checkDate=new Date(year,month,1);
+  return checkDate>=start && checkDate<end;
+}
 
+/* Calculer 40% Trading Floor */
+function nsCalcTTF(){
+  var frontsell=parseFloat(document.getElementById('ns-frontsell').value)||0;
+  var ttf=frontsell*0.4;
+  var el=document.getElementById('ns-ttf-display');
+  if(el)el.textContent='$'+ttf.toFixed(2);
+}
+
+/* Peupler le filtre cohorte */
+function nsPopulateFilter(){
+  var sel=document.getElementById('ns-filter-cohorte');
+  if(!sel)return;
+  var cohortes={};
+  upNstu.forEach(function(s){if(s.cohorte)cohortes[s.cohorte]=true;});
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var existing=Array.from(sel.options).map(function(o){return o.value;}).filter(Boolean);
+  Object.keys(cohortes).sort().forEach(function(c){
+    if(existing.indexOf(c)<0){
+      var d=new Date(c+'T00:00:00');
+      var opt=document.createElement('option');
+      opt.value=c;
+      opt.textContent='Cohorte '+MONTHS_FR[d.getMonth()]+' '+d.getFullYear();
+      sel.appendChild(opt);
+    }
+  });
+}
+
+/* Rendu liste étudiants */
+var nsVisibleCount=10;
 function nsRender(reset){
   if(reset===undefined)reset=false;
   if(reset)nsVisibleCount=10;
-  var rows=document.getElementById('nstu-rows');
-  if(!rows)return;
+  var rows=document.getElementById('nstu-rows');if(!rows)return;
+  var filterCohorte=document.getElementById('ns-filter-cohorte')?document.getElementById('ns-filter-cohorte').value:'';
+  var q=(document.getElementById('ns-search')?document.getElementById('ns-search').value:'').trim().toLowerCase();
+  var today=new Date();
+  var filtered=upNstu.filter(function(s){
+    if(filterCohorte&&s.cohorte!==filterCohorte)return false;
+    if(q&&!(s.name||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  /* Tri : plus récent en premier (date cohorte desc) */
+  filtered.sort(function(a,b){return (b.cohorte||'').localeCompare(a.cohorte||'');});
+
   var total=upNstu.length;
-  var alert25=upNstu.filter(function(s){return upDays(s.date)>=40&&!s.contacted;}).length;
-  var encours=upNstu.filter(function(s){return upDays(s.date)<40;}).length;
-  var frontsellTotal=upNstu.reduce(function(sum,s){return sum+(parseFloat(s.frontsell)||0);},0);
+  var encours=upNstu.filter(function(s){return nsIsActive(s,today.getFullYear(),today.getMonth());}).length;
+  var totalVendu=upNstu.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+  var totalFront=upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
   var el;
   el=document.getElementById('nstu-total');if(el)el.textContent=total;
-  el=document.getElementById('nstu-alert');if(el)el.textContent=alert25;
   el=document.getElementById('nstu-encours');if(el)el.textContent=encours;
-  el=document.getElementById('nstu-frontsell');if(el)el.textContent=frontsellTotal>0?'$'+frontsellTotal.toFixed(2):'—';
+  el=document.getElementById('nstu-vendu');if(el)el.textContent=totalVendu>0?'$'+totalVendu.toFixed(2):'—';
+  el=document.getElementById('nstu-frontsell');if(el)el.textContent=totalFront>0?'$'+totalFront.toFixed(2):'—';
 
-  if(!upNstu.length){
+  if(!filtered.length){
     rows.innerHTML='<div class="loading-msg" style="padding:2.5rem;">Aucun étudiant — clique sur <strong>+ Nouvel étudiant</strong> pour commencer.</div>';
-    var mb2=document.getElementById('ns-more-btn');if(mb2)mb2.style.display='none';
+    var mb=document.getElementById('ns-more-btn');if(mb)mb.style.display='none';
     return;
   }
-  var sorted=upNstu.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
-  var visible=Math.min(nsVisibleCount,sorted.length);
+  var visible=Math.min(nsVisibleCount,filtered.length);
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   var html='<table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
     +'<thead><tr style="background:var(--cream);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:700;">'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Nom</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Téléphone</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Arrivée</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Formation</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Jours</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Cohorte</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Prix vente</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell collecté</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">40% TTF</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
     +'</tr></thead><tbody>';
   for(var ri=0;ri<visible;ri++){
-    var s=sorted[ri];
-    var days=upDays(s.date);
-    var ready=days>=40&&!s.contacted;
-    var contacted=s.contacted;
-    var statusBg=ready?'#fef9ec':contacted?'#e8f4ec':'#e8eef7';
-    var statusColor=ready?'#b8862e':contacted?'var(--green)':'var(--blue)';
-    var statusLabel=ready?'⏰ À contacter':contacted?'✓ Contacté':'En formation';
+    var s=filtered[ri];
+    var active=nsIsActive(s,today.getFullYear(),today.getMonth());
+    var cohorteLabel='—';
+    if(s.cohorte){var cd=new Date(s.cohorte+'T00:00:00');cohorteLabel=MONTHS_FR[cd.getMonth()]+' '+cd.getFullYear();}
+    var ttf=(parseFloat(s.frontsell)||0)*0.4;
     html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
       +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(s.name||'—')+'</td>'
       +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(s.phone||'—')+'</td>'
-      +'<td style="padding:10px 14px;">'+(s.date||'—')+'</td>'
-      +'<td style="padding:10px 14px;">'+(s.course||'—')+'</td>'
-      +'<td style="padding:10px 14px;font-weight:700;color:'+(days>=40?'var(--red)':'var(--navy)')+';">'+days+'j</td>'
+      +'<td style="padding:10px 14px;">'+cohorteLabel+'</td>'
       +'<td style="padding:10px 14px;color:var(--text2);">'+(s.price?fmt$(s.price):'—')+'</td>'
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
-      +'<td style="padding:10px 14px;"><span style="background:'+statusBg+';color:'+statusColor+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+statusLabel+'</span></td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:var(--red);">'+fmt$(ttf)+'</td>'
+      +'<td style="padding:10px 14px;"><span style="background:'+(active?'#e8f4ec':'var(--cream2)')+';color:'+(active?'var(--green)':'var(--text3)')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(active?'✓ En cours':'Terminé')+'</span></td>'
       +'</tr>';
   }
   html+='</tbody></table>';
   rows.innerHTML=html;
-
-  var mb=document.getElementById('ns-more-btn');
-  if(mb){
-    if(visible<sorted.length){
-      mb.style.display='block';
-      mb.textContent='Voir plus ('+(sorted.length-visible)+' restants)';
-    } else {
-      mb.style.display='none';
-    }
-  }
+  var mb2=document.getElementById('ns-more-btn');
+  if(mb2){mb2.style.display=visible<filtered.length?'block':'none';if(visible<filtered.length)mb2.textContent='Voir plus ('+(filtered.length-visible)+' restants)';}
 }
+function nsLoadMore(){nsVisibleCount+=10;nsRender(false);}
 
-function nsLoadMore(){
-  nsVisibleCount+=10;
-  nsRender(false);
-}
-
+/* Modal étudiant */
 function nsOpenModal(id){
   document.getElementById('ns-overlay').style.display='flex';
   document.getElementById('ns-edit-id').value=id||'';
+  var ttfEl=document.getElementById('ns-ttf-display');
   if(id){
     var s=upNstu.find(function(x){return x.id===id;});
     if(!s)return;
     document.getElementById('ns-modal-title').textContent='Modifier — '+s.name;
     document.getElementById('ns-name').value=s.name||'';
-    document.getElementById('ns-email').value=s.email||'';
     document.getElementById('ns-phone').value=s.phone||'';
-    document.getElementById('ns-date').value=s.date||'';
-    document.getElementById('ns-course').value=s.course||'ElaveFX';
+    document.getElementById('ns-cohorte').value=s.cohorte||'2027-01-01';
     document.getElementById('ns-price').value=s.price||'';
     document.getElementById('ns-frontsell').value=s.frontsell||'';
     document.getElementById('ns-notes').value=s.notes||'';
     document.getElementById('ns-btn-delete').style.display='inline-flex';
+    if(ttfEl)ttfEl.textContent='$'+((parseFloat(s.frontsell)||0)*0.4).toFixed(2);
   } else {
     document.getElementById('ns-modal-title').textContent='Nouvel étudiant';
-    ['ns-name','ns-email','ns-phone','ns-price','ns-frontsell','ns-notes'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
-    document.getElementById('ns-date').value=new Date().toISOString().slice(0,10);
-    document.getElementById('ns-course').value='ElaveFX';
+    ['ns-name','ns-phone','ns-price','ns-frontsell','ns-notes'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
+    document.getElementById('ns-cohorte').value='2027-01-01';
     document.getElementById('ns-btn-delete').style.display='none';
+    if(ttfEl)ttfEl.textContent='$0.00';
   }
 }
 function nsCloseModal(){document.getElementById('ns-overlay').style.display='none';}
@@ -1497,394 +1178,161 @@ async function nsSaveStudent(){
   var id=document.getElementById('ns-edit-id').value||('ns'+Date.now());
   var name=document.getElementById('ns-name').value.trim();
   if(!name){alert('Le nom est requis.');return;}
+  var frontsell=document.getElementById('ns-frontsell').value;
+  var isNew=!document.getElementById('ns-edit-id').value;
   var s={
     id:id,name:name,
-    email:document.getElementById('ns-email').value.trim(),
     phone:document.getElementById('ns-phone').value.trim(),
-    date:document.getElementById('ns-date').value,
-    course:document.getElementById('ns-course').value,
+    cohorte:document.getElementById('ns-cohorte').value,
     price:document.getElementById('ns-price').value,
-    frontsell:document.getElementById('ns-frontsell').value,
-    notes:document.getElementById('ns-notes').value,
-    contacted:upNstu.find(function(x){return x.id===id;})?upNstu.find(function(x){return x.id===id;}).contacted:false
+    frontsell:frontsell,
+    ttf:((parseFloat(frontsell)||0)*0.4).toFixed(2),
+    notes:document.getElementById('ns-notes').value
   };
   var idx=upNstu.findIndex(function(x){return x.id===id;});
   if(idx>=0)upNstu[idx]=s;else upNstu.push(s);
-  await upSaveNstu();nsCloseModal();nsRender();upCheckAlerts();
+  await upSaveNstu();
+
+  /* Créer automatiquement l'accès journal de trading si c'est un nouvel étudiant */
+  if(isNew){
+    var slug=toSlug(name);
+    var alreadyExists=allStudents.find(function(x){return x.slug===slug;});
+    if(!alreadyExists){
+      var parts=name.split(' ');
+      var initials=parts.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+      var journalStudent={name:name,slug:slug,initials:initials,createdAt:new Date().toISOString()};
+      /* Sauvegarder dans Firebase pour que l'étudiant puisse se connecter */
+      await fsSave('students/'+slug,journalStudent);
+      allStudents.unshift(journalStudent);
+      await saveStudents();
+    }
+  }
+
+  nsCloseModal();nsPopulateFilter();nsRender();
+
+  /* Rafraîchir l'onglet Étudiants si visible */
+  if(currentRole==='prof'){
+    var stuTab=document.getElementById('tab-etudiants');
+    if(stuTab&&stuTab.classList.contains('active'))renderStudents();
+  }
 }
+
 async function nsDeleteStudent(){
   var id=document.getElementById('ns-edit-id').value;
   if(!id||!confirm('Supprimer cet étudiant ?'))return;
-  upNstu=upNstu.filter(function(x){return x.id!==id;});
-  await upSaveNstu();nsCloseModal();nsRender();upCheckAlerts();
-}
-async function nsMarkContacted(id){
   var s=upNstu.find(function(x){return x.id===id;});
-  if(!s)return;
-  s.contacted=true;
+  upNstu=upNstu.filter(function(x){return x.id!==id;});
   await upSaveNstu();
 
-  /* Créer automatiquement un appel pour aujourd'hui */
-  var today=new Date().toISOString().slice(0,10);
-  var newCall={
-    id:'up'+Date.now(),
-    name:s.name,
-    email:s.email||'',
-    phone:s.phone||'',
-    date:today,
-    course:s.course,
-    answered:'Non',
-    closed:'',
-    amount:'',
-    collected:'',
-    tryagainDate:'',
-    closercallDate:'',
-    closercallResult:'',
-    notes:'[Auto] Premier contact upsell — étudiant depuis '+s.date
-  };
-  upCalls.push(newCall);
-  await upSaveCalls();
-
-  nsRender();
-  upRender();
-  upCheckAlerts();
-  upCalRender();
-
-  /* Ouvrir directement la fiche du nouvel appel pour compléter */
-  upOpenModal(newCall.id);
-}
-
-async function upMarkRecontacted(id){
-  var c=upCalls.find(function(x){return x.id===id;});
-  if(!c)return;
-
-  /* Créer un nouvel appel pour aujourd'hui en relance */
-  var today=new Date().toISOString().slice(0,10);
-  var newCall={
-    id:'up'+Date.now(),
-    name:c.name,
-    email:c.email||'',
-    phone:c.phone||'',
-    date:today,
-    course:c.course,
-    answered:'Non',
-    closed:'',
-    amount:'',
-    collected:'',
-    tryagainDate:'',
-    closercallDate:'',
-    closercallResult:'',
-    notes:'[Auto] Relance 10 jours — appel original du '+c.date
-  };
-  upCalls.push(newCall);
-
-  /* Marquer l'appel original comme répondu pour le retirer des alertes */
-  c.answered='Oui';
-  await upSaveCalls();
-
-  upRender();
-  upCheckAlerts();
-  upCalRender();
-
-  /* Ouvrir la fiche du nouvel appel */
-  upOpenModal(newCall.id);
+  /* Retirer aussi l'accès journal si l'étudiant existe */
+  if(s&&s.name){
+    var slug=toSlug(s.name);
+    var jIdx=allStudents.findIndex(function(x){return x.slug===slug;});
+    if(jIdx>=0&&confirm('Voulez-vous aussi supprimer l\'accès au journal de trading de '+s.name+' ?')){
+      allStudents.splice(jIdx,1);
+      await saveStudents();
+    }
+  }
+  nsCloseModal();nsRender();
 }
 
 document.addEventListener('click',function(e){
-  if(e.target.id==='up-overlay')upCloseModal();
   if(e.target.id==='ns-overlay')nsCloseModal();
 });
 
-/* ---- CALENDRIER UPSELL ---- */
+/* ---- CALENDRIER CMP ---- */
 function upCalRender(){
-  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  var DAYS_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
   var title=document.getElementById('up-cal-title');
-  if(title)title.textContent=MONTHS_FR[upCalMonth]+' '+upCalYear;
-
-  /* ALERTES CLOCHES */
-  var alertBox=document.getElementById('up-cal-alerts');
-  if(alertBox){
-    var alerts=[];
-    upNstu.forEach(function(s){var d=upDays(s.date);if(d>=40&&!s.contacted)alerts.push({type:'40j',name:s.name,course:s.course,days:d,id:s.id});});
-    upCalls.forEach(function(c){if(c.answered==='Oui'||c.closed==='closed')return;var d=upDays(c.date);if(d>=10)alerts.push({type:'10j',name:c.name,course:c.course,days:d,id:c.id});});
-    if(alerts.length){
-      alertBox.style.display='block';
-      var wrapper=document.createElement('div');
-      wrapper.style.cssText='display:flex;flex-direction:column;gap:6px;';
-      alerts.forEach(function(a){
-        var is40=a.type==='40j';
-        var bg=is40?'#fef9ec':'#fceaea';
-        var col=is40?'#b8862e':'var(--red)';
-        var bc=is40?'rgba(184,134,46,0.25)':'rgba(176,48,48,0.2)';
-        var label=is40?'🔔 40 jours en formation — prêt à contacter':'🔔 10 jours sans réponse — à rappeler';
-        var row=document.createElement('div');
-        row.style.cssText='background:'+bg+';border:1px solid '+bc+';border-radius:9px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;';
-        var info=document.createElement('div');
-        info.innerHTML='<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+col+';">'+label+'</span>'
-          +'<div style="font-size:13px;color:var(--navy);margin-top:2px;"><strong>'+a.name+'</strong> — '+a.course+' — '+a.days+' jours</div>';
-        var btn=document.createElement('button');
-        btn.className='btn-next btn-sm';
-        btn.style.cssText='font-size:10px;padding:4px 10px;flex-shrink:0;'+(is40?'':'background:var(--red);');
-        btn.textContent=is40?'✓ Contacter':'✓ Relancer';
-        if(is40){
-          btn.addEventListener('click',(function(id){return function(){nsMarkContacted(id);};})(a.id));
-        } else {
-          btn.addEventListener('click',(function(id){return function(){upMarkRecontacted(id);};})(a.id));
-        }
-        row.appendChild(info);
-        row.appendChild(btn);
-        wrapper.appendChild(row);
-      });
-      alertBox.innerHTML='';
-      alertBox.appendChild(wrapper);
-    } else {alertBox.style.display='none';}
-  }
-
+  if(title)title.textContent='Cohortes '+upCalYear;
   var grid=document.getElementById('up-cal-grid');
   if(!grid)return;
   grid.innerHTML='';
-  DAYS_FR.forEach(function(d){var el=document.createElement('div');el.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 0;';el.textContent=d;grid.appendChild(el);});
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  /* Cohortes de l'année */
+  var cohorteDates=['01-01','05-01','09-01'].map(function(d){return upCalYear+'-'+d;});
+  var totalVendu=0,totalFront=0,totalTTF=0;
 
-  var firstDay=new Date(upCalYear,upCalMonth,1).getDay();
-  var dim=new Date(upCalYear,upCalMonth+1,0).getDate();
-  var today=new Date();
-
-  var dayMap={};
-  upCalls.forEach(function(c){
-    if(!c.date)return;
-    if(!dayMap[c.date])dayMap[c.date]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0};
-    dayMap[c.date].calls.push(c);
-    if(c.closed==='closed')dayMap[c.date].closed++;
-    if(upState(c)==='rappeler')dayMap[c.date].rappeler++;
-    dayMap[c.date].amountSold+=parseFloat(c.amount)||0;
-    dayMap[c.date].amountCollected+=parseFloat(c.collected)||0;
-    /* Try Again : apparaît sur sa date de relance */
-    if(c.closed==='tryagain'&&c.tryagainDate){
-      if(!dayMap[c.tryagainDate])dayMap[c.tryagainDate]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0,tryagains:[]};
-      if(!dayMap[c.tryagainDate].tryagains)dayMap[c.tryagainDate].tryagains=[];
-      dayMap[c.tryagainDate].tryagains.push(c);
-    }
-    /* Closer Call : apparaît sur la date du closer call */
-    if(c.closed==='closercall'&&c.closercallDate){
-      if(!dayMap[c.closercallDate])dayMap[c.closercallDate]={calls:[],closed:0,rappeler:0,amountSold:0,amountCollected:0,closercall:0};
-      dayMap[c.closercallDate].closercall=(dayMap[c.closercallDate].closercall||0)+1;
-      if(!dayMap[c.closercallDate].closercalls)dayMap[c.closercallDate].closercalls=[];
-      dayMap[c.closercallDate].closercalls.push(c);
-    }
-  });
-
-  var bellMap={};
-  upNstu.forEach(function(s){
-    if(!s.date||s.contacted)return;
-    var ad=new Date(s.date+'T00:00:00');ad.setDate(ad.getDate()+40);
-    var ds=ad.toISOString().slice(0,10);
-    if(!bellMap[ds])bellMap[ds]=[];
-    bellMap[ds].push({type:'40j',name:s.name,course:s.course,id:s.id});
-  });
-  upCalls.forEach(function(c){
-    if(!c.date||c.answered==='Oui'||c.closed==='closed')return;
-    var ad=new Date(c.date+'T00:00:00');ad.setDate(ad.getDate()+10);
-    var ds=ad.toISOString().slice(0,10);
-    if(!bellMap[ds])bellMap[ds]=[];
-    bellMap[ds].push({type:'10j',name:c.name,course:c.course,id:c.id});
-  });
-
-  var mCalls=0,mClosed=0,mRappel=0,mSold=0,mCollected=0;
-  for(var i=0;i<firstDay;i++){var e=document.createElement('div');e.style.cssText='background:transparent;border-color:transparent;min-height:74px;';grid.appendChild(e);}
-
-  for(var day=1;day<=dim;day++){
+  for(var m=0;m<12;m++){
     var cell=document.createElement('div');
-    var mm=String(upCalMonth+1).padStart(2,'0'),dd=String(day).padStart(2,'0');
-    var ds=upCalYear+'-'+mm+'-'+dd;
-    var isToday=today.getFullYear()===upCalYear&&today.getMonth()===upCalMonth&&today.getDate()===day;
-    var hasCalls=dayMap[ds]&&dayMap[ds].calls.length>0;
-    var hasBells=bellMap[ds]&&bellMap[ds].length>0;
-    var hasClose=hasCalls&&dayMap[ds].closed>0;
-    var borderColor=isToday?'var(--blue-light)':hasClose?'rgba(26,122,74,0.3)':hasBells?'rgba(184,134,46,0.35)':'var(--border)';
-    var bgColor=hasClose?'#f7fcf9':hasBells?'#fefbf3':'white';
-    cell.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:8px;padding:5px 6px;min-height:74px;cursor:pointer;transition:opacity 0.15s;';
+    var activeStudents=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
+    var isCohortStart=cohorteDates.some(function(c){var d=new Date(c+'T00:00:00');return d.getFullYear()===upCalYear&&d.getMonth()===m;});
+    var today=new Date();
+    var isCurrentMonth=today.getFullYear()===upCalYear&&today.getMonth()===m;
+    var bgColor=isCohortStart?'#e8eef7':activeStudents.length>0?'#f7fcf9':'white';
+    var borderColor=isCurrentMonth?'var(--blue-light)':isCohortStart?'rgba(45,74,138,0.3)':activeStudents.length>0?'rgba(26,122,74,0.2)':'var(--border)';
+    cell.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:10px;padding:10px 12px;cursor:pointer;transition:opacity 0.15s;min-height:90px;';
     cell.onmouseover=function(){this.style.opacity='0.8';};
     cell.onmouseout=function(){this.style.opacity='1';};
-    cell.onclick=(function(d){return function(){upOpenDayPanel(d);};})(ds);
-
-    var numEl=document.createElement('div');
-    numEl.style.cssText='font-size:11px;font-weight:700;color:'+(isToday?'var(--blue)':'var(--text3)')+';margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;';
-    numEl.innerHTML='<span>'+day+'</span>'+(hasBells?'<span style="font-size:12px;">🔔</span>':'');
-    cell.appendChild(numEl);
-
-    if(hasCalls){
-      var d=dayMap[ds];
-      mCalls+=d.calls.length;mClosed+=d.closed;mRappel+=d.rappeler;mSold+=d.amountSold;mCollected+=d.amountCollected;
-      var el2=document.createElement('div');el2.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el2.textContent=d.calls.length+' appel'+(d.calls.length>1?'s':'');cell.appendChild(el2);
-      if(d.closed){var el3=document.createElement('div');el3.style.cssText='font-size:10px;color:var(--green);font-weight:700;';el3.textContent='💰 '+d.closed;cell.appendChild(el3);}
-      if(d.rappeler){var el4=document.createElement('div');el4.style.cssText='font-size:10px;color:var(--red);';el4.textContent='⏰ '+d.rappeler;cell.appendChild(el4);}
-      if(d.closercall){var el6=document.createElement('div');el6.style.cssText='font-size:10px;color:var(--blue);font-weight:700;';el6.textContent='📅 '+d.closercall+' closer';cell.appendChild(el6);}
-      if(d.tryagains&&d.tryagains.length){var el7=document.createElement('div');el7.style.cssText='font-size:10px;color:#b8862e;font-weight:700;';el7.textContent='⏰ '+d.tryagains.length+' try again';cell.appendChild(el7);}
-      if(d.amountSold>0){var el5=document.createElement('div');el5.style.cssText='font-size:9px;color:var(--green);margin-top:2px;';el5.textContent='$'+d.amountSold.toFixed(0);cell.appendChild(el5);}
-    }
+    cell.onclick=(function(month){return function(){upShowMonthDetail(month);};})(m);
+    var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+    var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+    var mTTF=mFront*0.4;
+    totalVendu+=mVendu;totalFront+=mFront;totalTTF+=mTTF;
+    cell.innerHTML='<div style="font-size:11px;font-weight:700;color:'+(isCurrentMonth?'var(--blue)':'var(--text3)')+';margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">'+MONTHS_FR[m]+(isCohortStart?'<span style="font-size:9px;background:var(--blue);color:white;border-radius:4px;padding:1px 5px;margin-left:4px;">DÉBUT</span>':'')+'</div>'
+      +'<div style="font-size:1.1rem;font-weight:700;font-family:\'Playfair Display\',serif;color:var(--navy);">'+activeStudents.length+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);">étudiant'+(activeStudents.length>1?'s':'')+' actif'+(activeStudents.length>1?'s':'')+'</div>'
+      +(mFront>0?'<div style="font-size:10px;color:var(--green);margin-top:3px;font-weight:700;">$'+mFront.toFixed(0)+' collecté</div>':'');
     grid.appendChild(cell);
   }
 
+  /* Cartes résumé */
   var summary=document.getElementById('up-cal-summary');
   if(summary){
-    var closeRate=mCalls>0?Math.round(mClosed/mCalls*100):0;
-    var collectRate=mSold>0?Math.round(mCollected/mSold*100):0;
-    var perCall=mCalls>0?'$'+(mSold/mCalls).toFixed(2)+'/appel':null;
     var cards=[
-      {l:'Appels',v:mCalls,c:'var(--navy)',sub:perCall},
-      {l:'Closes',v:mClosed,c:'var(--green)',sub:closeRate+'% des appels'},
-      {l:'À rappeler',v:mRappel,c:'var(--red)',sub:null},
-      {l:'Montant vendu',v:'$'+mSold.toFixed(2),c:'var(--green)',sub:null},
-      {l:'Montant collecté',v:'$'+mCollected.toFixed(2),c:'var(--blue)',sub:collectRate+'% du vendu'}
+      {l:'Étudiants inscrits',v:upNstu.length,c:'var(--navy)',sub:null},
+      {l:'En cours ce mois',v:upNstu.filter(function(s){return nsIsActive(s,today.getFullYear(),today.getMonth());}).length,c:'var(--green)',sub:null},
+      {l:'Montant vendu',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0).toFixed(2),c:'var(--green)',sub:null},
+      {l:'Frontsell collecté',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0).toFixed(2),c:'var(--blue)',sub:null},
+      {l:'40% Trading Floor',v:'$'+(upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0)*0.4).toFixed(2),c:'var(--red)',sub:'à remettre'}
     ];
     summary.innerHTML=cards.map(function(s){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
-        +'<div style="font-family:&quot;Playfair Display&quot;,serif;font-size:1.2rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
+        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
-        +(s.sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;">'+s.sub+'</div>':'')
+        +(s.sub?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:2px;">'+s.sub+'</div>':'')
         +'</div>';
     }).join('');
   }
 }
 
-function upOpenDayPanel(ds){
-  var panel=document.getElementById('up-day-panel');
-  var titleEl=document.getElementById('up-day-title');
-  var contentEl=document.getElementById('up-day-content');
-  if(!panel||!titleEl||!contentEl)return;
-  var parts=ds.split('-');
-  var MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  titleEl.textContent=parseInt(parts[2])+' '+MONTHS[parseInt(parts[1])-1]+' '+parts[0];
-  contentEl.innerHTML='';
-
-  /* Appels du jour */
-  var dayAppels=upCalls.filter(function(c){return c.date===ds;});
-  if(dayAppels.length){
-    var hdr=document.createElement('div');
-    hdr.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;';
-    hdr.textContent='📞 Appels ('+dayAppels.length+')';
-    contentEl.appendChild(hdr);
-    dayAppels.forEach(function(c){
-      var st=upState(c);
-      var sc={oui:'var(--green)',rappeler:'var(--red)',attente:'#b8862e'};
-      var sl={oui:'A répondu',rappeler:'À rappeler',attente:'En attente'};
-      var closedStr=c.closed==='closed'?'💰 Closé':c.closed==='notclosed'?'💩 Non closé':c.closed==='tryagain'?'⏰ Try Again':'—';
-      var row=document.createElement('div');
-      row.style.cssText='background:var(--cream);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
-      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
-        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+c.course+' · '+closedStr+'</div>'
-        +'<div style="margin-top:4px;"><span style="font-size:10px;font-weight:700;color:'+(sc[st]||'var(--text3)')+';">'+(sl[st]||st)+'</span>'
-        +(c.amount?'<span style="font-size:10px;color:var(--green);margin-left:8px;">$'+parseFloat(c.amount).toFixed(2)+'</span>':'')
-        +'</div>';
-      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
-      contentEl.appendChild(row);
-    });
+function upShowMonthDetail(m){
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var detail=document.getElementById('up-cal-month-detail');
+  var titleEl=document.getElementById('up-cal-detail-title');
+  var listEl=document.getElementById('up-cal-detail-list');
+  if(!detail||!titleEl||!listEl)return;
+  var activeStudents=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
+  titleEl.textContent=MONTHS_FR[m]+' '+upCalYear+' — '+activeStudents.length+' étudiant'+(activeStudents.length>1?'s':'');
+  if(!activeStudents.length){
+    listEl.innerHTML='<div style="color:var(--text3);font-style:italic;font-size:13px;padding:0.5rem 0;">Aucun étudiant actif ce mois</div>';
+  } else {
+    var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+    var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+    var mTTF=mFront*0.4;
+    listEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'
+      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--green);">$'+mVendu.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Vendu</div></div>'
+      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--blue);">$'+mFront.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Collecté</div></div>'
+      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--red);">$'+mTTF.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">40% TTF</div></div>'
+      +'</div>'
+      +activeStudents.map(function(s){
+        var MONTHS2=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+        var cd=s.cohorte?new Date(s.cohorte+'T00:00:00'):null;
+        var cohorteStr=cd?MONTHS2[cd.getMonth()]+' '+cd.getFullYear():'—';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')">'
+          +'<div><div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
+          +'<div style="font-size:11px;color:var(--text3);">Cohorte '+cohorteStr+' · '+(s.phone||'—')+'</div></div>'
+          +'<div style="text-align:right;">'
+          +'<div style="font-size:12px;color:var(--green);font-weight:700;">'+(s.frontsell?'$'+parseFloat(s.frontsell).toFixed(2):'—')+'</div>'
+          +'<div style="font-size:10px;color:var(--red);">TTF: $'+((parseFloat(s.frontsell)||0)*0.4).toFixed(2)+'</div>'
+          +'</div></div>';
+      }).join('');
   }
-
-  /* Alertes cloches */
-  var bells25=upNstu.filter(function(s){
-    if(s.contacted)return false;
-    var ad=new Date(s.date+'T00:00:00');ad.setDate(ad.getDate()+40);
-    return ad.toISOString().slice(0,10)===ds;
-  });
-  var bells10=upCalls.filter(function(c){
-    if(c.answered==='Oui'||c.closed==='closed')return false;
-    var ad=new Date(c.date+'T00:00:00');ad.setDate(ad.getDate()+10);
-    return ad.toISOString().slice(0,10)===ds;
-  });
-
-  if(bells25.length||bells10.length){
-    var hdr2=document.createElement('div');
-    hdr2.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:12px;margin-bottom:8px;';
-    hdr2.textContent='🔔 Alertes ce jour';
-    contentEl.appendChild(hdr2);
-
-    bells25.forEach(function(s){
-      var row=document.createElement('div');
-      row.style.cssText='background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
-      var info=document.createElement('div');
-      info.style.cssText='cursor:pointer;flex:1;';
-      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);text-decoration:underline;text-underline-offset:2px;">'+s.name+'</div>'
-        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">⏰ 40 jours en formation — '+s.course+' · Inscrit le '+s.date+'</div>';
-      /* Clic sur le nom = ouvrir la fiche étudiant */
-      info.addEventListener('click',(function(sid){return function(){nsOpenModal(sid);};})(s.id));
-      var btn=document.createElement('button');
-      btn.className='btn-next btn-sm';
-      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;margin-left:8px;';
-      btn.title='Marquer comme contacté et créer un appel pour aujourd\'hui';
-      btn.textContent='✓ Contacter';
-      btn.addEventListener('click',(function(id){return function(e){e.stopPropagation();nsMarkContacted(id);};})(s.id));
-      row.appendChild(info);row.appendChild(btn);
-      contentEl.appendChild(row);
-    });
-
-    bells10.forEach(function(c){
-      var row=document.createElement('div');
-      row.style.cssText='background:#fceaea;border:1px solid rgba(176,48,48,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
-      var info=document.createElement('div');
-      info.style.cssText='cursor:pointer;flex:1;';
-      info.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
-        +'<div style="font-size:11px;color:var(--red);margin-top:2px;">🔔 10 jours sans réponse — '+c.course+'</div>';
-      info.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
-      var btn=document.createElement('button');
-      btn.className='btn-next btn-sm';
-      btn.style.cssText='font-size:10px;padding:4px 8px;flex-shrink:0;margin-left:8px;background:var(--red);';
-      btn.textContent='✓ Relancer';
-      btn.title='Créer un nouvel appel de relance pour aujourd\'hui';
-      btn.addEventListener('click',(function(id){return function(e){e.stopPropagation();upMarkRecontacted(id);};})(c.id));
-      row.appendChild(info);row.appendChild(btn);
-      contentEl.appendChild(row);
-    });
-  }
-
-  if(!contentEl.children.length){
-    contentEl.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun appel ni alerte ce jour</div>';
-  }
-
-  /* Try Again prévus ce jour */
-  var tryagains=upCalls.filter(function(c){return c.closed==='tryagain'&&c.tryagainDate===ds;});
-  if(tryagains.length){
-    var hdrTa=document.createElement('div');
-    hdrTa.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#b8862e;margin-top:12px;margin-bottom:8px;';
-    hdrTa.textContent='⏰ Try Again prévus ('+tryagains.length+')';
-    contentEl.appendChild(hdrTa);
-    tryagains.forEach(function(c){
-      var row=document.createElement('div');
-      row.style.cssText='background:#fef9ec;border:1px solid rgba(184,134,46,0.2);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
-      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
-        +'<div style="font-size:11px;color:#b8862e;margin-top:2px;">'+c.course+' · Appelé le '+c.date+'</div>';
-      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
-      contentEl.appendChild(row);
-    });
-  }
-
-  /* Closer Calls prévus ce jour */
-  var closercalls=upCalls.filter(function(c){return c.closed==='closercall'&&c.closercallDate===ds;});
-  if(closercalls.length){
-    var hdrCc=document.createElement('div');
-    hdrCc.style.cssText='font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-top:12px;margin-bottom:8px;';
-    hdrCc.textContent='📅 Closer Calls ('+closercalls.length+')';
-    contentEl.appendChild(hdrCc);
-    closercalls.forEach(function(c){
-      var res=c.closercallResult;
-      var resTxt=res==='closed'?'💰 Closé':res==='notclosed'?'💩 Non closé':res==='noshow'?'👻 No Show':res==='reschedule'?'🔄 Reprogrammé':'⏳ En attente';
-      var resBg=res==='closed'?'#e8f4ec':res==='notclosed'?'#fceaea':'#e8eef7';
-      var row=document.createElement('div');
-      row.style.cssText='background:'+resBg+';border:1px solid rgba(45,74,138,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:6px;cursor:pointer;';
-      row.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--navy);">'+c.name+'</div>'
-        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+c.course+' · '+resTxt+'</div>';
-      row.addEventListener('click',(function(id){return function(){upOpenModal(id);};})(c.id));
-      contentEl.appendChild(row);
-    });
-  }
-
-  panel.style.display='block';
+  detail.style.display='block';
 }
 
-function upCloseDayPanel(){var p=document.getElementById('up-day-panel');if(p)p.style.display='none';}
-function upCalPrev(){if(upCalMonth===0){upCalMonth=11;upCalYear--;}else{upCalMonth--;}upCloseDayPanel();upCalRender();}
-function upCalNext(){if(upCalMonth===11){upCalMonth=0;upCalYear++;}else{upCalMonth++;}upCloseDayPanel();upCalRender();}
+function upCalPrev(){upCalYear--;upCloseDayPanel();upCalRender();}
+function upCalNext(){upCalYear++;upCloseDayPanel();upCalRender();}
+function upCloseDayPanel(){var d=document.getElementById('up-cal-month-detail');if(d)d.style.display='none';}
 
 
 if(loadSession()){
