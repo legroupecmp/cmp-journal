@@ -937,17 +937,17 @@ function runFIFO(rows){
   Object.keys(bySymbol).forEach(function(sym){
     var execs=bySymbol[sym],pos=0,group=[],totalFees=0,totalRaw=0,firstSide=null;
     execs.forEach(function(ex){
-      var side=(ex['Side']||'').toLowerCase(),qty=parseInt(ex['Quantity'])||0;
+      var side=(ex['Side']||'').toLowerCase(),qty=parseInt((ex['Quantity']||'').replace(/[\s\t\u00a0,]/g,''))||0;
       var fee=Math.abs(parseMoney(ex['Execution fee'])),pnl=parseMoney(ex['Net P/L']);
       if(group.length===0)firstSide=side;
       group.push(ex);totalFees+=fee;totalRaw+=pnl;
       pos+=side==='sell'?-qty:qty;
       if(pos===0&&group.length>0){
-        var dir=firstSide==='sell'?'LONG':'SHORT';
+        var dir=firstSide==='sell'?'SHORT':'LONG';
         var eE=group.filter(function(e){return(e['Side']||'').toLowerCase()===(dir==='SHORT'?'sell':'buy');}),
             eX=group.filter(function(e){return(e['Side']||'').toLowerCase()!==(dir==='SHORT'?'sell':'buy');});
-        var avg=function(a){var s=0,q=0;a.forEach(function(e){var qq=parseInt(e['Quantity'])||0;s+=parseMoney(e['Price'])*qq;q+=qq;});return q>0?s/q:0;};
-        var mq=Math.max.apply(null,group.map(function(e){return parseInt(e['Quantity'])||0;}));
+        var avg=function(a){var s=0,q=0;a.forEach(function(e){var qq=parseInt((e['Quantity']||'').replace(/[\s\t\u00a0,]/g,''))||0;s+=parseMoney(e['Price'])*qq;q+=qq;});return q>0?s/q:0;};
+        var mq=Math.max.apply(null,group.map(function(e){return parseInt((e['Quantity']||'').replace(/[\s\t\u00a0,]/g,''))||0;}));
         var rawDT=group[0]['Date/Time']||'';
         var trDate=rawDT.split(' ')[0];
         var trHour=null;
