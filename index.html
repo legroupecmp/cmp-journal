@@ -935,7 +935,7 @@ function runFIFO(rows){
   rows.forEach(function(r){var sym=r['Symbol'];if(!sym)return;if(!bySymbol[sym])bySymbol[sym]=[];bySymbol[sym].push(r);});
   var trades=[];
   Object.keys(bySymbol).forEach(function(sym){
-    var execs=bySymbol[sym],pos=0,group=[],totalFees=0,totalRaw=0,firstSide=null;
+    var execs=bySymbol[sym].reverse(),pos=0,group=[],totalFees=0,totalRaw=0,firstSide=null;
     execs.forEach(function(ex){
       var side=(ex['Side']||'').toLowerCase(),qty=parseInt((ex['Quantity']||'').replace(/[\s\t\u00a0,]/g,''))||0;
       var fee=Math.abs(parseMoney(ex['Execution fee'])),pnl=parseMoney(ex['Net P/L']);
