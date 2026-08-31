@@ -224,6 +224,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="tab" onclick="switchTab('details')">Détails</div>
     <div class="tab" onclick="switchTab('import')">Importer</div>
     <div class="tab" id="tab-upsell-btn" onclick="switchTab('upsell')" style="display:none;">Étudiants</div>
+    <div class="tab" id="tab-cohorte-btn" onclick="switchTab('cohorte')" style="display:none;">Cohorte</div>
   </div>
   <div class="body">
 
@@ -457,7 +458,8 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:440px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="ns-modal-title">Nouvel étudiant</div>
         <input type="hidden" id="ns-edit-id">
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Ex. Marc Tremblay" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Prénom Nom (ex: Joanie Lavoie)" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">⚠ Le mot de passe de l'étudiant sera exactement ce nom — ex: <strong>Joanie Lavoie</strong></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="ns-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Cohorte de départ</label>
           <select class="q-input" id="ns-cohorte">
@@ -489,6 +491,20 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- COHORTE -->
+    <div id="tab-cohorte" class="tab-content">
+      <div class="section-badge">🎓 Suivi</div>
+      <div class="page-title">Performance par cohorte</div>
+      <div class="page-sub">Sélectionne une cohorte pour voir la performance de chaque étudiant</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <select class="q-input" style="width:auto;min-width:220px;" id="cohorte-filter" onchange="cohorteRender()">
+          <option value="">— Choisir une cohorte —</option>
+        </select>
+        <div id="cohorte-stats" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;"></div>
+      </div>
+      <div id="cohorte-list" style="display:flex;flex-direction:column;gap:12px;"></div>
     </div>
 
   </div>
@@ -598,6 +614,7 @@ async function startApp(){
   document.getElementById('top-role-label').textContent=currentRole==='prof'?'Professeur':'Mon Journal';
   
   document.getElementById('tab-upsell-btn').style.display=currentRole==='prof'?'':'none';
+  document.getElementById('tab-cohorte-btn').style.display=currentRole==='prof'?'':'none';
   if(currentRole==='etudiant'){
     document.getElementById('db-title').textContent='Mon tableau de bord';
     document.getElementById('db-sub').textContent='Ma performance — '+currentUser;
@@ -621,6 +638,7 @@ function logout(){
   document.getElementById('login-error').style.display='none';
   document.getElementById('login-info').style.display='none';
   document.getElementById('tab-upsell-btn').style.display='none';
+  document.getElementById('tab-cohorte-btn').style.display='none';
   document.getElementById('db-title').textContent='Tableau de bord';
   document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
   switchTab('dashboard');
@@ -656,13 +674,14 @@ function switchTab(name){
   }
   var badge=document.getElementById('student-view-badge');
   if(badge) badge.style.display=(name==='details'&&viewingStudent)?'flex':'none';
-  var tabs=['dashboard','trades','calendrier','details','import','upsell'];
+  var tabs=['dashboard','trades','calendrier','details','import','upsell','cohorte'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
   document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
   var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
   if(name==='calendrier')renderCalendar();
   if(name==='details')renderDetails();
   if(name==='upsell'){upLoadCalls();}
+  if(name==='cohorte'){cohortePopulateFilter();cohorteRender();}
 }
 
 function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
@@ -1334,6 +1353,131 @@ function upCalPrev(){upCalYear--;upCloseDayPanel();upCalRender();}
 function upCalNext(){upCalYear++;upCloseDayPanel();upCalRender();}
 function upCloseDayPanel(){var d=document.getElementById('up-cal-month-detail');if(d)d.style.display='none';}
 
+
+/* ---- ONGLET COHORTE ---- */
+var cohorteCharts={};
+
+function cohortePopulateFilter(){
+  var sel=document.getElementById('cohorte-filter');
+  if(!sel)return;
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var cohortes={};
+  upNstu.forEach(function(s){if(s.cohorte)cohortes[s.cohorte]=true;});
+  /* Vider sauf le premier option */
+  while(sel.options.length>1)sel.remove(1);
+  Object.keys(cohortes).sort().forEach(function(c){
+    var d=new Date(c+'T00:00:00');
+    var opt=document.createElement('option');
+    opt.value=c;
+    opt.textContent='Cohorte '+MONTHS_FR[d.getMonth()]+' '+d.getFullYear();
+    sel.appendChild(opt);
+  });
+}
+
+async function cohorteRender(){
+  var cohorte=document.getElementById('cohorte-filter').value;
+  var listEl=document.getElementById('cohorte-list');
+  var statsEl=document.getElementById('cohorte-stats');
+  if(!listEl)return;
+
+  if(!cohorte){
+    listEl.innerHTML='<div class="loading-msg">Sélectionne une cohorte pour voir les étudiants</div>';
+    if(statsEl)statsEl.innerHTML='';
+    return;
+  }
+
+  var students=upNstu.filter(function(s){return s.cohorte===cohorte;});
+  if(!students.length){
+    listEl.innerHTML='<div class="loading-msg">Aucun étudiant dans cette cohorte</div>';
+    return;
+  }
+
+  listEl.innerHTML='<div class="loading-msg">Chargement des données...</div>';
+
+  /* Charger les trades de chaque étudiant */
+  var results=await Promise.all(students.map(async function(s){
+    var slug=toSlug(s.name);
+    try{
+      var data=await fsLoad('trades/'+slug);
+      var trades=data&&data.list?data.list:[];
+      return {student:s,trades:trades,slug:slug};
+    }catch(e){return {student:s,trades:[],slug:slug};}
+  }));
+
+  /* Stats globales de la cohorte */
+  var totalPnl=0,totalTrades=0,totalWins=0;
+  results.forEach(function(r){
+    var pnl=r.trades.reduce(function(s,t){return s+t.pnl;},0);
+    totalPnl+=pnl;
+    totalTrades+=r.trades.length;
+    totalWins+=r.trades.filter(function(t){return t.pnl>=0;}).length;
+  });
+
+  if(statsEl){
+    var statsCards=[
+      {l:'Étudiants',v:students.length,c:'var(--navy)'},
+      {l:'P&L total cohorte',v:(totalPnl>=0?'+':'')+' $'+totalPnl.toFixed(2),c:totalPnl>=0?'var(--green)':'var(--red)'},
+      {l:'Trades fermés',v:totalTrades,c:'var(--navy)'},
+      {l:'Win rate moyen',v:totalTrades>0?Math.round(totalWins/totalTrades*100)+'%':'—',c:'var(--green)'}
+    ];
+    statsEl.innerHTML=statsCards.map(function(s){
+      return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 1rem;box-shadow:var(--shadow);min-width:120px;">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">'+s.l+'</div>'
+        +'<div style="font-size:1.1rem;font-weight:700;color:'+s.c+';font-family:\'Playfair Display\',serif;">'+s.v+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  /* Trier par P&L décroissant */
+  results.sort(function(a,b){
+    var pA=a.trades.reduce(function(s,t){return s+t.pnl;},0);
+    var pB=b.trades.reduce(function(s,t){return s+t.pnl;},0);
+    return pB-pA;
+  });
+
+  listEl.innerHTML='';
+
+  results.forEach(function(r,idx){
+    var trades=r.trades;
+    var pnl=trades.reduce(function(s,t){return s+t.pnl;},0);
+    var wins=trades.filter(function(t){return t.pnl>=0;}).length;
+    var wr=trades.length?Math.round(wins/trades.length*100):0;
+    var chartId='cohorte-chart-'+idx;
+
+    var card=document.createElement('div');
+    card.className='q-card';
+    card.style.cssText='padding:1rem;';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">'
+      +'<div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--navy);">'+r.student.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+r.slug+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+(pnl>=0?'var(--green)':'var(--red)')+';">'+(pnl>=0?'+':'')+' $'+pnl.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">P&L</div></div>'
+      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:var(--navy);">'+trades.length+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Trades</div></div>'
+      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+(wr>=50?'var(--green)':'var(--red)')+';">'+wr+'%</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Win rate</div></div>'
+      +'</div>'
+      +'</div>'
+      +(trades.length?'<canvas id="'+chartId+'" height="60"></canvas>':'<div style="text-align:center;padding:1rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun trade importé</div>');
+    listEl.appendChild(card);
+
+    /* Dessiner le graphique si trades */
+    if(trades.length){
+      var sorted=trades.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+      var cumul=0;
+      var labels=[];var data=[];
+      sorted.forEach(function(t){cumul+=t.pnl;labels.push(t.date);data.push(parseFloat(cumul.toFixed(2)));});
+      var ctx=document.getElementById(chartId).getContext('2d');
+      if(cohorteCharts[chartId]){cohorteCharts[chartId].destroy();}
+      cohorteCharts[chartId]=new Chart(ctx,{
+        type:'line',
+        data:{labels:labels,datasets:[{data:data,borderColor:'#1a7a4a',backgroundColor:'rgba(26,122,74,0.08)',borderWidth:1.5,pointRadius:2,tension:0.3,fill:true}]},
+        options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:true,ticks:{font:{size:9},callback:function(v){return '$'+v;}}}},animation:{duration:400}}
+      });
+    }
+  });
+}
 
 if(loadSession()){
   startApp();
