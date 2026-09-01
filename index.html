@@ -918,6 +918,16 @@ async function viewStudentDetails(i){
   }
 }
 
+async function viewStudentBySlug(slug,name){
+  viewingStudent={slug:slug,name:name};
+  switchTab('details');
+  var badge=document.getElementById('student-view-badge');
+  if(badge){
+    badge.style.display='flex';
+    document.getElementById('student-view-name').textContent=name;
+  }
+}
+
 function closeStudentView(){
   viewingStudent=null;
   var badge=document.getElementById('student-view-badge');
@@ -1446,7 +1456,10 @@ async function cohorteRender(){
 
     var card=document.createElement('div');
     card.className='q-card';
-    card.style.cssText='padding:1rem;';
+    card.style.cssText='padding:1rem;cursor:pointer;transition:opacity 0.15s;';
+    card.onmouseover=function(){this.style.opacity='0.85';};
+    card.onmouseout=function(){this.style.opacity='1';};
+    card.addEventListener('click',(function(slug,name){return function(){viewStudentBySlug(slug,name);};})(r.slug,r.student.name));
     card.innerHTML=
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">'
       +'<div>'
