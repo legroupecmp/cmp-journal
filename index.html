@@ -515,25 +515,27 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Prénom Nom (ex: Joanie Lavoie)" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div>
           <div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">⚠ Le mot de passe de l'étudiant sera exactement ce nom — ex: <strong>Joanie Lavoie</strong></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="ns-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Cohorte de départ</label>
-          <select class="q-input" id="ns-cohorte">
-            <option value="2027-01-01">Cohorte 1 — 1er janvier 2027</option>
-            <option value="2027-05-01">Cohorte 2 — 1er mai 2027</option>
-            <option value="2027-09-01">Cohorte 3 — 1er septembre 2027</option>
-            <option value="2028-01-01">Cohorte 1 — 1er janvier 2028</option>
-            <option value="2028-05-01">Cohorte 2 — 1er mai 2028</option>
-            <option value="2028-09-01">Cohorte 3 — 1er septembre 2028</option>
-          </select>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Mois de début (cohorte)</label>
+          <input class="q-input" type="month" id="ns-cohorte" placeholder="AAAA-MM">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">Ex : 2027-01 pour janvier 2027</div>
         </div>
         <div style="margin-bottom:0.85rem;background:var(--cream2);border-radius:9px;padding:0.85rem;">
           <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:0.75rem;">💵 Vente</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0.5rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0.75rem;">
             <div><label class="input-label">Prix de vente $</label><input class="q-input" type="number" id="ns-price" placeholder="0.00" min="0" step="0.01" oninput="nsCalcTTF()"></div>
             <div><label class="input-label">Frontsell collecté $</label><input class="q-input" type="number" id="ns-frontsell" placeholder="0.00" min="0" step="0.01" oninput="nsCalcTTF()"></div>
           </div>
+          <div style="margin-bottom:0.6rem;">
+            <label class="input-label">Ma part (%)</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" id="ns-pct-15" onclick="nsSetPct(15)" style="flex:1;padding:8px;border:2px solid var(--border);border-radius:7px;background:white;cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);">15%</button>
+              <button type="button" id="ns-pct-20" onclick="nsSetPct(20)" style="flex:1;padding:8px;border:2px solid var(--border);border-radius:7px;background:white;cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);">20%</button>
+              <button type="button" id="ns-pct-30" onclick="nsSetPct(30)" style="flex:1;padding:8px;border:2px solid var(--border);border-radius:7px;background:white;cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);">30%</button>
+            </div>
+          </div>
           <div style="background:white;border-radius:7px;padding:0.6rem 0.85rem;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:12px;color:var(--text3);">40% Trading Floor :</span>
-            <span style="font-size:13px;font-weight:700;color:var(--red);" id="ns-ttf-display">$0.00</span>
+            <span style="font-size:12px;color:var(--text3);">Ma part (<span id="ns-pct-label">—</span>) :</span>
+            <span style="font-size:13px;font-weight:700;color:var(--green);" id="ns-ttf-display">$0.00</span>
           </div>
         </div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Notes</label><textarea class="q-input" id="ns-notes" rows="2" placeholder="Contexte, source..."></textarea></div>
@@ -1137,12 +1139,30 @@ function nsIsActive(s, year, month){
   return checkDate>=start && checkDate<end;
 }
 
-/* Calculer 40% Trading Floor */
+/* Pourcentage ma part */
+var nsPct=0;
+
+function nsSetPct(pct){
+  nsPct=pct;
+  ['15','20','30'].forEach(function(p){
+    var btn=document.getElementById('ns-pct-'+p);
+    if(!btn)return;
+    if(parseInt(p)===pct){
+      btn.style.background='var(--navy)';btn.style.color='white';btn.style.borderColor='var(--navy)';
+    } else {
+      btn.style.background='white';btn.style.color='var(--text2)';btn.style.borderColor='var(--border)';
+    }
+  });
+  var lbl=document.getElementById('ns-pct-label');
+  if(lbl)lbl.textContent=pct+'%';
+  nsCalcTTF();
+}
+
 function nsCalcTTF(){
   var frontsell=parseFloat(document.getElementById('ns-frontsell').value)||0;
-  var ttf=frontsell*0.4;
+  var ma_part=frontsell*(nsPct/100);
   var el=document.getElementById('ns-ttf-display');
-  if(el)el.textContent='$'+ttf.toFixed(2);
+  if(el)el.textContent=nsPct>0?'$'+ma_part.toFixed(2):'—';
 }
 
 /* Peupler le filtre cohorte */
@@ -1205,7 +1225,7 @@ function nsRender(reset){
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Cohorte</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Prix vente</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">40% TTF</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Ma part</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
     +'</tr></thead><tbody>';
   for(var ri=0;ri<visible;ri++){
@@ -1213,14 +1233,13 @@ function nsRender(reset){
     var active=nsIsActive(s,today.getFullYear(),today.getMonth());
     var cohorteLabel='—';
     if(s.cohorte){var cd=new Date(s.cohorte+'T00:00:00');cohorteLabel=MONTHS_FR[cd.getMonth()]+' '+cd.getFullYear();}
-    var ttf=(parseFloat(s.frontsell)||0)*0.4;
     html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
       +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(s.name||'—')+'</td>'
       +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(s.phone||'—')+'</td>'
       +'<td style="padding:10px 14px;">'+cohorteLabel+'</td>'
       +'<td style="padding:10px 14px;color:var(--text2);">'+(s.price?fmt$(s.price):'—')+'</td>'
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
-      +'<td style="padding:10px 14px;font-weight:700;color:var(--red);">'+fmt$(ttf)+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+( s.ma_part&&parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2)+(s.pct?' ('+s.pct+'%)':''):'—')+'</td>'
       +'<td style="padding:10px 14px;"><span style="background:'+(active?'#e8f4ec':'var(--cream2)')+';color:'+(active?'var(--green)':'var(--text3)')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(active?'✓ En cours':'Terminé')+'</span></td>'
       +'</tr>';
   }
@@ -1242,17 +1261,21 @@ function nsOpenModal(id){
     document.getElementById('ns-modal-title').textContent='Modifier — '+s.name;
     document.getElementById('ns-name').value=s.name||'';
     document.getElementById('ns-phone').value=s.phone||'';
-    document.getElementById('ns-cohorte').value=s.cohorte||'2027-01-01';
+    document.getElementById('ns-cohorte').value=s.cohorte?s.cohorte.slice(0,7):'';
     document.getElementById('ns-price').value=s.price||'';
     document.getElementById('ns-frontsell').value=s.frontsell||'';
     document.getElementById('ns-notes').value=s.notes||'';
     document.getElementById('ns-btn-delete').style.display='inline-flex';
-    if(ttfEl)ttfEl.textContent='$'+((parseFloat(s.frontsell)||0)*0.4).toFixed(2);
+    if(s.pct)nsSetPct(s.pct);else{nsPct=0;['15','20','30'].forEach(function(p){var b=document.getElementById('ns-pct-'+p);if(b){b.style.background='white';b.style.color='var(--text2)';b.style.borderColor='var(--border)';}});var lbl=document.getElementById('ns-pct-label');if(lbl)lbl.textContent='—';if(ttfEl)ttfEl.textContent='—';}
+    nsCalcTTF();
   } else {
     document.getElementById('ns-modal-title').textContent='Nouvel étudiant';
     ['ns-name','ns-phone','ns-price','ns-frontsell','ns-notes'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
-    document.getElementById('ns-cohorte').value='2027-01-01';
+    document.getElementById('ns-cohorte').value='';
     document.getElementById('ns-btn-delete').style.display='none';
+    nsPct=0;
+    ['15','20','30'].forEach(function(p){var b=document.getElementById('ns-pct-'+p);if(b){b.style.background='white';b.style.color='var(--text2)';b.style.borderColor='var(--border)';}});
+    var lbl=document.getElementById('ns-pct-label');if(lbl)lbl.textContent='—';
     if(ttfEl)ttfEl.textContent='$0.00';
   }
 }
@@ -1264,13 +1287,18 @@ async function nsSaveStudent(){
   if(!name){alert('Le nom est requis.');return;}
   var frontsell=document.getElementById('ns-frontsell').value;
   var isNew=!document.getElementById('ns-edit-id').value;
+  var cohorteVal=document.getElementById('ns-cohorte').value;
+  /* Convertir YYYY-MM en YYYY-MM-01 pour compatibilité avec nsIsActive */
+  var cohorteDate=cohorteVal?(cohorteVal.length===7?cohorteVal+'-01':cohorteVal):'';
+  var ma_part=nsPct>0?((parseFloat(frontsell)||0)*(nsPct/100)).toFixed(2):'0.00';
   var s={
     id:id,name:name,
     phone:document.getElementById('ns-phone').value.trim(),
-    cohorte:document.getElementById('ns-cohorte').value,
+    cohorte:cohorteDate,
     price:document.getElementById('ns-price').value,
     frontsell:frontsell,
-    ttf:((parseFloat(frontsell)||0)*0.4).toFixed(2),
+    pct:nsPct,
+    ma_part:ma_part,
     notes:document.getElementById('ns-notes').value
   };
   var idx=upNstu.findIndex(function(x){return x.id===id;});
@@ -1350,7 +1378,7 @@ function upCalRender(){
     cell.onclick=(function(month){return function(){upShowMonthDetail(month);};})(m);
     var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
     var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-    var mTTF=mFront*0.4;
+    var mTTF=activeStudents.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
     totalVendu+=mVendu;totalFront+=mFront;totalTTF+=mTTF;
     cell.innerHTML='<div style="font-size:11px;font-weight:700;color:'+(isCurrentMonth?'var(--blue)':'var(--text3)')+';margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">'+MONTHS_FR[m]+(isCohortStart?'<span style="font-size:9px;background:var(--blue);color:white;border-radius:4px;padding:1px 5px;margin-left:4px;">DÉBUT</span>':'')+'</div>'
       +'<div style="font-size:1.1rem;font-weight:700;font-family:\'Playfair Display\',serif;color:var(--navy);">'+activeStudents.length+'</div>'
@@ -1367,7 +1395,7 @@ function upCalRender(){
       {l:'En cours ce mois',v:upNstu.filter(function(s){return nsIsActive(s,today.getFullYear(),today.getMonth());}).length,c:'var(--green)',sub:null},
       {l:'Montant vendu',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0).toFixed(2),c:'var(--green)',sub:null},
       {l:'Frontsell collecté',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0).toFixed(2),c:'var(--blue)',sub:null},
-      {l:'40% Trading Floor',v:'$'+(upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0)*0.4).toFixed(2),c:'var(--red)',sub:'à remettre'}
+      {l:'Ma part totale',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0).toFixed(2),c:'var(--green)',sub:null}
     ];
     summary.innerHTML=cards.map(function(s){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
@@ -1392,7 +1420,7 @@ function upShowMonthDetail(m){
   } else {
     var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
     var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-    var mTTF=mFront*0.4;
+    var mTTF=activeStudents.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
     listEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'
       +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--green);">$'+mVendu.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Vendu</div></div>'
       +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--blue);">$'+mFront.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Collecté</div></div>'
@@ -1407,7 +1435,7 @@ function upShowMonthDetail(m){
           +'<div style="font-size:11px;color:var(--text3);">Cohorte '+cohorteStr+' · '+(s.phone||'—')+'</div></div>'
           +'<div style="text-align:right;">'
           +'<div style="font-size:12px;color:var(--green);font-weight:700;">'+(s.frontsell?'$'+parseFloat(s.frontsell).toFixed(2):'—')+'</div>'
-          +'<div style="font-size:10px;color:var(--red);">TTF: $'+((parseFloat(s.frontsell)||0)*0.4).toFixed(2)+'</div>'
+          +'<div style="font-size:10px;color:var(--green);">Ma part: $'+(parseFloat(s.ma_part)||0).toFixed(2)+(s.pct?' ('+s.pct+'%)':'')+'</div>'
           +'</div></div>';
       }).join('');
   }
