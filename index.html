@@ -1354,54 +1354,96 @@ document.addEventListener('click',function(e){
 
 /* ---- CALENDRIER CMP ---- */
 function upCalRender(){
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var MONTHS_SHORT=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  var today=new Date();
+
   var title=document.getElementById('up-cal-title');
-  if(title)title.textContent='Cohortes '+upCalYear;
+  if(title)title.textContent=upCalYear;
+
   var grid=document.getElementById('up-cal-grid');
   if(!grid)return;
   grid.innerHTML='';
-  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  /* Cohortes de l'année */
-  var cohorteDates=['01-01','05-01','09-01'].map(function(d){return upCalYear+'-'+d;});
-  var totalVendu=0,totalFront=0,totalTTF=0;
 
   for(var m=0;m<12;m++){
-    var cell=document.createElement('div');
-    var activeStudents=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
-    var isCohortStart=cohorteDates.some(function(c){var d=new Date(c+'T00:00:00');return d.getFullYear()===upCalYear&&d.getMonth()===m;});
-    var today=new Date();
+    /* Étudiants actifs ce mois */
+    var actifs=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
+    /* Étudiants qui DÉBUTENT ce mois */
+    var debutants=upNstu.filter(function(s){
+      if(!s.cohorte)return false;
+      var d=new Date(s.cohorte+'T00:00:00');
+      return d.getFullYear()===upCalYear&&d.getMonth()===m;
+    });
+
     var isCurrentMonth=today.getFullYear()===upCalYear&&today.getMonth()===m;
-    var bgColor=isCohortStart?'#e8eef7':activeStudents.length>0?'#f7fcf9':'white';
-    var borderColor=isCurrentMonth?'var(--blue-light)':isCohortStart?'rgba(45,74,138,0.3)':activeStudents.length>0?'rgba(26,122,74,0.2)':'var(--border)';
-    cell.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:10px;padding:10px 12px;cursor:pointer;transition:opacity 0.15s;min-height:90px;';
+    var hasStu=actifs.length>0;
+    var mFront=actifs.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+    var mPart=actifs.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+
+    var cell=document.createElement('div');
+    cell.style.cssText='background:'+(isCurrentMonth?'#e8eef7':hasStu?'#f7fcf9':'white')+';'
+      +'border:2px solid '+(isCurrentMonth?'var(--blue)':hasStu?'rgba(26,122,74,0.25)':'var(--border)')+';'
+      +'border-radius:12px;padding:12px;cursor:pointer;transition:all 0.15s;min-height:100px;display:flex;flex-direction:column;gap:4px;';
     cell.onmouseover=function(){this.style.opacity='0.8';};
     cell.onmouseout=function(){this.style.opacity='1';};
     cell.onclick=(function(month){return function(){upShowMonthDetail(month);};})(m);
-    var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
-    var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-    var mTTF=activeStudents.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
-    totalVendu+=mVendu;totalFront+=mFront;totalTTF+=mTTF;
-    cell.innerHTML='<div style="font-size:11px;font-weight:700;color:'+(isCurrentMonth?'var(--blue)':'var(--text3)')+';margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;">'+MONTHS_FR[m]+(isCohortStart?'<span style="font-size:9px;background:var(--blue);color:white;border-radius:4px;padding:1px 5px;margin-left:4px;">DÉBUT</span>':'')+'</div>'
-      +'<div style="font-size:1.1rem;font-weight:700;font-family:\'Playfair Display\',serif;color:var(--navy);">'+activeStudents.length+'</div>'
-      +'<div style="font-size:10px;color:var(--text3);">étudiant'+(activeStudents.length>1?'s':'')+' actif'+(activeStudents.length>1?'s':'')+'</div>'
-      +(mFront>0?'<div style="font-size:10px;color:var(--green);margin-top:3px;font-weight:700;">$'+mFront.toFixed(0)+' collecté</div>':'');
+
+    /* En-tête du mois */
+    var header=document.createElement('div');
+    header.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;';
+    header.innerHTML='<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+(isCurrentMonth?'var(--blue)':'var(--navy)')+';">'+MONTHS_FR[m]+'</span>'
+      +(isCurrentMonth?'<span style="font-size:9px;background:var(--blue);color:white;border-radius:4px;padding:1px 6px;font-weight:700;">MAINTENANT</span>':'');
+    cell.appendChild(header);
+
+    /* Nombre d'étudiants actifs */
+    var cntEl=document.createElement('div');
+    cntEl.style.cssText='font-family:\'Playfair Display\',serif;font-size:1.5rem;font-weight:400;color:'+(hasStu?'var(--navy)':'var(--border)')+';line-height:1;';
+    cntEl.textContent=actifs.length;
+    cell.appendChild(cntEl);
+
+    var subEl=document.createElement('div');
+    subEl.style.cssText='font-size:10px;color:var(--text3);';
+    subEl.textContent='étudiant'+(actifs.length>1?'s':'')+' actif'+(actifs.length>1?'s':'');
+    cell.appendChild(subEl);
+
+    /* Nouveaux ce mois */
+    if(debutants.length>0){
+      var newEl=document.createElement('div');
+      newEl.style.cssText='font-size:10px;color:var(--blue);font-weight:700;margin-top:2px;';
+      newEl.textContent='+ '+debutants.length+' nouveau'+(debutants.length>1?'x':'');
+      cell.appendChild(newEl);
+    }
+
+    /* Montants */
+    if(mFront>0){
+      var moneyEl=document.createElement('div');
+      moneyEl.style.cssText='font-size:10px;color:var(--green);font-weight:700;margin-top:2px;';
+      moneyEl.textContent='$'+mFront.toFixed(0)+' collecté';
+      cell.appendChild(moneyEl);
+    }
+
     grid.appendChild(cell);
   }
 
-  /* Cartes résumé */
+  /* Cartes résumé annuelles */
   var summary=document.getElementById('up-cal-summary');
   if(summary){
+    var mActifs=upNstu.filter(function(s){return nsIsActive(s,today.getFullYear(),today.getMonth());}).length;
+    var totalVendu=upNstu.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+    var totalFront=upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+    var totalPart=upNstu.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
     var cards=[
-      {l:'Étudiants inscrits',v:upNstu.length,c:'var(--navy)',sub:null},
-      {l:'En cours ce mois',v:upNstu.filter(function(s){return nsIsActive(s,today.getFullYear(),today.getMonth());}).length,c:'var(--green)',sub:null},
-      {l:'Montant vendu',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0).toFixed(2),c:'var(--green)',sub:null},
-      {l:'Frontsell collecté',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0).toFixed(2),c:'var(--blue)',sub:null},
-      {l:'Ma part totale',v:'$'+upNstu.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0).toFixed(2),c:'var(--green)',sub:null}
+      {l:'Total inscrits',v:upNstu.length,c:'var(--navy)'},
+      {l:'Actifs ce mois',v:mActifs,c:'var(--green)'},
+      {l:'Montant vendu',v:'$'+totalVendu.toFixed(2),c:'var(--green)'},
+      {l:'Frontsell collecté',v:'$'+totalFront.toFixed(2),c:'var(--blue)'},
+      {l:'Ma part totale',v:'$'+totalPart.toFixed(2),c:'var(--navy)'}
     ];
-    summary.innerHTML=cards.map(function(s){
+    summary.style.gridTemplateColumns='repeat(5,1fr)';
+    summary.innerHTML=cards.map(function(c){
       return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;">'
-        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;font-weight:400;color:'+s.c+';">'+s.v+'</div>'
-        +'<div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+s.l+'</div>'
-        +(s.sub?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:2px;">'+s.sub+'</div>':'')
+        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:400;color:'+c.c+';">'+c.v+'</div>'
+        +'<div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-top:3px;">'+c.l+'</div>'
         +'</div>';
     }).join('');
   }
@@ -1409,36 +1451,49 @@ function upCalRender(){
 
 function upShowMonthDetail(m){
   var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var MONTHS_SHORT=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
   var detail=document.getElementById('up-cal-month-detail');
   var titleEl=document.getElementById('up-cal-detail-title');
   var listEl=document.getElementById('up-cal-detail-list');
   if(!detail||!titleEl||!listEl)return;
-  var activeStudents=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
-  titleEl.textContent=MONTHS_FR[m]+' '+upCalYear+' — '+activeStudents.length+' étudiant'+(activeStudents.length>1?'s':'');
-  if(!activeStudents.length){
-    listEl.innerHTML='<div style="color:var(--text3);font-style:italic;font-size:13px;padding:0.5rem 0;">Aucun étudiant actif ce mois</div>';
+
+  var actifs=upNstu.filter(function(s){return nsIsActive(s,upCalYear,m);});
+  var debutants=upNstu.filter(function(s){
+    if(!s.cohorte)return false;
+    var d=new Date(s.cohorte+'T00:00:00');
+    return d.getFullYear()===upCalYear&&d.getMonth()===m;
+  });
+
+  titleEl.textContent=MONTHS_FR[m]+' '+upCalYear+' — '+actifs.length+' étudiant'+(actifs.length>1?'s':'');
+
+  var mVendu=actifs.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+  var mFront=actifs.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+  var mPart=actifs.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+
+  var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">'
+    +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--green);">$'+mVendu.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Vendu</div></div>'
+    +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--blue);">$'+mFront.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Collecté</div></div>'
+    +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--navy);">$'+mPart.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Ma part</div></div>'
+    +'</div>';
+
+  if(!actifs.length){
+    html+='<div style="color:var(--text3);font-style:italic;font-size:13px;padding:0.5rem 0;">Aucun étudiant actif ce mois</div>';
   } else {
-    var mVendu=activeStudents.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
-    var mFront=activeStudents.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-    var mTTF=activeStudents.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
-    listEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'
-      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--green);">$'+mVendu.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Vendu</div></div>'
-      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--blue);">$'+mFront.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Collecté</div></div>'
-      +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--red);">$'+mTTF.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">40% TTF</div></div>'
-      +'</div>'
-      +activeStudents.map(function(s){
-        var MONTHS2=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
-        var cd=s.cohorte?new Date(s.cohorte+'T00:00:00'):null;
-        var cohorteStr=cd?MONTHS2[cd.getMonth()]+' '+cd.getFullYear():'—';
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')">'
-          +'<div><div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+'</div>'
-          +'<div style="font-size:11px;color:var(--text3);">Cohorte '+cohorteStr+' · '+(s.phone||'—')+'</div></div>'
-          +'<div style="text-align:right;">'
-          +'<div style="font-size:12px;color:var(--green);font-weight:700;">'+(s.frontsell?'$'+parseFloat(s.frontsell).toFixed(2):'—')+'</div>'
-          +'<div style="font-size:10px;color:var(--green);">Ma part: $'+(parseFloat(s.ma_part)||0).toFixed(2)+(s.pct?' ('+s.pct+'%)':'')+'</div>'
-          +'</div></div>';
-      }).join('');
+    html+=actifs.map(function(s){
+      var isNew=debutants.find(function(d){return d.id===s.id;});
+      var cd=s.cohorte?new Date(s.cohorte+'T00:00:00'):null;
+      var debutStr=cd?MONTHS_SHORT[cd.getMonth()]+' '+cd.getFullYear():'—';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')">'
+        +'<div><div style="font-size:13px;font-weight:600;color:var(--navy);">'+s.name+(isNew?'<span style="font-size:9px;background:var(--blue);color:white;border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:700;">NOUVEAU</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);">Début '+debutStr+' · '+(s.phone||'—')+'</div></div>'
+        +'<div style="text-align:right;">'
+        +'<div style="font-size:12px;color:var(--green);font-weight:700;">'+(s.frontsell?'$'+parseFloat(s.frontsell).toFixed(2):'—')+'</div>'
+        +'<div style="font-size:10px;color:var(--text3);">Ma part: $'+(parseFloat(s.ma_part)||0).toFixed(2)+(s.pct?' ('+s.pct+'%)':'')+'</div>'
+        +'</div></div>';
+    }).join('');
   }
+
+  listEl.innerHTML=html;
   detail.style.display='block';
 }
 
