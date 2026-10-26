@@ -322,6 +322,60 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <textarea class="q-input" id="csv-text" rows="6" placeholder="Collez ici le contenu du CSV..."></textarea>
         <div style="margin-top:0.75rem;text-align:right;"><button class="btn-next btn-sm" onclick="parseCSVText()">Analyser &amp; Importer</button></div>
       </div>
+
+      <!-- SAISIE MANUELLE -->
+      <div class="q-card" style="margin-top:1rem;">
+        <div class="q-card-title">✏️ Saisie manuelle</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:1rem;">
+          <div>
+            <label class="input-label">Symbole</label>
+            <input class="q-input" type="text" id="man-sym" placeholder="ex: AAPL" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div>
+            <label class="input-label">Quantité</label>
+            <input class="q-input" type="number" id="man-qty" placeholder="ex: 500" min="1" step="1" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label">Direction</label>
+            <select class="q-input" id="man-side" onchange="manCalcPnl()">
+              <option value="LONG">LONG</option>
+              <option value="SHORT">SHORT</option>
+            </select>
+          </div>
+          <div>
+            <label class="input-label">Date</label>
+            <input class="q-input" type="date" id="man-date">
+          </div>
+          <div>
+            <label class="input-label">Heure entrée</label>
+            <input class="q-input" type="time" id="man-time-in" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label">Prix entrée $</label>
+            <input class="q-input" type="number" id="man-price-in" placeholder="ex: 3.30" min="0" step="0.0001" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label">Heure sortie</label>
+            <input class="q-input" type="time" id="man-time-out" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label">Prix sortie $</label>
+            <input class="q-input" type="number" id="man-price-out" placeholder="ex: 4.00" min="0" step="0.0001" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label">Frais $ (optionnel)</label>
+            <input class="q-input" type="number" id="man-fees" placeholder="ex: 5.00" min="0" step="0.01" oninput="manCalcPnl()">
+          </div>
+        </div>
+        <!-- Aperçu PNL -->
+        <div id="man-pnl-preview" style="display:none;background:var(--cream2);border-radius:9px;padding:0.85rem 1.25rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;color:var(--text2);" id="man-pnl-detail">—</div>
+          <div style="font-size:1.3rem;font-weight:700;" id="man-pnl-val">—</div>
+        </div>
+        <div style="text-align:right;">
+          <button class="btn-next btn-sm" onclick="manAddTrade()">+ Ajouter ce trade</button>
+        </div>
+      </div>
     </div>
 
 
@@ -682,6 +736,7 @@ function switchTab(name){
   if(name==='details')renderDetails();
   if(name==='upsell'){upLoadCalls();}
   if(name==='cohorte'){cohortePopulateFilter();cohorteRender();}
+  if(name==='import'){var d=document.getElementById('man-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
 }
 
 function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
@@ -1490,6 +1545,88 @@ async function cohorteRender(){
       });
     }
   });
+}
+
+/* ---- SAISIE MANUELLE ---- */
+function manCalcPnl(){
+  var qty=parseFloat(document.getElementById('man-qty').value)||0;
+  var side=document.getElementById('man-side').value;
+  var priceIn=parseFloat(document.getElementById('man-price-in').value)||0;
+  var priceOut=parseFloat(document.getElementById('man-price-out').value)||0;
+  var fees=parseFloat(document.getElementById('man-fees').value)||0;
+  var preview=document.getElementById('man-pnl-preview');
+  var detailEl=document.getElementById('man-pnl-detail');
+  var valEl=document.getElementById('man-pnl-val');
+  if(!qty||!priceIn||!priceOut){
+    if(preview)preview.style.display='none';
+    return;
+  }
+  var gross=side==='LONG'?(priceOut-priceIn)*qty:(priceIn-priceOut)*qty;
+  var net=gross-fees;
+  if(preview)preview.style.display='flex';
+  if(detailEl){
+    var diff=side==='LONG'?(priceOut-priceIn).toFixed(4):(priceIn-priceOut).toFixed(4);
+    detailEl.textContent=side+' · '+qty+' actions · Δ$'+diff+' · Brut: '+(gross>=0?'+':'')+gross.toFixed(2)+(fees>0?' · Frais: -$'+fees.toFixed(2):'');
+  }
+  if(valEl){
+    valEl.textContent=(net>=0?'+':'')+' $'+net.toFixed(2);
+    valEl.style.color=net>=0?'var(--green)':'var(--red)';
+  }
+}
+
+async function manAddTrade(){
+  var sym=document.getElementById('man-sym').value.trim().toUpperCase();
+  var qty=parseFloat(document.getElementById('man-qty').value)||0;
+  var side=document.getElementById('man-side').value;
+  var date=document.getElementById('man-date').value;
+  var timeIn=document.getElementById('man-time-in').value||'00:00';
+  var priceIn=parseFloat(document.getElementById('man-price-in').value)||0;
+  var timeOut=document.getElementById('man-time-out').value||'00:00';
+  var priceOut=parseFloat(document.getElementById('man-price-out').value)||0;
+  var fees=parseFloat(document.getElementById('man-fees').value)||0;
+
+  if(!sym){alert('Le symbole est requis.');return;}
+  if(!qty||qty<=0){alert('La quantité est requise.');return;}
+  if(!date){alert('La date est requise.');return;}
+  if(!priceIn||!priceOut){alert('Les prix d\'entrée et de sortie sont requis.');return;}
+
+  var gross=side==='LONG'?(priceOut-priceIn)*qty:(priceIn-priceOut)*qty;
+  var net=parseFloat((gross-fees).toFixed(2));
+
+  var trade={
+    date:date,
+    sym:sym,
+    dir:side,
+    qty:qty,
+    avgEntry:priceIn,
+    avgExit:priceOut,
+    fees:fees,
+    pnl:net,
+    hour:timeIn.slice(0,2)
+  };
+
+  /* Vérifier doublon */
+  var key=trade.date+'|'+trade.sym+'|'+trade.dir+'|'+trade.qty+'|'+trade.avgEntry.toFixed(4);
+  if(allTrades.find(function(t){return (t.date+'|'+t.sym+'|'+t.dir+'|'+t.qty+'|'+t.avgEntry.toFixed(4))===key;})){
+    if(!confirm('Un trade similaire existe déjà. Ajouter quand même ?'))return;
+  }
+
+  allTrades.push(trade);
+  await saveTrades();
+  renderAll();
+
+  /* Feedback et réinitialisation */
+  var btn=document.querySelector('[onclick="manAddTrade()"]');
+  if(btn){var orig=btn.textContent;btn.textContent='✓ Ajouté !';btn.style.background='var(--green)';setTimeout(function(){btn.textContent=orig;btn.style.background='';},1500);}
+
+  /* Réinitialiser le formulaire */
+  ['man-sym','man-qty','man-price-in','man-price-out','man-fees','man-time-in','man-time-out'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('man-side').value='LONG';
+  document.getElementById('man-date').value=new Date().toISOString().slice(0,10);
+  var preview=document.getElementById('man-pnl-preview');
+  if(preview)preview.style.display='none';
 }
 
 if(loadSession()){
