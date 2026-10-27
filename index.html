@@ -468,7 +468,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
         <div style="margin-bottom:1rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-next" onclick="nsOpenModal(null)">+ Nouvel étudiant</button>
           <select class="q-input" style="width:auto;" id="ns-filter-cohorte" onchange="nsVisibleCount=10;nsRender()">
-            <option value="">Toutes les cohortes</option>
+            <option value="">Tous les mois</option>
           </select>
           <input class="q-input" style="width:180px;" type="text" id="ns-search" placeholder="Rechercher un nom..." oninput="nsVisibleCount=10;nsRender()">
         </div>
@@ -1169,19 +1169,20 @@ function nsCalcTTF(){
 function nsPopulateFilter(){
   var sel=document.getElementById('ns-filter-cohorte');
   if(!sel)return;
+  var current=sel.value;
+  /* Vider et reconstruire */
+  sel.innerHTML='<option value="">Tous les mois</option>';
   var cohortes={};
   upNstu.forEach(function(s){if(s.cohorte)cohortes[s.cohorte]=true;});
   var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  var existing=Array.from(sel.options).map(function(o){return o.value;}).filter(Boolean);
   Object.keys(cohortes).sort().forEach(function(c){
-    if(existing.indexOf(c)<0){
-      var d=new Date(c+'T00:00:00');
-      var opt=document.createElement('option');
-      opt.value=c;
-      opt.textContent='Cohorte '+MONTHS_FR[d.getMonth()]+' '+d.getFullYear();
-      sel.appendChild(opt);
-    }
+    var d=new Date(c+'T00:00:00');
+    var opt=document.createElement('option');
+    opt.value=c;
+    opt.textContent=MONTHS_FR[d.getMonth()]+' '+d.getFullYear();
+    sel.appendChild(opt);
   });
+  if(current)sel.value=current;
 }
 
 /* Rendu liste étudiants */
@@ -1227,20 +1228,29 @@ function nsRender(reset){
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Ma part</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
+    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Journal</th>'
     +'</tr></thead><tbody>';
   for(var ri=0;ri<visible;ri++){
     var s=filtered[ri];
     var active=nsIsActive(s,today.getFullYear(),today.getMonth());
     var cohorteLabel='—';
     if(s.cohorte){var cd=new Date(s.cohorte+'T00:00:00');cohorteLabel=MONTHS_FR[cd.getMonth()]+' '+cd.getFullYear();}
+    var slug=toSlug(s.name);
+    var hasJournal=!!allStudents.find(function(x){return x.slug===slug;});
+    var journalBtn=!active&&hasJournal
+      ?'<button onclick="event.stopPropagation();nsDeleteJournal(\''+s.id+'\')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">🗑 Supprimer</button>'
+      :(hasJournal
+        ?'<span style="font-size:11px;color:var(--green);">✓ Actif</span>'
+        :'<span style="font-size:11px;color:var(--text3);">—</span>');
     html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
       +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(s.name||'—')+'</td>'
       +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(s.phone||'—')+'</td>'
       +'<td style="padding:10px 14px;">'+cohorteLabel+'</td>'
       +'<td style="padding:10px 14px;color:var(--text2);">'+(s.price?fmt$(s.price):'—')+'</td>'
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
-      +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+( s.ma_part&&parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2)+(s.pct?' ('+s.pct+'%)':''):'—')+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.ma_part&&parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2)+(s.pct?' ('+s.pct+'%)':''):'—')+'</td>'
       +'<td style="padding:10px 14px;"><span style="background:'+(active?'#e8f4ec':'var(--cream2)')+';color:'+(active?'var(--green)':'var(--text3)')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(active?'✓ En cours':'Terminé')+'</span></td>'
+      +'<td style="padding:10px 14px;">'+journalBtn+'</td>'
       +'</tr>';
   }
   html+='</tbody></table>';
@@ -1249,6 +1259,24 @@ function nsRender(reset){
   if(mb2){mb2.style.display=visible<filtered.length?'block':'none';if(visible<filtered.length)mb2.textContent='Voir plus ('+(filtered.length-visible)+' restants)';}
 }
 function nsLoadMore(){nsVisibleCount+=10;nsRender(false);}
+
+async function nsDeleteJournal(id){
+  var s=upNstu.find(function(x){return x.id===id;});
+  if(!s)return;
+  if(!confirm('Supprimer le journal de trading de '+s.name+' ?\n\nSes informations (prix, frontsell, ma part) seront conservées.\nSeulement son accès au journal et ses trades seront supprimés.\n\nCette action est irréversible.'))return;
+  var slug=toSlug(s.name);
+  setSaveBadge('☁️ Suppression...');
+  /* Supprimer les trades */
+  await fsSave('trades/'+slug,{list:[],updatedAt:new Date().toISOString(),deleted:true});
+  /* Retirer l'accès journal */
+  var jIdx=allStudents.findIndex(function(x){return x.slug===slug;});
+  if(jIdx>=0){
+    allStudents.splice(jIdx,1);
+    await saveStudents();
+  }
+  setSaveBadge('☁️ Sauvegardé');
+  nsRender();
+}
 
 /* Modal étudiant */
 function nsOpenModal(id){
