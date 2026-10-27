@@ -214,6 +214,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
     <div class="top-right">
       <div class="save-badge" id="save-badge">☁️ —</div>
       <a href="https://legroupecmp.github.io/screener-cmp/" target="_blank" title="Screener CMP" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔍</a>
+      <button onclick="watchlistOpen()" title="Watchlist matinale" style="font-size:1.4rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:4px 9px;line-height:1;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋</button>
       <div class="top-user"><div class="user-dot" id="top-avatar">?</div><span id="top-name">—</span></div>
       <button class="btn-logout" onclick="logout()">Déconnexion</button>
     </div>
@@ -567,6 +568,32 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
   </div>
 </div>
 
+<!-- MODAL WATCHLIST -->
+<div id="wl-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.6);display:none;align-items:flex-start;justify-content:center;z-index:300;padding:20px;overflow-y:auto;">
+  <div style="background:white;border-radius:14px;width:100%;max-width:620px;box-shadow:0 8px 40px rgba(0,0,0,0.2);margin-top:60px;">
+    <!-- En-tête -->
+    <div style="background:var(--navy);border-radius:14px 14px 0 0;padding:1.1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:white;font-weight:400;">📋 Watchlist matinale</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;" id="wl-date-label">—</div>
+      </div>
+      <button onclick="watchlistClose()" style="background:rgba(255,255,255,0.15);border:none;border-radius:7px;color:white;font-size:16px;padding:4px 10px;cursor:pointer;">✕</button>
+    </div>
+    <!-- Zone écriture prof -->
+    <div id="wl-editor" style="display:none;padding:1.25rem 1.4rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem;">Watchlist d'aujourd'hui</div>
+      <textarea id="wl-text" rows="7" class="q-input" style="width:100%;resize:vertical;" placeholder="Ex: AAPL — breakout sur 185, surveiller à l'ouverture&#10;TSLA — plan short si recul sur 240&#10;..."></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;gap:8px;">
+        <button onclick="watchlistSave()" class="btn-next btn-sm">💾 Publier la watchlist</button>
+      </div>
+    </div>
+    <!-- Liste des entrées (5 derniers jours) -->
+    <div style="padding:1.25rem 1.4rem;" id="wl-entries-wrap">
+      <div id="wl-entries"><div class="loading-msg">Chargement...</div></div>
+    </div>
+  </div>
+</div>
+
 <script>
 var PROF_PASS='cmp2024';
 var viewingStudent=null;
@@ -662,6 +689,7 @@ function clearSession(){
 }
 
 async function startApp(){
+  watchlistLoad();
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   var parts=currentUser.split(' ');
@@ -1740,6 +1768,113 @@ async function manAddTrade(){
   var preview=document.getElementById('man-pnl-preview');
   if(preview)preview.style.display='none';
 }
+
+/* ---- WATCHLIST ---- */
+var wlEntries=[];
+
+async function watchlistLoad(){
+  try{
+    var d=await fsLoad('watchlist/entries');
+    wlEntries=d&&d.list?d.list:[];
+  }catch(e){wlEntries=[];}
+}
+
+function watchlistOpen(){
+  document.getElementById('wl-overlay').style.display='flex';
+  /* Afficher zone écriture seulement pour le prof */
+  var ed=document.getElementById('wl-editor');
+  if(ed)ed.style.display=currentRole==='prof'?'block':'none';
+  /* Date label */
+  var today=new Date();
+  var MONTHS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var DAYS_FR=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var lbl=document.getElementById('wl-date-label');
+  if(lbl)lbl.textContent=DAYS_FR[today.getDay()]+' '+today.getDate()+' '+MONTHS_FR[today.getMonth()]+' '+today.getFullYear();
+  /* Pré-remplir avec watchlist du jour si prof */
+  if(currentRole==='prof'){
+    var todayStr=today.toISOString().slice(0,10);
+    var todayEntry=wlEntries.find(function(e){return e.date===todayStr;});
+    var ta=document.getElementById('wl-text');
+    if(ta)ta.value=todayEntry?todayEntry.text:'';
+  }
+  watchlistRender();
+}
+
+function watchlistClose(){
+  document.getElementById('wl-overlay').style.display='none';
+}
+
+function watchlistRender(){
+  var el=document.getElementById('wl-entries');
+  if(!el)return;
+  var today=new Date();
+  /* Garder seulement les 5 derniers jours */
+  var cutoff=new Date(today);cutoff.setDate(cutoff.getDate()-5);
+  var recent=wlEntries.filter(function(e){
+    return new Date(e.date+'T00:00:00')>=cutoff;
+  }).sort(function(a,b){return b.date.localeCompare(a.date);});
+
+  if(!recent.length){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3);font-style:italic;font-size:13px;">Aucune watchlist pour les 5 derniers jours</div>';
+    return;
+  }
+
+  var MONTHS_FR=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  var DAYS_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var html='';
+  recent.forEach(function(e){
+    var d=new Date(e.date+'T00:00:00');
+    var isToday=e.date===today.toISOString().slice(0,10);
+    var dayLabel=DAYS_FR[d.getDay()]+' '+d.getDate()+' '+MONTHS_FR[d.getMonth()];
+    html+='<div style="margin-bottom:1rem;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:'+(isToday?'var(--blue)':'var(--text3)')+';">'
+      +(isToday?'📌 ':'')+'Watchlist — '+dayLabel+'</div>'
+      +(currentRole==='prof'?'<button onclick="watchlistDelete(\''+e.date+'\')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:2px 7px;font-size:10px;cursor:pointer;">🗑</button>':'')
+      +'</div>'
+      +'<div style="background:var(--cream2);border-radius:9px;padding:0.85rem 1rem;font-size:13px;color:var(--navy);white-space:pre-wrap;line-height:1.7;border-left:3px solid '+(isToday?'var(--blue)':'var(--border)')+';">'+escapeHtml(e.text)+'</div>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+}
+
+function escapeHtml(str){
+  var d=document.createElement('div');
+  d.textContent=str||'';
+  return d.innerHTML;
+}
+
+async function watchlistSave(){
+  var text=document.getElementById('wl-text').value.trim();
+  if(!text){alert('Écris quelque chose avant de publier !');return;}
+  var today=new Date().toISOString().slice(0,10);
+  /* Remplacer ou ajouter l'entrée du jour */
+  var idx=wlEntries.findIndex(function(e){return e.date===today;});
+  var entry={date:today,text:text,updatedAt:new Date().toISOString()};
+  if(idx>=0)wlEntries[idx]=entry;else wlEntries.push(entry);
+  /* Garder max 30 jours d'historique */
+  wlEntries.sort(function(a,b){return b.date.localeCompare(a.date);});
+  wlEntries=wlEntries.slice(0,30);
+  setSaveBadge('☁️ Sauvegarde...');
+  await fsSave('watchlist/entries',{list:wlEntries,updatedAt:new Date().toISOString()});
+  setSaveBadge('☁️ Publié');
+  watchlistRender();
+  var btn=document.querySelector('[onclick="watchlistSave()"]');
+  if(btn){btn.textContent='✓ Publié !';setTimeout(function(){btn.textContent='💾 Publier la watchlist';},1500);}
+}
+
+async function watchlistDelete(date){
+  if(!confirm('Supprimer la watchlist du '+date+' ?'))return;
+  wlEntries=wlEntries.filter(function(e){return e.date!==date;});
+  setSaveBadge('☁️ Sauvegarde...');
+  await fsSave('watchlist/entries',{list:wlEntries,updatedAt:new Date().toISOString()});
+  setSaveBadge('☁️ Sauvegardé');
+  watchlistRender();
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.id==='wl-overlay')watchlistClose();
+});
 
 if(loadSession()){
   startApp();
