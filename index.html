@@ -1377,8 +1377,8 @@ function upCalRender(){
 
     var isCurrentMonth=today.getFullYear()===upCalYear&&today.getMonth()===m;
     var hasStu=actifs.length>0;
-    var mFront=actifs.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-    var mPart=actifs.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+    var mFront=debutants.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+    var mPart=debutants.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
 
     var cell=document.createElement('div');
     cell.style.cssText='background:'+(isCurrentMonth?'#e8eef7':hasStu?'#f7fcf9':'white')+';'
@@ -1466,9 +1466,9 @@ function upShowMonthDetail(m){
 
   titleEl.textContent=MONTHS_FR[m]+' '+upCalYear+' — '+actifs.length+' étudiant'+(actifs.length>1?'s':'');
 
-  var mVendu=actifs.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
-  var mFront=actifs.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
-  var mPart=actifs.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+  var mVendu=debutants.reduce(function(s,x){return s+(parseFloat(x.price)||0);},0);
+  var mFront=debutants.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
+  var mPart=debutants.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
 
   var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">'
     +'<div style="background:white;border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-weight:700;color:var(--green);">$'+mVendu.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Vendu</div></div>'
