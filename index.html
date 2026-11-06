@@ -215,6 +215,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div class="save-badge" id="save-badge">☁️ —</div>
       <a href="https://legroupecmp.github.io/screener-cmp/" target="_blank" title="Screener CMP" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔍</a>
       <a href="https://legroupecmp.github.io/BearLedger/" target="_blank" title="Vérificateur Bear Ledger" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✅</a>
+      <a id="reel-btn" href="reel-maker.html" target="_blank" title="Reel Maker" style="display:none;font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🎥</a>
       <button onclick="watchlistOpen()" title="Watchlist matinale" style="font-size:1.4rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:4px 9px;line-height:1;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋</button>
       <div class="top-user"><div class="user-dot" id="top-avatar">?</div><span id="top-name">—</span></div>
       <button class="btn-logout" onclick="logout()">Déconnexion</button>
@@ -701,6 +702,7 @@ async function startApp(){
   
   document.getElementById('tab-upsell-btn').style.display=currentRole==='prof'?'':'none';
   document.getElementById('tab-cohorte-btn').style.display=currentRole==='prof'?'':'none';
+  document.getElementById('reel-btn').style.display=currentRole==='prof'?'':'none';
   if(currentRole==='etudiant'){
     document.getElementById('db-title').textContent='Mon tableau de bord';
     document.getElementById('db-sub').textContent='Ma performance — '+currentUser;
@@ -725,6 +727,7 @@ function logout(){
   document.getElementById('login-info').style.display='none';
   document.getElementById('tab-upsell-btn').style.display='none';
   document.getElementById('tab-cohorte-btn').style.display='none';
+  document.getElementById('reel-btn').style.display='none';
   document.getElementById('db-title').textContent='Tableau de bord';
   document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
   switchTab('dashboard');
