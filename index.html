@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CMP Journal — Trading</title>
+<title>Mon terminal — Groupe C.M.P</title>
+<meta name="theme-color" content="#1a2744"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script type="module">
@@ -163,6 +165,78 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 .cal-sum-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;box-shadow:var(--shadow);text-align:center;}
 .cal-sum-val{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);}
 .cal-sum-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-top:3px;}
+
+/* ===== TERMINAL : coque, navigation, adaptation écrans ===== */
+.top-bar{height:56px;padding:0 1.25rem;}
+.top-bar-left{display:flex;align-items:center;gap:8px;min-width:0;}
+.top-logo b{font-weight:400;}
+.menu-btn{display:none;align-items:center;justify-content:center;width:44px;height:44px;background:rgba(255,255,255,0.1);border:none;border-radius:8px;color:#fff;cursor:pointer;flex-shrink:0;}
+.shell{display:flex;align-items:flex-start;}
+.sidebar{width:244px;flex-shrink:0;background:var(--navy);color:#f5f0e8;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;padding:20px 14px;display:flex;flex-direction:column;gap:4px;z-index:90;}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border:none;border-radius:9px;background:transparent;color:#d5dbea;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-align:left;text-decoration:none;transition:background var(--tr),color var(--tr);}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,0.14);color:#fff;}
+.nav-item svg{flex-shrink:0;}
+.nav-sep{height:1px;background:rgba(255,255,255,0.14);margin:12px 8px;}
+.nav-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#aab4cc;padding:4px 12px 6px;font-weight:700;}
+.nav-tools{display:none;}
+.sidebar-scrim{display:none;}
+.shell-main{flex:1;min-width:0;}
+.shell-main .body{max-width:1180px;}
+.tabs{top:56px;flex-wrap:nowrap;overflow-x:auto;padding:0 1rem;-webkit-overflow-scrolling:touch;}
+.tab{white-space:nowrap;min-height:44px;display:flex;align-items:center;}
+body.is-student .sidebar,body.is-student .menu-btn{display:none;}
+.home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:1.1rem;}
+.year-switch{display:flex;align-items:center;background:#fff;border:1px solid var(--border2);border-radius:9px;}
+.year-switch button{min-width:44px;min-height:44px;border:none;background:transparent;font-size:18px;color:var(--navy);cursor:pointer;}
+.year-switch span{min-width:56px;text-align:center;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);}
+.home-kpis{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.home-kpi-main{background:var(--navy);color:#fff;border-radius:var(--radius);padding:1.25rem 1.4rem;box-shadow:var(--shadow);}
+.home-kpi-main .stat-label,.home-kpi-main .stat-sub{color:#c3cbe0;}
+.home-kpi-main .big{font-family:'Playfair Display',serif;font-size:2.3rem;line-height:1.1;margin:4px 0;}
+.home-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-bottom:12px;}
+.home-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.home-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0.6rem 0;border-bottom:1px solid var(--border);font-size:13px;}
+.home-row:last-child{border-bottom:none;}
+.home-row small{display:block;font-size:11px;color:var(--text3);}
+.link-btn{background:none;border:none;color:var(--blue);font-family:'Lato',sans-serif;font-size:12px;font-weight:700;cursor:pointer;min-height:44px;padding:0 4px;}
+.ent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+.ent-card{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);cursor:pointer;font-family:'Lato',sans-serif;color:var(--navy);transition:border-color var(--tr);}
+.ent-card:hover{border-color:var(--blue-light);}
+.ent-card-name{font-family:'Playfair Display',serif;font-size:1.15rem;}
+.ent-card-meta{font-size:12px;color:var(--text3);margin-top:4px;}
+.ent-add{display:flex;align-items:center;justify-content:center;min-height:92px;border:2px dashed var(--border2);background:transparent;box-shadow:none;color:var(--text2);font-weight:700;font-size:13px;}
+.ent-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:1rem;}
+@media(max-width:1000px){
+  .home-kpis{grid-template-columns:1fr 1fr;}.home-kpi-main{grid-column:1/-1;}
+  .home-grid,.home-grid2{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .menu-btn{display:inline-flex;}
+  .sidebar{position:fixed;top:56px;left:0;bottom:0;height:auto;width:272px;transform:translateX(-100%);transition:transform 0.2s ease;}
+  body.nav-open .sidebar{transform:none;box-shadow:0 0 40px rgba(0,0,0,0.35);}
+  body.nav-open .sidebar-scrim{display:block;position:fixed;inset:56px 0 0 0;background:rgba(20,25,40,0.45);z-index:85;}
+  .nav-tools{display:block;}
+  body:not(.is-student) .top-tool{display:none;}
+  .body{padding:1rem;}
+}
+@media(max-width:700px){
+  .top-bar{padding:0 0.75rem;}
+  .save-badge,.top-user span{display:none;}
+  .top-right{gap:8px;}
+  .input-row{grid-template-columns:1fr;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  [style*="grid-template-columns:1fr 1fr;gap:12px"]{grid-template-columns:1fr !important;}
+  #up-cal-grid,#up-cal-summary{grid-template-columns:repeat(2,1fr) !important;}
+  #nstu-rows{overflow-x:auto;}
+  #nstu-rows table{min-width:640px;}
+  .cal-day{min-height:52px;padding:3px 4px;}
+  .cal-day-pnl{font-size:10px;}
+  .cal-day-trades{display:none;}
+  .page-title{font-size:1.35rem;}
+  .home-kpi-main .big{font-size:1.9rem;}
+}
+@media(prefers-reduced-motion:reduce){.sidebar{transition:none;}}
 </style>
 </head>
 <body>
@@ -210,29 +284,151 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
 <div id="main-app">
   <div class="top-bar">
-    <div class="top-logo">CMP Journal <span id="top-role-label">Trading</span></div>
+    <div class="top-bar-left">
+      <button type="button" class="menu-btn" id="menu-btn" onclick="toggleSidebar()" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="top-logo"><b id="top-title">Mon terminal</b><span id="top-role-label">Groupe C.M.P</span></div>
+    </div>
     <div class="top-right">
       <div class="save-badge" id="save-badge">☁️ —</div>
-      <a href="https://legroupecmp.github.io/screener-cmp/" target="_blank" title="Screener CMP" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔍</a>
-      <a href="https://legroupecmp.github.io/BearLedger/" target="_blank" title="Vérificateur Bear Ledger" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✅</a>
-      <a id="reel-btn" href="reel-maker.html" target="_blank" title="Reel Maker" style="display:none;font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🎥</a>
-      <button onclick="watchlistOpen()" title="Watchlist matinale" style="font-size:1.4rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:4px 9px;line-height:1;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋</button>
+      <a class="top-tool" href="https://legroupecmp.github.io/screener-cmp/" target="_blank" title="Screener CMP" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔍</a>
+      <a class="top-tool" href="https://legroupecmp.github.io/BearLedger/" target="_blank" title="Vérificateur Bear Ledger" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✅</a>
+      <a class="top-tool" id="reel-btn" href="reel-maker.html" target="_blank" title="Reel Maker" style="display:none;font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🎥</a>
+      <button class="top-tool" onclick="watchlistOpen()" title="Watchlist matinale" style="font-size:1.4rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:4px 9px;line-height:1;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋</button>
       <div class="top-user"><div class="user-dot" id="top-avatar">?</div><span id="top-name">—</span></div>
       <button class="btn-logout" onclick="logout()">Déconnexion</button>
     </div>
   </div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('dashboard')">Tableau de bord</div>
-    <div class="tab" onclick="switchTab('trades')">Trades</div>
-    <div class="tab" onclick="switchTab('calendrier')">Calendrier</div>
-    <div class="tab" onclick="switchTab('details')">Détails</div>
-    <div class="tab" onclick="switchTab('import')">Importer</div>
-    <div class="tab" id="tab-upsell-btn" onclick="switchTab('upsell')" style="display:none;">Étudiants</div>
-    <div class="tab" id="tab-cohorte-btn" onclick="switchTab('cohorte')" style="display:none;">Cohorte</div>
+  <div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+    <button type="button" class="nav-item" data-section="home" onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Accueil</button>
+    <button type="button" class="nav-item" data-section="journal" onclick="switchTab(lastJournalTab)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Journal de trading</button>
+    <button type="button" class="nav-item" data-section="entreprises" onclick="switchTab('entreprises')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/></svg>Mes entreprises</button>
+    <button type="button" class="nav-item" data-section="etudiants" onclick="switchTab('upsell')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.4c1.8.8 3 2.6 3 5.6"/></svg>Étudiants CMP</button>
+    <div class="nav-tools">
+      <div class="nav-sep"></div>
+      <div class="nav-label">Outils</div>
+      <a class="nav-item" href="https://legroupecmp.github.io/screener-cmp/" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>Screener</a>
+      <a class="nav-item" href="https://legroupecmp.github.io/BearLedger/" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12.5l3 3 5-6"/></svg>Bear Ledger</a>
+      <a class="nav-item" href="reel-maker.html" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l6-3.5v10l-6-3.5"/></svg>Reel Maker</a>
+      <button type="button" class="nav-item" onclick="closeSidebar();watchlistOpen()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Watchlist matinale</button>
+    </div>
+  </aside>
+  <div class="sidebar-scrim" onclick="closeSidebar()"></div>
+  <div class="shell-main">
+  <div class="tabs" id="journal-tabs" style="display:none;">
+    <div class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Tableau de bord</div>
+    <div class="tab" data-tab="trades" onclick="switchTab('trades')">Trades</div>
+    <div class="tab" data-tab="calendrier" onclick="switchTab('calendrier')">Calendrier</div>
+    <div class="tab" data-tab="details" onclick="switchTab('details')">Détails</div>
+    <div class="tab" data-tab="import" onclick="switchTab('import')">Importer</div>
   </div>
-  <div class="body">
+<div class="body">
 
-    <div id="tab-dashboard" class="tab-content active">
+    <!-- ACCUEIL -->
+    <div id="tab-home" class="tab-content active">
+      <div class="home-head">
+        <div>
+          <div class="page-sub" id="home-date" style="margin-bottom:0.2rem;"></div>
+          <div class="page-title" style="margin-bottom:0;">Bonjour</div>
+          <div class="page-sub" style="margin-bottom:0;">Voici où tu en es cette année.</div>
+        </div>
+        <div class="year-switch" role="group" aria-label="Année affichée">
+          <button type="button" onclick="homeYearShift(-1)" aria-label="Année précédente">‹</button>
+          <span id="home-year">—</span>
+          <button type="button" onclick="homeYearShift(1)" aria-label="Année suivante">›</button>
+        </div>
+      </div>
+
+      <div class="home-kpis">
+        <div class="home-kpi-main">
+          <div class="stat-label">Rendement de l'année</div>
+          <div class="big" id="home-total">—</div>
+          <div class="stat-sub">Trading + ma part de la formation CMP</div>
+        </div>
+        <div class="stat-card"><div class="stat-label">Trading</div><div class="stat-val" id="home-trading">—</div><div class="stat-sub" id="home-trading-sub">—</div></div>
+        <div class="stat-card"><div class="stat-label">Formation CMP</div><div class="stat-val" id="home-cmp">—</div><div class="stat-sub" id="home-cmp-sub">—</div></div>
+        <div class="stat-card"><div class="stat-label">Entreprises</div><div class="stat-val" id="home-ent">—</div><div class="stat-sub">Comptabilité à connecter</div></div>
+      </div>
+
+      <div class="home-grid">
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="q-card-title">Courbe de trading de l'année</div>
+          <div style="position:relative;width:100%;height:220px;"><canvas id="home-chart"></canvas></div>
+          <div id="home-chart-empty" class="loading-msg" style="display:none;">Aucun trade cette année</div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <div class="q-card-title" style="margin-bottom:0;">Mes entreprises</div>
+            <button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button>
+          </div>
+          <div id="home-ent-list"><div class="loading-msg">Chargement...</div></div>
+        </div>
+      </div>
+
+      <div class="home-grid2">
+        <div class="q-card" style="margin-bottom:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <div class="q-card-title" style="margin-bottom:0;">Derniers trades</div>
+            <button type="button" class="link-btn" onclick="switchTab('trades')">Journal</button>
+          </div>
+          <div id="home-trades"><div class="loading-msg">Aucun trade</div></div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <div class="q-card-title" style="margin-bottom:0;">Étudiants récents</div>
+            <button type="button" class="link-btn" onclick="switchTab('upsell')">Tout voir</button>
+          </div>
+          <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MES ENTREPRISES -->
+    <div id="tab-entreprises" class="tab-content">
+      <div id="ent-list-view">
+        <div class="section-badge">🏢 Entreprises</div>
+        <div class="page-title">Mes entreprises</div>
+        <div class="page-sub">Ajoute une entreprise, puis ouvre-la pour suivre sa comptabilité.</div>
+        <div class="ent-grid" id="ent-grid"></div>
+      </div>
+      <div id="ent-detail-view" style="display:none;">
+        <button type="button" class="btn-back btn-sm" onclick="entBack()" style="margin-bottom:1rem;">← Mes entreprises</button>
+        <div class="ent-head">
+          <div>
+            <div class="page-title" id="ent-detail-name" style="margin-bottom:0.2rem;">—</div>
+            <div class="page-sub" id="ent-detail-meta" style="margin-bottom:0;">—</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="btn-back btn-sm" onclick="entOpenModal(entCurrent)">Modifier</button>
+            <button type="button" class="btn-danger" onclick="entDelete(entCurrent)">Supprimer</button>
+          </div>
+        </div>
+        <div class="q-card" id="ent-notes-card" style="display:none;"><div class="q-card-title">Notes</div><div id="ent-detail-notes" style="font-size:13px;color:var(--text2);white-space:pre-wrap;line-height:1.6;"></div></div>
+        <div class="q-card">
+          <div class="q-card-title">Comptabilité et factures</div>
+          <div id="ent-compta-host">
+            <div class="info-box" style="margin-bottom:0;">L'espace de suivi de la comptabilité de cette entreprise (téléversement des factures, revenus, dépenses) sera branché ici.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ENTREPRISE -->
+    <div id="ent-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;">
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:420px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="ent-modal-title">Nouvelle entreprise</div>
+        <input type="hidden" id="ent-edit-id">
+        <div style="margin-bottom:0.85rem;"><label class="input-label" for="ent-name">Nom de l'entreprise</label><input class="q-input" type="text" id="ent-name" placeholder="Ex. Groupe C.M.P"></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label" for="ent-type">Secteur ou type (optionnel)</label><input class="q-input" type="text" id="ent-type" placeholder="Ex. Formation, immobilier..."></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label" for="ent-notes">Notes (optionnel)</label><textarea class="q-input" id="ent-notes" rows="3"></textarea></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;">
+          <button type="button" class="btn-back btn-sm" onclick="entCloseModal()">Annuler</button>
+          <button type="button" class="btn-next btn-sm" onclick="entSave()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-dashboard" class="tab-content">
       <div class="section-badge">📊 Aperçu</div>
       <div class="page-title" id="db-title">Tableau de bord</div>
       <div class="page-sub" id="db-sub">Performance cumulée — toutes les sessions</div>
@@ -384,16 +580,6 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
 
     <div id="tab-details" class="tab-content">
-      <div id="student-view-badge" style="display:none;background:#e8eef7;border:1px solid rgba(45,74,138,0.2);border-radius:9px;padding:0.75rem 1.25rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:12px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="font-size:1.2rem;">👤</div>
-          <div>
-            <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);">Vue étudiant</div>
-            <div style="font-size:14px;font-weight:400;color:var(--navy);" id="student-view-name">—</div>
-          </div>
-        </div>
-        <button class="btn-back btn-sm" onclick="closeStudentView()">← Retour aux étudiants</button>
-      </div>
       <div class="section-badge">📈 Analyse</div>
       <div class="page-title">Détails de performance</div>
       <div class="page-sub">Statistiques avancées et analyses graphiques</div>
@@ -429,23 +615,6 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       </div>
     </div>
 
-    <div id="tab-etudiants" class="tab-content">
-      <div class="section-badge">👥 Gestion</div>
-      <div class="page-title">Étudiants inscrits</div>
-      <div class="page-sub">Journaux personnels sauvegardés dans Firebase</div>
-      <div class="q-card" style="margin-bottom:1rem;">
-        <div class="q-card-title">Ajouter un étudiant</div>
-        <div class="input-row">
-          <div><label class="input-label">Prénom</label><input class="q-input" id="s-prenom" type="text" placeholder="Jean" onkeydown="if(event.key==='Enter')addStudent()"></div>
-          <div><label class="input-label">Nom</label><input class="q-input" id="s-nom" type="text" placeholder="Tremblay" onkeydown="if(event.key==='Enter')addStudent()"></div>
-        </div>
-        <div style="text-align:right;"><button class="btn-next btn-sm" onclick="addStudent()">Créer le journal</button></div>
-      </div>
-      <div class="info-box">
-        <strong style="color:var(--navy);">Comment l'étudiant accède :</strong> Il ouvre cette page → choisit <em>Étudiant</em> → entre son prénom et nom exactement comme saisis ici → son journal s'ouvre depuis n'importe quel appareil.
-      </div>
-      <div id="student-list"><div class="loading-msg">Chargement...</div></div>
-    </div>
 
     <!-- UPSELL -->
     <div id="tab-upsell" class="tab-content">
@@ -516,8 +685,7 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:440px;padding:1.5rem;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;color:var(--navy);margin-bottom:1.25rem;" id="ns-modal-title">Nouvel étudiant</div>
         <input type="hidden" id="ns-edit-id">
-        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Prénom Nom (ex: Joanie Lavoie)" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div>
-          <div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;">⚠ Le mot de passe de l'étudiant sera exactement ce nom — ex: <strong>Joanie Lavoie</strong></div></div>
+        <div style="margin-bottom:0.85rem;"><label class="input-label">Nom complet</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="text" id="ns-name" placeholder="Prénom Nom" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-name').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Téléphone</label><div style="display:flex;gap:6px;align-items:center;"><input class="q-input" type="tel" id="ns-phone" placeholder="819-555-0123" style="flex:1;"><button type="button" onclick="upCopyText(document.getElementById('ns-phone').value,this)" style="background:var(--cream2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;" title="Copier">📋</button></div></div>
         <div style="margin-bottom:0.85rem;"><label class="input-label">Mois de début (cohorte)</label>
           <input class="q-input" type="month" id="ns-cohorte" placeholder="AAAA-MM">
@@ -553,20 +721,9 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
       </div>
     </div>
 
-    <!-- COHORTE -->
-    <div id="tab-cohorte" class="tab-content">
-      <div class="section-badge">🎓 Suivi</div>
-      <div class="page-title">Performance par cohorte</div>
-      <div class="page-sub">Sélectionne une cohorte pour voir la performance de chaque étudiant</div>
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;">
-        <select class="q-input" style="width:auto;min-width:220px;" id="cohorte-filter" onchange="cohorteRender()">
-          <option value="">— Choisir une cohorte —</option>
-        </select>
-        <div id="cohorte-stats" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;"></div>
-      </div>
-      <div id="cohorte-list" style="display:flex;flex-direction:column;gap:12px;"></div>
-    </div>
 
+  </div>
+  </div>
   </div>
 </div>
 
@@ -598,9 +755,8 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 
 <script>
 var PROF_PASS='cmp2024';
-var viewingStudent=null;
 var currentUser=null,currentRole=null,currentSlug=null;
-var allTrades=[],allStudents=[],perfChart=null;
+var allTrades=[],perfChart=null;
 var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 var MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 var DAYS=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
@@ -690,57 +846,12 @@ function clearSession(){
   try{localStorage.removeItem('cmp_session');}catch(e){}
 }
 
-async function startApp(){
-  watchlistLoad();
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('main-app').style.display='block';
-  var parts=currentUser.split(' ');
-  var initials=parts.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
-  document.getElementById('top-avatar').textContent=initials;
-  document.getElementById('top-name').textContent=currentUser;
-  document.getElementById('top-role-label').textContent=currentRole==='prof'?'Professeur':'Mon Journal';
-  
-  document.getElementById('tab-upsell-btn').style.display=currentRole==='prof'?'':'none';
-  document.getElementById('tab-cohorte-btn').style.display=currentRole==='prof'?'':'none';
-  document.getElementById('reel-btn').style.display=currentRole==='prof'?'':'none';
-  if(currentRole==='etudiant'){
-    document.getElementById('db-title').textContent='Mon tableau de bord';
-    document.getElementById('db-sub').textContent='Ma performance — '+currentUser;
-  }
-  await loadData();
-}
 
-function logout(){
-  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];allStudents=[];
-  clearSession();
-  if(perfChart){perfChart.destroy();perfChart=null;}
-  document.getElementById('main-app').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('prof-pass').value='';
-  document.getElementById('etu-prenom').value='';
-  document.getElementById('etu-nom').value='';
-  document.getElementById('login-prof-fields').style.display='none';
-  document.getElementById('login-etu-fields').style.display='none';
-  document.getElementById('role-prof').classList.remove('selected');
-  document.getElementById('role-etudiant').classList.remove('selected');
-  document.getElementById('login-error').style.display='none';
-  document.getElementById('login-info').style.display='none';
-  document.getElementById('tab-upsell-btn').style.display='none';
-  document.getElementById('tab-cohorte-btn').style.display='none';
-  document.getElementById('reel-btn').style.display='none';
-  document.getElementById('db-title').textContent='Tableau de bord';
-  document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
-  switchTab('dashboard');
-}
 
 async function loadData(){
   setSaveBadge('☁️ Chargement...');
   var tradesData=await fsLoad('trades/'+currentSlug);
   allTrades=tradesData&&tradesData.list?tradesData.list:[];
-  if(currentRole==='prof'){
-    var stuData=await fsLoad('config/students');
-    allStudents=stuData&&stuData.list?stuData.list:[];
-  }
   renderAll();
   setSaveBadge('☁️ Synchronisé');
 }
@@ -751,30 +862,8 @@ async function saveTrades(){
   setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
 }
 
-async function saveStudents(){
-  setSaveBadge('☁️ Sauvegarde...');
-  var ok=await fsSave('config/students',{list:allStudents,updatedAt:new Date().toISOString()});
-  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
-}
 
-function switchTab(name){
-  if(name!=='details'){
-    viewingStudent=null;
-  }
-  var badge=document.getElementById('student-view-badge');
-  if(badge) badge.style.display=(name==='details'&&viewingStudent)?'flex':'none';
-  var tabs=['dashboard','trades','calendrier','details','import','upsell','cohorte'];
-  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
-  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
-  var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
-  if(name==='calendrier')renderCalendar();
-  if(name==='details')renderDetails();
-  if(name==='upsell'){upLoadCalls();}
-  if(name==='cohorte'){cohortePopulateFilter();cohorteRender();}
-  if(name==='import'){var d=document.getElementById('man-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
-}
 
-function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderStudents();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
 
 var trVisibleCount=10;
 
@@ -942,101 +1031,12 @@ function renderCalendar(){
 function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else{calMonth--;}renderCalendar();}
 function calNext(){if(calMonth===11){calMonth=0;calYear++;}else{calMonth++;}renderCalendar();}
 
-async function renderStudents(){
-  var el=document.getElementById('student-list');
-  if(!allStudents.length){el.innerHTML='<div class="loading-msg">Aucun étudiant ajouté</div>';return;}
-  el.innerHTML='<div class="loading-msg">Chargement des résultats...</div>';
-  var rows=await Promise.all(allStudents.map(async function(s,i){
-    var data=await fsLoad('trades/'+s.slug);
-    var trades=data&&data.list?data.list:[];
-    var total=trades.reduce(function(a,t){return a+t.pnl;},0);
-    var wins=trades.filter(function(t){return t.pnl>=0;}).length;
-    var wr=trades.length?Math.round(wins/trades.length*100):null;
-    var pnlColor=trades.length?(total>=0?'var(--green)':'var(--red)'):'var(--text3)';
-    var pnlStr=trades.length?(total>=0?'+':'')+' $'+total.toFixed(2):'Aucun trade';
-    var wrStr=wr!==null?wr+'% win rate':'—';
-    return '<div class="student-item">'
-      +'<div class="student-info">'
-      +'<div class="student-avatar">'+s.initials+'</div>'
-      +'<div>'
-      +'<div style="font-size:14px;font-weight:400;color:var(--navy);cursor:pointer;text-decoration:underline;text-underline-offset:3px;" onclick="viewStudentDetails('+i+')">'+s.name+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);">'+trades.length+' trade(s) · '+wrStr+'</div>'
-      +'</div></div>'
-      +'<div style="display:flex;gap:8px;align-items:center;">'
-      +'<div style="text-align:right;margin-right:4px;">'
-      +'<div style="font-size:15px;font-weight:700;color:'+pnlColor+';">'+pnlStr+'</div>'
-      +'<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">P&L Net</div>'
-      +'</div>'
-      +'<button class="btn-back btn-sm" onclick="removeStudent('+i+')" title="Retirer acces seulement">Retirer accès</button>'
-      +'<button class="btn-danger" style="padding:5px 10px;font-size:10px;" onclick="deleteStudent('+i+')" title="Supprimer acces et tous les trades">🗑 Supprimer</button>'
-      +'</div></div>';
-  }));
-  el.innerHTML=rows.join('');
-}
 
-async function addStudent(){
-  var p=document.getElementById('s-prenom').value.trim();
-  var n=document.getElementById('s-nom').value.trim();
-  if(!p||!n){alert('Entre un prénom et un nom.');return;}
-  var slug=toSlug(p+' '+n);
-  if(allStudents.find(function(s){return s.slug===slug;})){alert('Cet étudiant existe déjà.');return;}
-  setSaveBadge('☁️ Création...');
-  var studentData={name:p+' '+n,slug:slug,initials:(p[0]+(n[0]||'')).toUpperCase(),createdAt:new Date().toISOString()};
-  await fsSave('students/'+slug,studentData);
-  allStudents.unshift(studentData);
-  await saveStudents();
-  renderStudents();
-  document.getElementById('s-prenom').value='';
-  document.getElementById('s-nom').value='';
-}
 
-async function removeStudent(i){
-  if(!confirm('Retirer acces de cet etudiant ? Ses trades restent conserves dans Firebase.'))return;
-  allStudents.splice(i,1);
-  await saveStudents();
-  renderStudents();
-}
 
-async function viewStudentDetails(i){
-  var s=allStudents[i];
-  viewingStudent=s;
-  switchTab('details');
-  var badge=document.getElementById('student-view-badge');
-  if(badge){
-    badge.style.display='flex';
-    document.getElementById('student-view-name').textContent=s.name;
-  }
-}
 
-async function viewStudentBySlug(slug,name){
-  viewingStudent={slug:slug,name:name};
-  switchTab('details');
-  var badge=document.getElementById('student-view-badge');
-  if(badge){
-    badge.style.display='flex';
-    document.getElementById('student-view-name').textContent=name;
-  }
-}
 
-function closeStudentView(){
-  viewingStudent=null;
-  var badge=document.getElementById('student-view-badge');
-  if(badge) badge.style.display='none';
-  switchTab('etudiants');
-}
 
-async function deleteStudent(i){
-  var s=allStudents[i];
-  if(!confirm('Supprimer definitivement le journal de '+s.name+' ? Cela va effacer son acces ET tous ses trades dans Firebase. Cette action est irreversible.'))return;
-  setSaveBadge('☁️ Suppression...');
-  // Effacer les trades dans Firebase
-  await fsSave('trades/'+s.slug,{list:[],updatedAt:new Date().toISOString(),deleted:true});
-  // Retirer de la liste
-  allStudents.splice(i,1);
-  await saveStudents();
-  setSaveBadge('☁️ Supprimé');
-  renderStudents();
-}
 
 function parseCSVRows(text){
   var lines=text.trim().split('\n').filter(function(l){return l.trim();});
@@ -1261,20 +1261,12 @@ function nsRender(reset){
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Frontsell</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Ma part</th>'
     +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Statut</th>'
-    +'<th style="padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Journal</th>'
     +'</tr></thead><tbody>';
   for(var ri=0;ri<visible;ri++){
     var s=filtered[ri];
     var active=nsIsActive(s,today.getFullYear(),today.getMonth());
     var cohorteLabel='—';
     if(s.cohorte){var cd=new Date(s.cohorte+'T00:00:00');cohorteLabel=MONTHS_FR[cd.getMonth()]+' '+cd.getFullYear();}
-    var slug=toSlug(s.name);
-    var hasJournal=!!allStudents.find(function(x){return x.slug===slug;});
-    var journalBtn=!active&&hasJournal
-      ?'<button onclick="event.stopPropagation();nsDeleteJournal(\''+s.id+'\')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">🗑 Supprimer</button>'
-      :(hasJournal
-        ?'<span style="font-size:11px;color:var(--green);">✓ Actif</span>'
-        :'<span style="font-size:11px;color:var(--text3);">—</span>');
     html+='<tr style="border-bottom:1px solid var(--border);cursor:pointer;" onclick="nsOpenModal(\''+s.id+'\')" onmouseover="this.style.background=\'var(--cream)\'" onmouseout="this.style.background=\'white\'">'
       +'<td style="padding:10px 14px;font-weight:600;color:var(--navy);">'+(s.name||'—')+'</td>'
       +'<td style="padding:10px 14px;color:var(--text3);font-size:12px;">'+(s.phone||'—')+'</td>'
@@ -1283,7 +1275,6 @@ function nsRender(reset){
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.frontsell?fmt$(s.frontsell):'—')+'</td>'
       +'<td style="padding:10px 14px;font-weight:700;color:var(--green);">'+(s.ma_part&&parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2)+(s.pct?' ('+s.pct+'%)':''):'—')+'</td>'
       +'<td style="padding:10px 14px;"><span style="background:'+(active?'#e8f4ec':'var(--cream2)')+';color:'+(active?'var(--green)':'var(--text3)')+';border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;">'+(active?'✓ En cours':'Terminé')+'</span></td>'
-      +'<td style="padding:10px 14px;">'+journalBtn+'</td>'
       +'</tr>';
   }
   html+='</tbody></table>';
@@ -1293,23 +1284,6 @@ function nsRender(reset){
 }
 function nsLoadMore(){nsVisibleCount+=10;nsRender(false);}
 
-async function nsDeleteJournal(id){
-  var s=upNstu.find(function(x){return x.id===id;});
-  if(!s)return;
-  if(!confirm('Supprimer le journal de trading de '+s.name+' ?\n\nSes informations (prix, frontsell, ma part) seront conservées.\nSeulement son accès au journal et ses trades seront supprimés.\n\nCette action est irréversible.'))return;
-  var slug=toSlug(s.name);
-  setSaveBadge('☁️ Suppression...');
-  /* Supprimer les trades */
-  await fsSave('trades/'+slug,{list:[],updatedAt:new Date().toISOString(),deleted:true});
-  /* Retirer l'accès journal */
-  var jIdx=allStudents.findIndex(function(x){return x.slug===slug;});
-  if(jIdx>=0){
-    allStudents.splice(jIdx,1);
-    await saveStudents();
-  }
-  setSaveBadge('☁️ Sauvegardé');
-  nsRender();
-}
 
 /* Modal étudiant */
 function nsOpenModal(id){
@@ -1347,7 +1321,6 @@ async function nsSaveStudent(){
   var name=document.getElementById('ns-name').value.trim();
   if(!name){alert('Le nom est requis.');return;}
   var frontsell=document.getElementById('ns-frontsell').value;
-  var isNew=!document.getElementById('ns-edit-id').value;
   var cohorteVal=document.getElementById('ns-cohorte').value;
   /* Convertir YYYY-MM en YYYY-MM-01 pour compatibilité avec nsIsActive */
   var cohorteDate=cohorteVal?(cohorteVal.length===7?cohorteVal+'-01':cohorteVal):'';
@@ -1366,47 +1339,17 @@ async function nsSaveStudent(){
   if(idx>=0)upNstu[idx]=s;else upNstu.push(s);
   await upSaveNstu();
 
-  /* Créer automatiquement l'accès journal de trading si c'est un nouvel étudiant */
-  if(isNew){
-    var slug=toSlug(name);
-    var alreadyExists=allStudents.find(function(x){return x.slug===slug;});
-    if(!alreadyExists){
-      var parts=name.split(' ');
-      var initials=parts.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
-      var journalStudent={name:name,slug:slug,initials:initials,createdAt:new Date().toISOString()};
-      /* Sauvegarder dans Firebase pour que l'étudiant puisse se connecter */
-      await fsSave('students/'+slug,journalStudent);
-      allStudents.unshift(journalStudent);
-      await saveStudents();
-    }
-  }
-
   nsCloseModal();nsPopulateFilter();nsRender();
-
-  /* Rafraîchir l'onglet Étudiants si visible */
-  if(currentRole==='prof'){
-    var stuTab=document.getElementById('tab-etudiants');
-    if(stuTab&&stuTab.classList.contains('active'))renderStudents();
-  }
+  if(document.getElementById('tab-home').classList.contains('active'))renderHome();
 }
 
 async function nsDeleteStudent(){
   var id=document.getElementById('ns-edit-id').value;
   if(!id||!confirm('Supprimer cet étudiant ?'))return;
-  var s=upNstu.find(function(x){return x.id===id;});
   upNstu=upNstu.filter(function(x){return x.id!==id;});
   await upSaveNstu();
-
-  /* Retirer aussi l'accès journal si l'étudiant existe */
-  if(s&&s.name){
-    var slug=toSlug(s.name);
-    var jIdx=allStudents.findIndex(function(x){return x.slug===slug;});
-    if(jIdx>=0&&confirm('Voulez-vous aussi supprimer l\'accès au journal de trading de '+s.name+' ?')){
-      allStudents.splice(jIdx,1);
-      await saveStudents();
-    }
-  }
   nsCloseModal();nsRender();
+  if(document.getElementById('tab-home').classList.contains('active'))renderHome();
 }
 
 document.addEventListener('click',function(e){
@@ -1564,132 +1507,8 @@ function upCloseDayPanel(){var d=document.getElementById('up-cal-month-detail');
 
 
 /* ---- ONGLET COHORTE ---- */
-var cohorteCharts={};
 
-function cohortePopulateFilter(){
-  var sel=document.getElementById('cohorte-filter');
-  if(!sel)return;
-  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  var cohortes={};
-  upNstu.forEach(function(s){if(s.cohorte)cohortes[s.cohorte]=true;});
-  /* Vider sauf le premier option */
-  while(sel.options.length>1)sel.remove(1);
-  Object.keys(cohortes).sort().forEach(function(c){
-    var d=new Date(c+'T00:00:00');
-    var opt=document.createElement('option');
-    opt.value=c;
-    opt.textContent='Cohorte '+MONTHS_FR[d.getMonth()]+' '+d.getFullYear();
-    sel.appendChild(opt);
-  });
-}
 
-async function cohorteRender(){
-  var cohorte=document.getElementById('cohorte-filter').value;
-  var listEl=document.getElementById('cohorte-list');
-  var statsEl=document.getElementById('cohorte-stats');
-  if(!listEl)return;
-
-  if(!cohorte){
-    listEl.innerHTML='<div class="loading-msg">Sélectionne une cohorte pour voir les étudiants</div>';
-    if(statsEl)statsEl.innerHTML='';
-    return;
-  }
-
-  var students=upNstu.filter(function(s){return s.cohorte===cohorte;});
-  if(!students.length){
-    listEl.innerHTML='<div class="loading-msg">Aucun étudiant dans cette cohorte</div>';
-    return;
-  }
-
-  listEl.innerHTML='<div class="loading-msg">Chargement des données...</div>';
-
-  /* Charger les trades de chaque étudiant */
-  var results=await Promise.all(students.map(async function(s){
-    var slug=toSlug(s.name);
-    try{
-      var data=await fsLoad('trades/'+slug);
-      var trades=data&&data.list?data.list:[];
-      return {student:s,trades:trades,slug:slug};
-    }catch(e){return {student:s,trades:[],slug:slug};}
-  }));
-
-  /* Stats globales de la cohorte */
-  var totalPnl=0,totalTrades=0,totalWins=0;
-  results.forEach(function(r){
-    var pnl=r.trades.reduce(function(s,t){return s+t.pnl;},0);
-    totalPnl+=pnl;
-    totalTrades+=r.trades.length;
-    totalWins+=r.trades.filter(function(t){return t.pnl>=0;}).length;
-  });
-
-  if(statsEl){
-    var statsCards=[
-      {l:'Étudiants',v:students.length,c:'var(--navy)'},
-      {l:'P&L total cohorte',v:(totalPnl>=0?'+':'')+' $'+totalPnl.toFixed(2),c:totalPnl>=0?'var(--green)':'var(--red)'},
-      {l:'Trades fermés',v:totalTrades,c:'var(--navy)'},
-      {l:'Win rate moyen',v:totalTrades>0?Math.round(totalWins/totalTrades*100)+'%':'—',c:'var(--green)'}
-    ];
-    statsEl.innerHTML=statsCards.map(function(s){
-      return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 1rem;box-shadow:var(--shadow);min-width:120px;">'
-        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">'+s.l+'</div>'
-        +'<div style="font-size:1.1rem;font-weight:700;color:'+s.c+';font-family:\'Playfair Display\',serif;">'+s.v+'</div>'
-        +'</div>';
-    }).join('');
-  }
-
-  /* Trier par P&L décroissant */
-  results.sort(function(a,b){
-    var pA=a.trades.reduce(function(s,t){return s+t.pnl;},0);
-    var pB=b.trades.reduce(function(s,t){return s+t.pnl;},0);
-    return pB-pA;
-  });
-
-  listEl.innerHTML='';
-
-  results.forEach(function(r,idx){
-    var trades=r.trades;
-    var pnl=trades.reduce(function(s,t){return s+t.pnl;},0);
-    var wins=trades.filter(function(t){return t.pnl>=0;}).length;
-    var wr=trades.length?Math.round(wins/trades.length*100):0;
-    var chartId='cohorte-chart-'+idx;
-
-    var card=document.createElement('div');
-    card.className='q-card';
-    card.style.cssText='padding:1rem;cursor:pointer;transition:opacity 0.15s;';
-    card.onmouseover=function(){this.style.opacity='0.85';};
-    card.onmouseout=function(){this.style.opacity='1';};
-    card.addEventListener('click',(function(slug,name){return function(){viewStudentBySlug(slug,name);};})(r.slug,r.student.name));
-    card.innerHTML=
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">'
-      +'<div>'
-      +'<div style="font-size:15px;font-weight:700;color:var(--navy);">'+r.student.name+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+r.slug+'</div>'
-      +'</div>'
-      +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'
-      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+(pnl>=0?'var(--green)':'var(--red)')+';">'+(pnl>=0?'+':'')+' $'+pnl.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">P&L</div></div>'
-      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:var(--navy);">'+trades.length+'</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Trades</div></div>'
-      +'<div style="text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+(wr>=50?'var(--green)':'var(--red)')+';">'+wr+'%</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Win rate</div></div>'
-      +'</div>'
-      +'</div>'
-      +(trades.length?'<canvas id="'+chartId+'" height="60"></canvas>':'<div style="text-align:center;padding:1rem;color:var(--text3);font-style:italic;font-size:13px;">Aucun trade importé</div>');
-    listEl.appendChild(card);
-
-    /* Dessiner le graphique si trades */
-    if(trades.length){
-      var sorted=trades.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
-      var cumul=0;
-      var labels=[];var data=[];
-      sorted.forEach(function(t){cumul+=t.pnl;labels.push(t.date);data.push(parseFloat(cumul.toFixed(2)));});
-      var ctx=document.getElementById(chartId).getContext('2d');
-      if(cohorteCharts[chartId]){cohorteCharts[chartId].destroy();}
-      cohorteCharts[chartId]=new Chart(ctx,{
-        type:'line',
-        data:{labels:labels,datasets:[{data:data,borderColor:'#1a7a4a',backgroundColor:'rgba(26,122,74,0.08)',borderWidth:1.5,pointRadius:2,tension:0.3,fill:true}]},
-        options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:true,ticks:{font:{size:9},callback:function(v){return '$'+v;}}}},animation:{duration:400}}
-      });
-    }
-  });
-}
 
 /* ---- SAISIE MANUELLE ---- */
 function manCalcPnl(){
@@ -1772,6 +1591,263 @@ async function manAddTrade(){
   var preview=document.getElementById('man-pnl-preview');
   if(preview)preview.style.display='none';
 }
+
+/* ---- NAVIGATION ---- */
+var SECTION_OF={home:'home',dashboard:'journal',trades:'journal',calendrier:'journal',details:'journal',import:'journal',entreprises:'entreprises',upsell:'etudiants'};
+var lastJournalTab='dashboard';
+
+function toggleSidebar(){document.body.classList.toggle('nav-open');}
+function closeSidebar(){document.body.classList.remove('nav-open');}
+
+function switchTab(name){
+  var sec=SECTION_OF[name]||'home';
+  if(sec==='journal')lastJournalTab=name;
+  document.querySelectorAll('.nav-item[data-section]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-section')===sec);});
+  var jt=document.getElementById('journal-tabs');
+  if(jt)jt.style.display=sec==='journal'?'flex':'none';
+  document.querySelectorAll('#journal-tabs .tab').forEach(function(t){t.classList.toggle('active',t.getAttribute('data-tab')===name);});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  var el=document.getElementById('tab-'+name);if(el)el.classList.add('active');
+  if(name==='home')renderHome();
+  if(name==='calendrier')renderCalendar();
+  if(name==='details')renderDetails();
+  if(name==='upsell'){upLoadCalls();}
+  if(name==='entreprises')entRender();
+  if(name==='import'){var d=document.getElementById('man-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+function renderAll(){renderTrades();renderDashboard();if(currentRole==='prof')renderHome();var det=document.getElementById('tab-details');if(det&&det.classList.contains('active'))renderDetails();}
+
+async function startApp(){
+  watchlistLoad();
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  var parts=currentUser.split(' ');
+  var initials=parts.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+  document.getElementById('top-avatar').textContent=initials;
+  document.getElementById('top-name').textContent=currentUser;
+  var prof=currentRole==='prof';
+  document.body.classList.toggle('is-student',!prof);
+  document.getElementById('top-title').textContent=prof?'Mon terminal':'CMP Journal';
+  document.getElementById('top-role-label').textContent=prof?'Groupe C.M.P':'Mon Journal';
+  document.getElementById('reel-btn').style.display=prof?'':'none';
+  if(!prof){
+    document.getElementById('db-title').textContent='Mon tableau de bord';
+    document.getElementById('db-sub').textContent='Ma performance — '+currentUser;
+  }
+  switchTab(prof?'home':'dashboard');
+  await loadData();
+  if(prof){
+    await Promise.all([upLoadCalls(),entLoad()]);
+    renderHome();
+  }
+}
+
+function logout(){
+  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;
+  clearSession();
+  if(perfChart){perfChart.destroy();perfChart=null;}
+  if(homeChart){homeChart.destroy();homeChart=null;}
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('prof-pass').value='';
+  document.getElementById('etu-prenom').value='';
+  document.getElementById('etu-nom').value='';
+  document.getElementById('login-prof-fields').style.display='none';
+  document.getElementById('login-etu-fields').style.display='none';
+  document.getElementById('role-prof').classList.remove('selected');
+  document.getElementById('role-etudiant').classList.remove('selected');
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('login-info').style.display='none';
+  document.getElementById('reel-btn').style.display='none';
+  document.body.classList.remove('is-student');
+  document.getElementById('db-title').textContent='Tableau de bord';
+  document.getElementById('db-sub').textContent='Performance cumulée — toutes les sessions';
+  switchTab('home');
+}
+
+/* ---- ACCUEIL ---- */
+var homeYear=new Date().getFullYear(),homeChart=null;
+
+function homeYearShift(n){homeYear+=n;renderHome();}
+
+function moneySigned(v){return (v>=0?'+ ':'− ')+'$'+Math.abs(v).toFixed(2);}
+
+function renderHome(){
+  if(currentRole!=='prof')return;
+  var now=new Date();
+  var DAYS_FULL=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var el=document.getElementById('home-date');
+  if(el)el.textContent=DAYS_FULL[now.getDay()]+' '+now.getDate()+' '+MONTHS[now.getMonth()].toLowerCase()+' '+now.getFullYear();
+  el=document.getElementById('home-year');if(el)el.textContent=homeYear;
+  var ys=String(homeYear);
+
+  /* Trading de l'année */
+  var trades=allTrades.filter(function(t){return (t.date||'').slice(0,4)===ys;});
+  var pnl=trades.reduce(function(s,t){return s+t.pnl;},0);
+  var wins=trades.filter(function(t){return t.pnl>=0;}).length;
+
+  /* Formation CMP : ma part des étudiants qui débutent cette année */
+  var cmp=upNstu.filter(function(s){return (s.cohorte||'').slice(0,4)===ys;});
+  var part=cmp.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+  var actifs=upNstu.filter(function(s){return nsIsActive(s,now.getFullYear(),now.getMonth());}).length;
+
+  var total=pnl+part;
+  el=document.getElementById('home-total');if(el){el.textContent=moneySigned(total);}
+  el=document.getElementById('home-trading');if(el){el.textContent=trades.length?moneySigned(pnl):'—';el.className='stat-val'+(trades.length?(pnl>=0?' green':' red'):'');}
+  el=document.getElementById('home-trading-sub');if(el)el.textContent=trades.length?trades.length+' trades · '+Math.round(wins/trades.length*100)+' % gagnants':'Aucun trade';
+  el=document.getElementById('home-cmp');if(el){el.textContent=cmp.length?'$'+part.toFixed(2):'—';}
+  el=document.getElementById('home-cmp-sub');if(el)el.textContent=cmp.length+' inscrit'+(cmp.length>1?'s':'')+' · '+actifs+' actif'+(actifs>1?'s':'')+' ce mois';
+  el=document.getElementById('home-ent');if(el)el.textContent=entList.length;
+
+  /* Courbe de l'année */
+  var cv=document.getElementById('home-chart'),empty=document.getElementById('home-chart-empty');
+  if(homeChart){homeChart.destroy();homeChart=null;}
+  if(cv&&empty){
+    if(!trades.length){cv.style.display='none';empty.style.display='block';}
+    else{
+      cv.style.display='block';empty.style.display='none';
+      var sorted=trades.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+      var cum=0,labels=[],data=[];
+      sorted.forEach(function(t){cum+=t.pnl;labels.push(t.date);data.push(parseFloat(cum.toFixed(2)));});
+      homeChart=new Chart(cv.getContext('2d'),{type:'line',
+        data:{labels:labels,datasets:[{data:data,borderColor:'#1a7a4a',backgroundColor:'rgba(26,122,74,0.08)',borderWidth:2,pointRadius:2,tension:0.3,fill:true}]},
+        options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{font:{size:10},callback:function(v){return '$'+v;}}}}}});
+    }
+  }
+
+  /* Entreprises */
+  var entEl=document.getElementById('home-ent-list');
+  if(entEl){
+    entEl.innerHTML='';
+    if(!entList.length){entEl.innerHTML='<div class="loading-msg">Aucune entreprise</div>';}
+    else entList.slice(0,4).forEach(function(e){
+      var row=document.createElement('div');row.className='home-row';
+      var l=document.createElement('div');l.textContent=e.name;
+      if(e.type){var sm=document.createElement('small');sm.textContent=e.type;l.appendChild(sm);}
+      var b=document.createElement('button');b.type='button';b.className='link-btn';b.textContent='Ouvrir';
+      b.addEventListener('click',function(){switchTab('entreprises');entOpen(e.id);});
+      row.appendChild(l);row.appendChild(b);entEl.appendChild(row);
+    });
+  }
+
+  /* Derniers trades */
+  var trEl=document.getElementById('home-trades');
+  if(trEl){
+    trEl.innerHTML='';
+    var last=allTrades.slice(-5).reverse();
+    if(!last.length)trEl.innerHTML='<div class="loading-msg">Aucun trade</div>';
+    last.forEach(function(t){
+      var row=document.createElement('div');row.className='home-row';
+      var l=document.createElement('div');l.textContent=t.sym;
+      var sm=document.createElement('small');sm.textContent=t.date+' · '+t.dir;l.appendChild(sm);
+      var v=document.createElement('div');v.className=t.pnl>=0?'pnl-pos':'pnl-neg';v.textContent=moneySigned(t.pnl);
+      row.appendChild(l);row.appendChild(v);trEl.appendChild(row);
+    });
+  }
+
+  /* Étudiants récents */
+  var stEl=document.getElementById('home-students');
+  if(stEl){
+    stEl.innerHTML='';
+    var recent=upNstu.slice().sort(function(a,b){return (b.cohorte||'').localeCompare(a.cohorte||'');}).slice(0,4);
+    if(!recent.length)stEl.innerHTML='<div class="loading-msg">Aucun étudiant</div>';
+    recent.forEach(function(s){
+      var row=document.createElement('div');row.className='home-row';
+      var l=document.createElement('div');l.textContent=s.name;
+      var sm=document.createElement('small');
+      var cd=s.cohorte?new Date(s.cohorte+'T00:00:00'):null;
+      sm.textContent=cd?'Début '+MONTHS[cd.getMonth()].toLowerCase()+' '+cd.getFullYear():'Début non précisé';
+      l.appendChild(sm);
+      var v=document.createElement('div');v.className='pnl-pos';v.textContent=parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2):'—';
+      row.appendChild(l);row.appendChild(v);stEl.appendChild(row);
+    });
+  }
+}
+
+/* ---- MES ENTREPRISES ---- */
+var entList=[],entCurrent=null;
+
+async function entLoad(){
+  var d=await fsLoad('entreprises/list');
+  entList=d&&d.list?d.list:[];
+}
+async function entPersist(){
+  setSaveBadge('☁️ Sauvegarde...');
+  var ok=await fsSave('entreprises/list',{list:entList,updatedAt:new Date().toISOString()});
+  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+  return ok;
+}
+
+function entRender(){
+  var listV=document.getElementById('ent-list-view'),detV=document.getElementById('ent-detail-view');
+  if(!listV||!detV)return;
+  var cur=entList.find(function(e){return e.id===entCurrent;});
+  if(entCurrent&&cur){
+    listV.style.display='none';detV.style.display='block';
+    document.getElementById('ent-detail-name').textContent=cur.name;
+    document.getElementById('ent-detail-meta').textContent=cur.type||'Aucun secteur précisé';
+    var nc=document.getElementById('ent-notes-card');
+    nc.style.display=cur.notes?'block':'none';
+    document.getElementById('ent-detail-notes').textContent=cur.notes||'';
+    /* Point d'accroche pour le module de comptabilité */
+    var host=document.getElementById('ent-compta-host');
+    if(typeof window.entComptaMount==='function')window.entComptaMount(host,cur);
+    return;
+  }
+  entCurrent=null;
+  detV.style.display='none';listV.style.display='block';
+  var grid=document.getElementById('ent-grid');grid.innerHTML='';
+  entList.forEach(function(e){
+    var b=document.createElement('button');b.type='button';b.className='ent-card';
+    var n=document.createElement('div');n.className='ent-card-name';n.textContent=e.name;
+    var m=document.createElement('div');m.className='ent-card-meta';m.textContent=e.type||'Ouvrir la fiche';
+    b.appendChild(n);b.appendChild(m);
+    b.addEventListener('click',function(){entOpen(e.id);});
+    grid.appendChild(b);
+  });
+  var add=document.createElement('button');add.type='button';add.className='ent-card ent-add';add.textContent='+ Ajouter une entreprise';
+  add.addEventListener('click',function(){entOpenModal(null);});
+  grid.appendChild(add);
+}
+function entOpen(id){entCurrent=id;entRender();window.scrollTo(0,0);}
+function entBack(){entCurrent=null;entRender();}
+
+function entOpenModal(id){
+  var e=id?entList.find(function(x){return x.id===id;}):null;
+  document.getElementById('ent-edit-id').value=e?e.id:'';
+  document.getElementById('ent-modal-title').textContent=e?'Modifier l\'entreprise':'Nouvelle entreprise';
+  document.getElementById('ent-name').value=e?e.name:'';
+  document.getElementById('ent-type').value=e?(e.type||''):'';
+  document.getElementById('ent-notes').value=e?(e.notes||''):'';
+  document.getElementById('ent-overlay').style.display='flex';
+  document.getElementById('ent-name').focus();
+}
+function entCloseModal(){document.getElementById('ent-overlay').style.display='none';}
+
+async function entSave(){
+  var name=document.getElementById('ent-name').value.trim();
+  if(!name){alert('Le nom est requis.');return;}
+  var id=document.getElementById('ent-edit-id').value;
+  var rec={id:id||('ent'+Date.now()),name:name,
+    type:document.getElementById('ent-type').value.trim(),
+    notes:document.getElementById('ent-notes').value.trim()};
+  var idx=entList.findIndex(function(x){return x.id===rec.id;});
+  if(idx>=0){rec.createdAt=entList[idx].createdAt;entList[idx]=rec;}
+  else{rec.createdAt=new Date().toISOString();entList.push(rec);}
+  await entPersist();
+  entCloseModal();entRender();
+}
+async function entDelete(id){
+  var e=entList.find(function(x){return x.id===id;});
+  if(!e||!confirm('Supprimer l\'entreprise « '+e.name+' » ?'))return;
+  entList=entList.filter(function(x){return x.id!==id;});
+  await entPersist();
+  entCurrent=null;entRender();
+}
+document.addEventListener('click',function(e){if(e.target.id==='ent-overlay')entCloseModal();});
 
 /* ---- WATCHLIST ---- */
 var wlEntries=[];
@@ -1887,13 +1963,6 @@ if(loadSession()){
 var detailCharts={};
 
 function renderDetails(){
-  if(viewingStudent){
-    fsLoad('trades/'+viewingStudent.slug).then(function(data){
-      var studentTrades=data&&data.list?data.list:[];
-      renderDetailsWithTrades(studentTrades);
-    });
-    return;
-  }
   renderDetailsWithTrades(allTrades);
 }
 
