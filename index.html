@@ -438,6 +438,7 @@ body.is-student .sidebar,body.is-student .menu-btn{display:none;}
         <div class="section-badge">🏢 Entreprises</div>
         <div class="page-title">Mes entreprises</div>
         <div class="page-sub">Ajoute une entreprise, puis ouvre-la pour suivre sa comptabilité.</div>
+        <div class="info-box" id="ent-empty" style="display:none;"><strong style="color:var(--navy);">Première étape :</strong> clique sur « + Ajouter une entreprise » (par exemple <em>Wash2o Abitibi</em>, avec les sources de revenu <em>Wash2o Abitibi, TTF</em>). Ouvre ensuite sa fiche : ta comptabilité s'y trouve, avec le mois, le cumulatif annuel et les factures.</div>
         <div class="ent-grid" id="ent-grid"></div>
       </div>
       <div id="ent-detail-view" style="display:none;">
@@ -1818,13 +1819,32 @@ function renderHome(){
 /* ---- MES ENTREPRISES ---- */
 var entList=[],entCurrent=null;
 
+var entSeeded=false,entLoadFailed=false;
+var ENT_DEFAULT={id:'ent-cmp',name:'Entreprise CMP',type:'',notes:'',sources:['Wash2o Abitibi','TTF']};
+
 async function entLoad(){
-  var d=await fsLoad('entreprises/list');
-  entList=d&&d.list?d.list:[];
+  entLoadFailed=false;
+  try{
+    await cpDb();
+    var snap=await window.fsGetDoc(cpRef('entreprises','list'));
+    var d=snap.exists()?snap.data():null;
+    entList=d&&d.list?d.list:[];
+    entSeeded=!!(d&&d.seeded);
+    /* Création automatique, une seule fois, de « Entreprise CMP » */
+    if(!entSeeded){
+      if(!entList.some(function(e){return e.id===ENT_DEFAULT.id;})){
+        var def=JSON.parse(JSON.stringify(ENT_DEFAULT));def.createdAt=new Date().toISOString();
+        entList.unshift(def);
+      }
+      entSeeded=true;
+      await entPersist();
+    }
+  }catch(e){console.error('entLoad',e);entList=[];entLoadFailed=true;}
 }
 async function entPersist(){
+  if(entLoadFailed){alert('La liste des entreprises n\'a pas pu être chargée. Recharge la page avant de la modifier.');return false;}
   setSaveBadge('☁️ Sauvegarde...');
-  var ok=await fsSave('entreprises/list',{list:entList,updatedAt:new Date().toISOString()});
+  var ok=await fsSave('entreprises/list',{list:entList,seeded:entSeeded,updatedAt:new Date().toISOString()});
   setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
   return ok;
 }
@@ -1847,6 +1867,7 @@ function entRender(){
   }
   entCurrent=null;
   detV.style.display='none';listV.style.display='block';
+  var emp=document.getElementById('ent-empty');if(emp)emp.style.display=entList.length?'none':'block';
   var grid=document.getElementById('ent-grid');grid.innerHTML='';
   entList.forEach(function(e){
     var b=document.createElement('button');b.type='button';b.className='ent-card';
