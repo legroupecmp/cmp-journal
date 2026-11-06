@@ -2021,6 +2021,7 @@ function cpRender(){
   if(cp.loading)html='<div class="loading-msg">Chargement de la comptabilité...</div>';
   else if(cp.needAuth)html=cpAuthHtml();
   else if(cp.error)html='<div class="login-error" style="display:block;">'+escapeHtml(cp.error)+'</div><button type="button" class="btn-back btn-sm" data-act="retry">Réessayer</button>';
+  else if(cp.screen==='import')html=cpImportHtml();
   else if(cp.screen==='year')html=cpYearHtml();
   else if(cp.screen==='new')html=cpNewHtml();
   else if(cp.screen==='form')html=cpFormHtml();
@@ -2070,6 +2071,7 @@ function cpDashHtml(){
    +'<button type="button" class="cp-arrow" data-act="mnext" aria-label="Mois suivant">›</button></div>'
    +'<div class="cp-actions"><button type="button" class="btn-back btn-sm" data-act="toyear">Cumulatif annuel</button>'
    +'<button type="button" class="btn-back btn-sm" data-act="dlmonth">Récap. du mois</button>'
+   +'<button type="button" class="btn-back btn-sm" data-act="import">Importer</button>'
    +'<button type="button" class="btn-next btn-sm" data-act="new">+ Nouvelle transaction</button></div></div>';
   h+='<div class="home-kpi-main" style="margin-bottom:12px;"><div class="stat-label">Solde net du mois</div><div class="big">'+cpMoney(s.solde)+'</div><div class="stat-sub">Revenus moins dépenses, taxes incluses · '+(s.solde>=0?'solde positif':'solde négatif')+'</div></div>';
   h+='<div class="cp-two"><div class="stat-card"><div class="stat-label">Revenus</div><div class="stat-val green">'+cpMoney(s.rev)+'</div></div><div class="stat-card"><div class="stat-label">Dépenses</div><div class="stat-val red">'+cpMoney(s.dep)+'</div></div></div>';
@@ -2228,6 +2230,8 @@ function cpClick(e){
     case 'yprev':cp.year=String(parseInt(cp.year,10)-1);cpRender();break;
     case 'ynext':cp.year=String(parseInt(cp.year,10)+1);cpRender();break;
     case 'dlmonth':cpDlMonth();break;
+    case 'import':cp.screen='import';cpRender();break;
+    case 'doimport':cpDoImport();break;
     case 'dlyear':cpDlYear();break;
     case 'new':cp.screen='new';cpRender();break;
     case 'view':cp.view=t.getAttribute('data-v');cpRender();break;
@@ -2390,6 +2394,60 @@ async function cpDelete(id){
     var next=cp.entries.filter(function(x){return x.id!==id;});
     await cpPersist(next);cp.entries=next;cpRender();
   }catch(err){alert('Suppression impossible : '+cpErr(err));}
+}
+
+
+/* ---- Importation depuis l'ancienne application ---- */
+function cpImportHtml(){
+  return '<button type="button" class="btn-back btn-sm" data-act="back" style="margin-bottom:1rem;">← Retour</button>'
+   +'<div class="page-title" style="font-size:1.3rem;">Importer mes données</div>'
+   +'<div class="info-box"><strong style="color:var(--navy);">Comment faire :</strong><br>1. Dans ton ancienne application de comptabilité, copie tes données (bouton « Copier mes données »).<br>2. Colle-les ci-dessous.<br>3. Clique sur « Importer ». Les transactions déjà présentes ne sont pas dupliquées.</div>'
+   +'<div class="q-card"><label class="input-label" for="cp-import-text">Données à importer</label>'
+   +'<textarea class="q-input" id="cp-import-text" rows="9" placeholder="[ { &quot;id&quot;: ..., &quot;type&quot;: &quot;depense&quot;, ... } ]"></textarea>'
+   +'<div class="login-error" id="cp-import-err"></div>'
+   +'<div style="margin-top:0.85rem;text-align:right;"><button type="button" class="btn-next" data-act="doimport">Importer</button></div></div>';
+}
+function cpNorm(o){
+  if(!o||typeof o!=='object')return null;
+  var type=o.type==='revenu'?'revenu':(o.type==='depense'?'depense':null);if(!type)return null;
+  var dp=String(o.datePaiement||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(dp))return null;
+  var df=String(o.dateFacture||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(df))df=dp;
+  var num=function(x){x=Number(x);return isFinite(x)?x:0;};
+  var e={id:String(o.id||('i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6))),type:type,dateFacture:df,datePaiement:dp,
+    description:String(o.description||''),categorie:String(o.categorie||(type==='revenu'?'Autre revenu':'Autre dépense')),
+    montantTotal:num(o.montantTotal),pourboire:num(o.pourboire),sousTotal:num(o.sousTotal),tps:num(o.tps),tvq:num(o.tvq),source:''};
+  if(type==='revenu'){
+    var s=cpSources(),src=o.source;
+    if(s.indexOf(src)<0)src=(/ttf/i.test(e.description)&&s.indexOf('TTF')>=0)?'TTF':s[0];
+    e.source=src;
+  }
+  return e;
+}
+async function cpDoImport(){
+  var er=document.getElementById('cp-import-err'),raw=document.getElementById('cp-import-text').value.trim();
+  er.style.display='none';
+  function fail(m){er.textContent=m;er.style.display='block';}
+  if(!raw){fail('Colle d\'abord les données copiées depuis l\'ancienne application.');return;}
+  var data;
+  try{
+    data=JSON.parse(raw);
+    if(data&&typeof data.value==='string')data=JSON.parse(data.value);
+    if(data&&!Array.isArray(data))data=data.entries||data.bl_entries||null;
+    if(typeof data==='string')data=JSON.parse(data);
+  }catch(e){fail('Ces données ne sont pas lisibles. Copie de nouveau le contenu complet depuis l\'ancienne application.');return;}
+  if(!Array.isArray(data)){fail('Je ne trouve aucune liste de transactions dans ce texte.');return;}
+  var have={};cp.entries.forEach(function(e){have[e.id]=true;});
+  var add=[],dup=0,bad=0;
+  data.forEach(function(o){var e=cpNorm(o);if(!e){bad++;return;}if(have[e.id]){dup++;return;}have[e.id]=true;add.push(e);});
+  if(!add.length){fail('Aucune nouvelle transaction à importer ('+dup+' déjà présente'+(dup!==1?'s':'')+', '+bad+' ignorée'+(bad!==1?'s':'')+').');return;}
+  try{
+    var next=cp.entries.concat(add);
+    await cpPersist(next);
+    cp.entries=next;
+    var last=add.map(function(e){return e.datePaiement.slice(0,7);}).sort().pop();
+    cp.month=last;cp.year=last.slice(0,4);cp.screen='dashboard';cpRender();
+    alert(add.length+' transaction'+(add.length!==1?'s':'')+' importée'+(add.length!==1?'s':'')+(dup?' ('+dup+' déjà présente'+(dup!==1?'s':'')+')':'')+(bad?' ('+bad+' ignorée'+(bad!==1?'s':'')+')':'')+'.');
+  }catch(e){fail('Importation impossible : '+cpErr(e));}
 }
 
 /* ---- Rapports téléchargeables ---- */
