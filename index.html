@@ -373,6 +373,7 @@ body.is-student .nav-item[data-prof]{display:none !important;}
     <button type="button" class="nav-item" data-section="home" data-prof onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Accueil</button>
     <button type="button" class="nav-item" data-section="journal" onclick="switchTab(lastJournalTab)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Journal de trading</button>
     <button type="button" class="nav-item" data-section="entreprises" data-prof onclick="switchTab('entreprises')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/></svg>Mes entreprises</button>
+    <button type="button" class="nav-item" data-section="invest" data-prof onclick="switchTab('invest')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>Investissements</button>
     <button type="button" class="nav-item" data-section="etudiants" data-prof onclick="switchTab('upsell')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.4c1.8.8 3 2.6 3 5.6"/></svg>Étudiants CMP</button>
     <div class="nav-tools">
       <div class="nav-sep"></div>
@@ -482,6 +483,14 @@ body.is-student .nav-item[data-prof]{display:none !important;}
         <div class="section-badge" style="margin-top:0.5rem;">📒 Comptabilité</div>
         <div id="ent-compta-host"></div>
       </div>
+    </div>
+
+    <!-- INVESTISSEMENTS -->
+    <div id="tab-invest" class="tab-content">
+      <div class="section-badge">💼 Placements</div>
+      <div class="page-title" style="margin-bottom:0.2rem;">Investissements</div>
+      <div class="page-sub" style="margin-bottom:0;">Portefeuilles long terme, cotisations (REER, CELI, CELIAPP, non enregistré) et revenus de placement.</div>
+      <div id="iv-host" style="margin-top:0.5rem;"></div>
     </div>
 
     <!-- MODAL ENTREPRISE -->
@@ -1639,7 +1648,7 @@ async function manAddTrade(){
 }
 
 /* ---- NAVIGATION ---- */
-var SECTION_OF={home:'home',dashboard:'journal',trades:'journal',calendrier:'journal',details:'journal',import:'journal',entreprises:'entreprises',upsell:'etudiants'};
+var SECTION_OF={home:'home',dashboard:'journal',trades:'journal',calendrier:'journal',details:'journal',import:'journal',entreprises:'entreprises',invest:'invest',upsell:'etudiants'};
 var lastJournalTab='dashboard';
 
 function toggleSidebar(){document.body.classList.toggle('nav-open');}
@@ -1659,6 +1668,7 @@ function switchTab(name){
   if(name==='details')renderDetails();
   if(name==='upsell'){upLoadCalls();}
   if(name==='entreprises')entRender();
+  if(name==='invest')ivMount();
   if(name==='import'){var d=document.getElementById('man-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
   closeSidebar();
   window.scrollTo(0,0);
@@ -1693,7 +1703,7 @@ async function startApp(){
 function logout(){
   currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
   clearSession();
-  cpReset();
+  cpReset();ivReset();
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
   if(perfChart){perfChart.destroy();perfChart=null;}
   if(homeChart){homeChart.destroy();homeChart=null;}
@@ -2524,6 +2534,350 @@ function todoToggle(id){
 function todoDelete(id){
   todoList=todoList.filter(function(x){return x.id!==id;});
   todoRender();todoPersist();
+}
+
+/* ---- INVESTISSEMENTS (portefeuilles, cotisations, revenus T5) ---- */
+var IV_TYPES=[{k:'REER',label:'REER'},{k:'CELI',label:'CELI'},{k:'CELIAPP',label:'CELIAPP'},{k:'NR',label:'Non enregistré'}];
+var IV_COLORS={REER:'#2d4a8a',CELI:'#1a7a4a',CELIAPP:'#b8862e',NR:'#6e5b8a'};
+var IV_CATS=['Intérêts','Dividendes admissibles','Dividendes ordinaires','Gains en capital','Autre'];
+var iv={host:null,loaded:false,loading:false,needAuth:false,error:null,data:{accounts:[],contribs:[],income:[]},tab:'ports',year:String(new Date().getFullYear()),screen:'main',form:null,ftype:null,charts:[],specs:[]};
+
+function ivLabel(k){var t=IV_TYPES.find(function(x){return x.k===k;});return t?t.label:k;}
+function ivNum(x){x=parseFloat(x);return isFinite(x)?x:0;}
+function ivId(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function ivAcc(id){return iv.data.accounts.find(function(a){return a.id===id;});}
+function ivAccName(a){return a.name||ivLabel(a.type);}
+function ivAccLabel(id,fallback){var a=ivAcc(id);return a?ivAccName(a)+' · '+ivLabel(a.type):(fallback||'Compte supprimé');}
+function ivPrice(h){return ivNum(h.price)>0?ivNum(h.price):ivNum(h.cost);}
+function ivHoldVal(h){return ivNum(h.qty)*ivPrice(h);}
+function ivHoldCost(h){return ivNum(h.qty)*ivNum(h.cost);}
+function ivAccTot(a){var v=ivNum(a.cash),c=ivNum(a.cash);(a.holdings||[]).forEach(function(h){v+=ivHoldVal(h);c+=ivHoldCost(h);});return {value:v,cost:c,gain:v-c};}
+function ivQty(n){return ivNum(n).toLocaleString('fr-CA',{maximumFractionDigits:4});}
+function ivUnit(n){return ivNum(n).toLocaleString('fr-CA',{style:'currency',currency:'CAD',minimumFractionDigits:2,maximumFractionDigits:4});}
+function ivPct(g,c){return c>0?(g/c*100).toFixed(1).replace('.',',')+' %':'—';}
+function ivGainHtml(g,c){return '<span class="'+(g>=0?'pnl-pos':'pnl-neg')+'">'+(g>=0?'+ ':'− ')+cpMoney(Math.abs(g))+'</span><br><small>'+ivPct(g,c)+'</small>';}
+function ivYearSum(list,year){return list.filter(function(x){return (x.date||'').slice(0,4)===year;}).reduce(function(s,x){return s+ivNum(x.amount);},0);}
+
+/* ---- Montage et chargement ---- */
+function ivMount(){
+  var host=document.getElementById('iv-host');if(!host)return;
+  if(iv.host===host&&(iv.loaded||iv.loading)){ivRender();return;}
+  iv.host=host;host.onclick=ivClick;host.oninput=ivInput;host.onchange=ivChange;host.onkeydown=ivKey;
+  ivLoad();
+}
+function ivReset(){iv.host=null;iv.loaded=false;iv.loading=false;iv.needAuth=false;iv.error=null;iv.data={accounts:[],contribs:[],income:[]};iv.screen='main';iv.form=null;}
+async function ivLoad(){
+  iv.loading=true;iv.error=null;ivRender();
+  try{
+    var user=await cpUser();
+    if(!user){iv.needAuth=true;iv.loading=false;ivRender();return;}
+    iv.needAuth=false;
+    var snap=await window.fsGetDoc(cpRef('invest','data'));
+    var d=snap.exists()?snap.data():{};
+    iv.data={accounts:d.accounts||[],contribs:d.contribs||[],income:d.income||[]};
+    iv.loaded=true;
+  }catch(e){iv.error=cpErr(e);}
+  iv.loading=false;ivRender();
+}
+async function ivPersist(){
+  setSaveBadge('☁️ Sauvegarde...');
+  try{
+    await window.fsSetDoc(cpRef('invest','data'),{accounts:iv.data.accounts,contribs:iv.data.contribs,income:iv.data.income,updatedAt:new Date().toISOString()});
+    setSaveBadge('☁️ Sauvegardé');
+  }catch(e){setSaveBadge('⚠ Erreur');throw e;}
+}
+async function ivCommit(fn){
+  var backup=JSON.stringify(iv.data);
+  fn();
+  try{await ivPersist();return true;}
+  catch(e){iv.data=JSON.parse(backup);alert('Enregistrement impossible : '+cpErr(e));return false;}
+}
+
+/* ---- Rendu ---- */
+function ivRender(){
+  var h=iv.host;if(!h)return;
+  iv.charts.forEach(function(c){try{c.destroy();}catch(e){}});iv.charts=[];iv.specs=[];
+  var html;
+  if(iv.loading)html='<div class="loading-msg">Chargement des investissements...</div>';
+  else if(iv.needAuth)html=ivAuthHtml();
+  else if(iv.error)html='<div class="login-error" style="display:block;">'+escapeHtml(iv.error)+'</div><button type="button" class="btn-back btn-sm" data-act="retry">Réessayer</button>';
+  else if(iv.screen==='form')html=ivFormHtml();
+  else html=ivMainHtml();
+  h.innerHTML=html;
+  iv.specs.forEach(function(s){var cv=document.getElementById(s.id);if(cv&&window.Chart)iv.charts.push(new Chart(cv.getContext('2d'),s.cfg));});
+}
+function ivAuthHtml(){
+  return '<div class="q-card"><div class="q-card-title">Connexion sécurisée</div>'
+   +'<div class="info-box">Tes investissements sont protégés. Connecte-toi avec ton courriel et ton mot de passe Firebase (une seule fois par appareil).</div>'
+   +'<div class="input-row"><div><label class="input-label" for="iv-auth-email">Courriel</label><input class="q-input" type="email" id="iv-auth-email" autocomplete="username"></div>'
+   +'<div><label class="input-label" for="iv-auth-pass">Mot de passe</label><input class="q-input" type="password" id="iv-auth-pass" autocomplete="current-password"></div></div>'
+   +'<div class="login-error" id="iv-auth-err"></div><button type="button" class="btn-next" data-act="signin">Se connecter</button></div>';
+}
+async function ivSignIn(){
+  var em=document.getElementById('iv-auth-email').value.trim(),pw=document.getElementById('iv-auth-pass').value,er=document.getElementById('iv-auth-err');
+  er.style.display='none';
+  if(!em||!pw){er.textContent='Entre ton courriel et ton mot de passe.';er.style.display='block';return;}
+  if(!window.fbSignIn){er.textContent='Le module de connexion n\'est pas chargé. Recharge la page (Ctrl+Shift+R).';er.style.display='block';return;}
+  try{await window.fbSignIn(window.fbAuth,em,pw);await ivLoad();}
+  catch(err){er.textContent=cpErr(err);er.style.display='block';}
+}
+function ivKey(e){if(e.key==='Enter'&&(e.target.id==='iv-auth-email'||e.target.id==='iv-auth-pass')){e.preventDefault();ivSignIn();}}
+
+function ivMainHtml(){
+  var ys=iv.year,d=iv.data,value=0,cost=0;
+  d.accounts.forEach(function(a){var t=ivAccTot(a);value+=t.value;cost+=t.cost;});
+  var gain=value-cost,contribY=ivYearSum(d.contribs,ys),incomeY=ivYearSum(d.income,ys);
+  var h='<div class="home-head" style="margin-bottom:0.9rem;"><div></div><div class="year-switch" role="group" aria-label="Année affichée"><button type="button" data-act="yprev" aria-label="Année précédente">‹</button><span>'+ys+'</span><button type="button" data-act="ynext" aria-label="Année suivante">›</button></div></div>';
+  h+='<div class="stat-grid">'
+   +'<div class="stat-card"><div class="stat-label">Valeur totale</div><div class="stat-val">'+cpMoney(value)+'</div><div class="stat-sub">Tous les comptes</div></div>'
+   +'<div class="stat-card"><div class="stat-label">Gain / perte</div><div class="stat-val '+(gain>=0?'green':'red')+'">'+(gain>=0?'+ ':'− ')+cpMoney(Math.abs(gain))+'</div><div class="stat-sub">'+ivPct(gain,cost)+' sur le coût</div></div>'
+   +'<div class="stat-card"><div class="stat-label">Cotisations '+ys+'</div><div class="stat-val">'+cpMoney(contribY)+'</div><div class="stat-sub">REER, CELI, CELIAPP, non enr.</div></div>'
+   +'<div class="stat-card"><div class="stat-label">Revenus de placement '+ys+'</div><div class="stat-val green">'+cpMoney(incomeY)+'</div><div class="stat-sub">Intérêts, dividendes, gains</div></div></div>';
+  h+='<div class="cp-seg">'
+   +'<button type="button" data-act="tab" data-t="ports" class="'+(iv.tab==='ports'?'on-rev':'')+'">Portefeuilles</button>'
+   +'<button type="button" data-act="tab" data-t="contrib" class="'+(iv.tab==='contrib'?'on-rev':'')+'">Cotisations</button>'
+   +'<button type="button" data-act="tab" data-t="income" class="'+(iv.tab==='income'?'on-rev':'')+'">Revenus (T5)</button></div>';
+  if(iv.tab==='contrib')return h+ivContribHtml();
+  if(iv.tab==='income')return h+ivIncomeHtml();
+  return h+ivPortsHtml(value);
+}
+
+function ivPortsHtml(totalValue){
+  var d=iv.data;
+  var h='<div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button type="button" class="btn-next btn-sm" data-act="addacc">+ Ajouter un compte</button></div>';
+  if(!d.accounts.length)return h+'<div class="info-box"><strong style="color:var(--navy);">Première étape :</strong> ajoute un compte (REER, CELI, CELIAPP ou non enregistré), puis les positions qu\'il contient. Tu pourras ensuite suivre sa valeur et ses gains.</div>';
+  /* Répartition par type */
+  var byType=IV_TYPES.map(function(t){var v=0;d.accounts.forEach(function(a){if(a.type===t.k)v+=ivAccTot(a).value;});return {k:t.k,label:t.label,v:v};}).filter(function(x){return x.v>0;});
+  if(byType.length>1||(byType.length===1&&totalValue>0)){
+    h+='<div class="q-card"><div class="q-card-title">Répartition par type de compte</div><div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;"><div style="width:140px;height:140px;flex-shrink:0;"><canvas id="iv-pie"></canvas></div><div style="flex:1;min-width:160px;display:flex;flex-direction:column;gap:8px;">'
+     +byType.map(function(x){return '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;"><span style="width:9px;height:9px;border-radius:50%;background:'+IV_COLORS[x.k]+';flex-shrink:0;"></span><span style="flex:1;color:var(--text2);">'+escapeHtml(x.label)+'</span><strong>'+cpMoney(x.v)+'</strong><span style="color:var(--text3);width:42px;text-align:right;">'+Math.round(x.v/totalValue*100)+' %</span></div>';}).join('')+'</div></div></div>';
+    iv.specs.push({id:'iv-pie',cfg:{type:'doughnut',data:{labels:byType.map(function(x){return x.label;}),datasets:[{data:byType.map(function(x){return x.v;}),backgroundColor:byType.map(function(x){return IV_COLORS[x.k];}),borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+' : '+cpMoney(c.parsed);}}}}}}});
+  }
+  IV_TYPES.forEach(function(t){
+    var accs=d.accounts.filter(function(a){return a.type===t.k;});
+    if(!accs.length)return;
+    var sum=accs.reduce(function(s,a){return s+ivAccTot(a).value;},0);
+    h+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin:1.1rem 0 0.5rem;"><div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;color:'+IV_COLORS[t.k]+';">'+escapeHtml(t.label)+'</div><div style="font-weight:700;color:var(--navy);">'+cpMoney(sum)+'</div></div>';
+    accs.forEach(function(a){h+=ivAccHtml(a);});
+  });
+  return h;
+}
+function ivAccHtml(a){
+  var t=ivAccTot(a),hs=a.holdings||[],id=cpAttr(a.id);
+  var h='<div class="q-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:0.6rem;"><div><div style="font-size:15px;font-weight:700;color:var(--navy);">'+escapeHtml(ivAccName(a))+'</div>'
+   +'<div class="stat-sub">Coût '+cpMoney(t.cost)+(ivNum(a.cash)>0?' · Liquidités '+cpMoney(a.cash):'')+(a.pricesAt?' · Prix du '+escapeHtml(a.pricesAt):'')+'</div></div>'
+   +'<div style="text-align:right;"><div style="font-family:\'Playfair Display\',serif;font-size:1.3rem;color:var(--navy);">'+cpMoney(t.value)+'</div><div style="font-size:12px;">'+ivGainHtml(t.gain,t.cost).replace('<br><small>',' · <small>')+'</div></div></div>';
+  if(!hs.length)h+='<div class="loading-msg" style="padding:1rem;">Aucune position dans ce compte.</div>';
+  else{
+    h+='<div style="overflow-x:auto;"><table class="cp-table" style="min-width:560px;"><thead><tr><th>Titre</th><th>Qté</th><th>Coût moy.</th><th>Prix</th><th>Valeur</th><th>Gain / perte</th><th></th></tr></thead><tbody>';
+    hs.forEach(function(x){
+      var hv=ivHoldVal(x),hc=ivHoldCost(x);
+      h+='<tr><td>'+escapeHtml(x.symbol)+'</td><td>'+ivQty(x.qty)+'</td><td>'+ivUnit(x.cost)+'</td><td>'+(ivNum(x.price)>0?ivUnit(x.price):'<small>—</small>')+'</td><td>'+cpMoney(hv)+'</td><td>'+(ivNum(x.price)>0?ivGainHtml(hv-hc,hc):'<small>—</small>')+'</td>'
+       +'<td style="white-space:nowrap;"><button type="button" class="cp-clip" data-act="edithold" data-id="'+id+'" data-h="'+cpAttr(x.id)+'" aria-label="Modifier la position" title="Modifier">✎</button><button type="button" class="cp-del" data-act="delhold" data-id="'+id+'" data-h="'+cpAttr(x.id)+'" aria-label="Supprimer la position">✕</button></td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0.8rem;"><button type="button" class="btn-next btn-sm" data-act="addhold" data-id="'+id+'">+ Position</button>'
+   +(hs.length?'<button type="button" class="btn-back btn-sm" data-act="prices" data-id="'+id+'">Mettre à jour les prix</button>':'')
+   +'<button type="button" class="btn-back btn-sm" data-act="editacc" data-id="'+id+'">Modifier le compte</button>'
+   +'<button type="button" class="btn-back btn-sm" style="color:var(--red);" data-act="delacc" data-id="'+id+'">Supprimer</button></div></div>';
+  return h;
+}
+
+function ivContribHtml(){
+  var d=iv.data,ys=iv.year;
+  var h='<div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button type="button" class="btn-next btn-sm" data-act="addcontrib">+ Nouvelle cotisation</button></div>';
+  h+='<div class="q-card"><div class="q-card-title">Cotisations par type de compte</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:320px;"><thead><tr><th>Type</th><th>'+ys+'</th><th>Total cumulé</th></tr></thead><tbody>';
+  var ty=0,ta=0;
+  IV_TYPES.forEach(function(t){
+    var y=d.contribs.filter(function(c){return c.type===t.k&&(c.date||'').slice(0,4)===ys;}).reduce(function(s,c){return s+ivNum(c.amount);},0);
+    var a=d.contribs.filter(function(c){return c.type===t.k;}).reduce(function(s,c){return s+ivNum(c.amount);},0);
+    ty+=y;ta+=a;
+    h+='<tr><td>'+escapeHtml(t.label)+'</td><td>'+cpMoney(y)+'</td><td>'+cpMoney(a)+'</td></tr>';
+  });
+  h+='<tr class="total"><td>Total</td><td>'+cpMoney(ty)+'</td><td>'+cpMoney(ta)+'</td></tr></tbody></table></div></div>';
+  var years=[];d.contribs.forEach(function(c){var y=(c.date||'').slice(0,4);if(y&&years.indexOf(y)<0)years.push(y);});
+  if(years.indexOf(ys)<0)years.push(ys);
+  years.sort();
+  if(years.length>1){
+    h+='<div class="q-card"><div class="q-card-title">Cotisations par année</div><div style="position:relative;width:100%;height:200px;"><canvas id="iv-bar"></canvas></div></div>';
+    iv.specs.push({id:'iv-bar',cfg:{type:'bar',data:{labels:years,datasets:IV_TYPES.map(function(t){return {label:t.label,data:years.map(function(y){return d.contribs.filter(function(c){return c.type===t.k&&(c.date||'').slice(0,4)===y;}).reduce(function(s,c){return s+ivNum(c.amount);},0);}),backgroundColor:IV_COLORS[t.k],stack:'c'};})},
+      options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:function(v){return cpShort(v);},font:{size:10}}}}}}});
+  }
+  var list=d.contribs.filter(function(c){return (c.date||'').slice(0,4)===ys;}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  h+='<div class="q-card"><div class="q-card-title">Cotisations de '+ys+'</div>';
+  if(!list.length)h+='<div class="loading-msg">Aucune cotisation en '+ys+'.</div>';
+  list.forEach(function(c){
+    h+='<div class="cp-txn" data-act="editcontrib" data-id="'+cpAttr(c.id)+'"><div class="cp-ico rev">+</div><div class="cp-mid"><div class="cp-desc">'+escapeHtml(ivAccLabel(c.accountId,(c.accName||'Compte supprimé')+' · '+ivLabel(c.type)))+'</div><div class="cp-meta">'+escapeHtml(c.date)+(c.note?' · '+escapeHtml(c.note):'')+'</div></div><div class="cp-amt rev">'+cpMoney(c.amount)+'</div>'
+     +'<button type="button" class="cp-del" data-act="delcontrib" data-id="'+cpAttr(c.id)+'" aria-label="Supprimer la cotisation">🗑</button></div>';
+  });
+  return h+'</div>';
+}
+
+function ivIncomeHtml(){
+  var d=iv.data,ys=iv.year;
+  var h='<div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button type="button" class="btn-next btn-sm" data-act="addincome">+ Nouveau revenu</button></div>';
+  h+='<div class="info-box">Les relevés <strong>T5</strong> concernent surtout les comptes non enregistrés. Les revenus gagnés dans un REER, un CELI ou un CELIAPP ne produisent pas de T5. Entre ici les montants de tes relevés pour garder le total de l\'année.</div>';
+  var tot=0;
+  h+='<div class="q-card"><div class="q-card-title">Revenus de placement '+ys+'</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:300px;"><thead><tr><th>Catégorie</th><th>Montant</th></tr></thead><tbody>';
+  IV_CATS.forEach(function(cat){
+    var s=d.income.filter(function(x){return x.cat===cat&&(x.date||'').slice(0,4)===ys;}).reduce(function(a,x){return a+ivNum(x.amount);},0);
+    tot+=s;h+='<tr><td>'+escapeHtml(cat)+'</td><td>'+cpMoney(s)+'</td></tr>';
+  });
+  h+='<tr class="total"><td>Total</td><td>'+cpMoney(tot)+'</td></tr></tbody></table></div></div>';
+  var list=d.income.filter(function(x){return (x.date||'').slice(0,4)===ys;}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  h+='<div class="q-card"><div class="q-card-title">Détail '+ys+'</div>';
+  if(!list.length)h+='<div class="loading-msg">Aucun revenu en '+ys+'.</div>';
+  list.forEach(function(x){
+    h+='<div class="cp-txn" data-act="editincome" data-id="'+cpAttr(x.id)+'"><div class="cp-ico rev">+</div><div class="cp-mid"><div class="cp-desc">'+escapeHtml(x.cat)+' · '+escapeHtml(ivAccLabel(x.accountId,(x.accName||'Compte supprimé')+' · '+ivLabel(x.type)))+'</div><div class="cp-meta">'+escapeHtml(x.date)+(x.note?' · '+escapeHtml(x.note):'')+'</div></div><div class="cp-amt rev">'+cpMoney(x.amount)+'</div>'
+     +'<button type="button" class="cp-del" data-act="delincome" data-id="'+cpAttr(x.id)+'" aria-label="Supprimer le revenu">🗑</button></div>';
+  });
+  return h+'</div>';
+}
+
+/* ---- Formulaires ---- */
+function ivAccOpts(){return iv.data.accounts.map(function(a){return [a.id,ivAccName(a)+' · '+ivLabel(a.type)];});}
+function ivFormDef(){
+  var t=iv.ftype,f=iv.form;
+  if(t==='account')return {title:f.id?'Modifier le compte':'Nouveau compte',fields:[
+    {k:'type',label:'Type de compte',kind:'select',opts:IV_TYPES.map(function(x){return [x.k,x.label];})},
+    {k:'name',label:'Nom du compte (optionnel)',kind:'text',ph:'Ex. CELI — Questrade'},
+    {k:'cash',label:'Liquidités dans le compte (optionnel)',kind:'number',hint:'Argent non investi, en $ CA.'}]};
+  if(t==='holding')return {title:f.hid?'Modifier la position':'Nouvelle position',fields:[
+    {k:'symbol',label:'Titre ou fonds',kind:'text',ph:'Ex. XEQT, VFV, AAPL'},
+    {k:'qty',label:'Quantité',kind:'number'},
+    {k:'cost',label:'Coût moyen par part ($ CA)',kind:'number',hint:'Ton prix d\'achat moyen.'},
+    {k:'price',label:'Prix actuel par part (optionnel)',kind:'number',hint:'Tu pourras le mettre à jour plus tard.'}]};
+  if(t==='contrib')return {title:f.id?'Modifier la cotisation':'Nouvelle cotisation',fields:[
+    {k:'date',label:'Date',kind:'date'},
+    {k:'accountId',label:'Compte',kind:'select',opts:ivAccOpts()},
+    {k:'amount',label:'Montant cotisé ($ CA)',kind:'number'},
+    {k:'note',label:'Note (optionnel)',kind:'text'}]};
+  return {title:f.id?'Modifier le revenu':'Nouveau revenu de placement',fields:[
+    {k:'date',label:'Date',kind:'date'},
+    {k:'accountId',label:'Compte',kind:'select',opts:ivAccOpts()},
+    {k:'cat',label:'Catégorie',kind:'select',opts:IV_CATS.map(function(c){return [c,c];})},
+    {k:'amount',label:'Montant ($ CA)',kind:'number'},
+    {k:'note',label:'Note (optionnel)',kind:'text',ph:'Ex. T5 2026, case 25'}]};
+}
+function ivFormHtml(){
+  if(iv.ftype==='prices')return ivPricesHtml();
+  var d=ivFormDef(),f=iv.form;
+  var h='<button type="button" class="btn-back btn-sm" data-act="cancel" style="margin-bottom:1rem;">← Retour</button><div class="page-title" style="font-size:1.3rem;">'+escapeHtml(d.title)+'</div><div class="q-card">';
+  d.fields.forEach(function(x){
+    h+='<div style="margin-bottom:0.85rem;"><label class="input-label" for="iv-f-'+x.k+'">'+escapeHtml(x.label)+'</label>';
+    if(x.kind==='select')h+='<select class="q-input" id="iv-f-'+x.k+'" data-k="'+x.k+'">'+x.opts.map(function(o){return '<option value="'+cpAttr(o[0])+'"'+(String(f[x.k])===String(o[0])?' selected':'')+'>'+escapeHtml(o[1])+'</option>';}).join('')+'</select>';
+    else h+='<input class="q-input" id="iv-f-'+x.k+'" data-k="'+x.k+'" type="'+x.kind+'"'+(x.kind==='number'?' step="any" min="0"':'')+' value="'+cpAttr(f[x.k]==null?'':f[x.k])+'"'+(x.ph?' placeholder="'+cpAttr(x.ph)+'"':'')+'>';
+    if(x.hint)h+='<div class="stat-sub">'+escapeHtml(x.hint)+'</div>';
+    h+='</div>';
+  });
+  return h+'<div class="login-error" id="iv-form-err"></div><button type="button" class="btn-next" style="width:100%;justify-content:center;" data-act="save">Enregistrer</button></div>';
+}
+function ivPricesHtml(){
+  var a=ivAcc(iv.form.id);
+  var h='<button type="button" class="btn-back btn-sm" data-act="cancel" style="margin-bottom:1rem;">← Retour</button><div class="page-title" style="font-size:1.3rem;">Mettre à jour les prix</div><div class="page-sub">'+escapeHtml(a?ivAccName(a):'')+'</div><div class="q-card">';
+  (a?a.holdings||[]:[]).forEach(function(x){
+    h+='<div class="home-row"><div>'+escapeHtml(x.symbol)+'<small>'+ivQty(x.qty)+' parts</small></div><input class="q-input" style="width:140px;" type="number" step="any" min="0" data-hid="'+cpAttr(x.id)+'" value="'+cpAttr(iv.form.prices[x.id]==null?'':iv.form.prices[x.id])+'" aria-label="Prix de '+cpAttr(x.symbol)+'"></div>';
+  });
+  return h+'<div class="login-error" id="iv-form-err"></div><button type="button" class="btn-next" style="width:100%;justify-content:center;margin-top:0.85rem;" data-act="saveprices">Enregistrer les prix</button></div>';
+}
+
+/* ---- Événements ---- */
+function ivOpenForm(type,values){iv.ftype=type;iv.form=values;iv.screen='form';ivRender();}
+function ivClick(e){
+  var t=e.target.closest?e.target.closest('[data-act]'):null;
+  if(!t||!iv.host.contains(t))return;
+  var a=t.getAttribute('data-act'),id=t.getAttribute('data-id'),hid=t.getAttribute('data-h');
+  var today=cpToday();
+  switch(a){
+    case 'signin':ivSignIn();break;
+    case 'retry':ivLoad();break;
+    case 'tab':iv.tab=t.getAttribute('data-t');ivRender();break;
+    case 'yprev':iv.year=String(parseInt(iv.year,10)-1);ivRender();break;
+    case 'ynext':iv.year=String(parseInt(iv.year,10)+1);ivRender();break;
+    case 'cancel':iv.screen='main';iv.form=null;ivRender();break;
+    case 'addacc':ivOpenForm('account',{id:'',type:'CELI',name:'',cash:''});break;
+    case 'editacc':{var ac=ivAcc(id);if(ac)ivOpenForm('account',{id:ac.id,type:ac.type,name:ac.name||'',cash:ac.cash||''});break;}
+    case 'delacc':ivDelAcc(id);break;
+    case 'addhold':ivOpenForm('holding',{accId:id,hid:'',symbol:'',qty:'',cost:'',price:''});break;
+    case 'edithold':{var a2=ivAcc(id),h2=a2&&(a2.holdings||[]).find(function(x){return x.id===hid;});if(h2)ivOpenForm('holding',{accId:id,hid:hid,symbol:h2.symbol,qty:h2.qty,cost:h2.cost,price:h2.price||''});break;}
+    case 'delhold':ivDelHold(id,hid);break;
+    case 'prices':{var a3=ivAcc(id);if(a3){var pr={};(a3.holdings||[]).forEach(function(x){pr[x.id]=x.price||'';});ivOpenForm('prices',{id:id,prices:pr});}break;}
+    case 'addcontrib':if(!iv.data.accounts.length){alert('Ajoute d\'abord un compte dans l\'onglet Portefeuilles.');break;}ivOpenForm('contrib',{id:'',date:today,accountId:iv.data.accounts[0].id,amount:'',note:''});break;
+    case 'editcontrib':{var c=iv.data.contribs.find(function(x){return x.id===id;});if(c)ivOpenForm('contrib',{id:c.id,date:c.date,accountId:ivAcc(c.accountId)?c.accountId:(iv.data.accounts[0]?iv.data.accounts[0].id:''),amount:c.amount,note:c.note||''});break;}
+    case 'delcontrib':ivDelEntry('contribs',id,'cette cotisation');break;
+    case 'addincome':if(!iv.data.accounts.length){alert('Ajoute d\'abord un compte dans l\'onglet Portefeuilles.');break;}ivOpenForm('income',{id:'',date:today,accountId:iv.data.accounts[0].id,cat:IV_CATS[0],amount:'',note:''});break;
+    case 'editincome':{var x2=iv.data.income.find(function(x){return x.id===id;});if(x2)ivOpenForm('income',{id:x2.id,date:x2.date,accountId:ivAcc(x2.accountId)?x2.accountId:(iv.data.accounts[0]?iv.data.accounts[0].id:''),cat:x2.cat,amount:x2.amount,note:x2.note||''});break;}
+    case 'delincome':ivDelEntry('income',id,'ce revenu');break;
+    case 'save':ivSave();break;
+    case 'saveprices':ivSavePrices();break;
+  }
+}
+function ivInput(e){
+  var t=e.target;if(!iv.form)return;
+  var k=t.getAttribute&&t.getAttribute('data-k'),hid=t.getAttribute&&t.getAttribute('data-hid');
+  if(hid&&iv.form.prices)iv.form.prices[hid]=t.value;
+  else if(k)iv.form[k]=t.value;
+}
+function ivChange(e){ivInput(e);}
+
+async function ivDelAcc(id){
+  var a=ivAcc(id);if(!a)return;
+  if(!confirm('Supprimer le compte « '+ivAccName(a)+' » et ses positions ? Ses cotisations et revenus déjà saisis sont conservés.'))return;
+  if(await ivCommit(function(){iv.data.accounts=iv.data.accounts.filter(function(x){return x.id!==id;});}))ivRender();
+}
+async function ivDelHold(id,hid){
+  var a=ivAcc(id);if(!a)return;
+  var h=(a.holdings||[]).find(function(x){return x.id===hid;});if(!h)return;
+  if(!confirm('Supprimer la position « '+h.symbol+' » ?'))return;
+  if(await ivCommit(function(){a.holdings=a.holdings.filter(function(x){return x.id!==hid;});}))ivRender();
+}
+async function ivDelEntry(key,id,label){
+  if(!confirm('Supprimer '+label+' ?'))return;
+  if(await ivCommit(function(){iv.data[key]=iv.data[key].filter(function(x){return x.id!==id;});}))ivRender();
+}
+async function ivSave(){
+  var f=iv.form,t=iv.ftype,er=document.getElementById('iv-form-err');
+  function fail(m){if(er){er.textContent=m;er.style.display='block';}}
+  var ok=false;
+  if(t==='account'){
+    ok=await ivCommit(function(){
+      if(f.id){var a=ivAcc(f.id);a.type=f.type;a.name=(f.name||'').trim();a.cash=ivNum(f.cash);}
+      else iv.data.accounts.push({id:ivId('a'),type:f.type,name:(f.name||'').trim(),cash:ivNum(f.cash),holdings:[],pricesAt:''});
+    });
+  }else if(t==='holding'){
+    var sym=(f.symbol||'').trim().toUpperCase();
+    if(!sym){fail('Le titre est requis.');return;}
+    if(!(ivNum(f.qty)>0)){fail('La quantité doit être plus grande que zéro.');return;}
+    if(f.cost===''||ivNum(f.cost)<0){fail('Entre le coût moyen par part.');return;}
+    ok=await ivCommit(function(){
+      var a=ivAcc(f.accId);a.holdings=a.holdings||[];
+      if(f.hid){var h=a.holdings.find(function(x){return x.id===f.hid;});h.symbol=sym;h.qty=ivNum(f.qty);h.cost=ivNum(f.cost);h.price=ivNum(f.price);}
+      else a.holdings.push({id:ivId('h'),symbol:sym,qty:ivNum(f.qty),cost:ivNum(f.cost),price:ivNum(f.price)});
+      if(ivNum(f.price)>0)a.pricesAt=cpToday();
+    });
+  }else{
+    var acc=ivAcc(f.accountId);
+    if(!acc){fail('Choisis un compte.');return;}
+    if(!f.date){fail('La date est requise.');return;}
+    if(!(ivNum(f.amount)>0)){fail('Le montant doit être plus grand que zéro.');return;}
+    var key=t==='contrib'?'contribs':'income';
+    ok=await ivCommit(function(){
+      var rec={id:f.id||ivId(t==='contrib'?'c':'r'),date:f.date,accountId:acc.id,type:acc.type,accName:ivAccName(acc),amount:ivNum(f.amount),note:(f.note||'').trim()};
+      if(t==='income')rec.cat=f.cat;
+      var i=iv.data[key].findIndex(function(x){return x.id===rec.id;});
+      if(i>=0)iv.data[key][i]=rec;else iv.data[key].push(rec);
+    });
+  }
+  if(ok){iv.screen='main';iv.form=null;ivRender();}
+}
+async function ivSavePrices(){
+  var f=iv.form,a=ivAcc(f.id);if(!a)return;
+  var ok=await ivCommit(function(){
+    (a.holdings||[]).forEach(function(h){var v=f.prices[h.id];if(v!==''&&v!=null&&ivNum(v)>=0)h.price=ivNum(v);});
+    a.pricesAt=cpToday();
+  });
+  if(ok){iv.screen='main';iv.form=null;ivRender();}
 }
 
 /* ---- UTILITAIRES ---- */
