@@ -234,7 +234,6 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 .shell-main .body{max-width:1180px;}
 .tabs{top:56px;flex-wrap:nowrap;overflow-x:auto;padding:0 1rem;-webkit-overflow-scrolling:touch;}
 .tab{white-space:nowrap;min-height:44px;display:flex;align-items:center;}
-body.is-student .sidebar,body.is-student .menu-btn{display:none;}
 .home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:1.1rem;}
 .year-switch{display:flex;align-items:center;background:#fff;border:1px solid var(--border2);border-radius:9px;}
 .year-switch button{min-width:44px;min-height:44px;border:none;background:transparent;font-size:18px;color:var(--navy);cursor:pointer;}
@@ -286,6 +285,38 @@ body.is-student .sidebar,body.is-student .menu-btn{display:none;}
   .home-kpi-main .big{font-size:1.9rem;}
 }
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+
+/* ===== v3 : menu latéral seul (plus de barre du haut) + à faire ===== */
+.top-bar{display:none !important;}
+.mobile-bar{display:none;}
+.sidebar{top:0;height:100vh;padding:18px 14px 14px;}
+.tabs{top:0;}
+.sb-head{padding:2px 12px 14px;}
+.sb-title{font-family:'Playfair Display',serif;font-size:1.25rem;color:#fff;}
+.sb-sub{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#aab4cc;margin-top:2px;font-weight:700;}
+.nav-tools{display:block;}
+.sb-spacer{flex:1;min-height:12px;}
+.sb-foot{border-top:1px solid rgba(255,255,255,0.14);padding-top:12px;display:flex;flex-direction:column;gap:6px;}
+.sb-user{display:flex;align-items:center;gap:10px;color:#e6eaf4;font-size:13px;padding:0 12px;min-width:0;}
+.sb-user span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sb-badge{font-size:10px;color:#aab4cc;padding:0 12px;}
+body.is-student .nav-item[data-prof]{display:none !important;}
+.todo-row{display:flex;align-items:center;gap:10px;padding:0.3rem 0;border-bottom:1px solid var(--border);min-height:44px;}
+.todo-row:last-child{border-bottom:none;}
+.todo-row input[type=checkbox]{width:22px;height:22px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+.todo-text{flex:1;font-size:14px;color:var(--navy);word-break:break-word;}
+.todo-row.done .todo-text{text-decoration:line-through;color:var(--text3);}
+.todo-note{font-size:11px;color:var(--text3);white-space:nowrap;}
+.todo-del{background:none;border:none;color:var(--text3);cursor:pointer;min-width:40px;min-height:44px;font-size:16px;}
+.todo-del:hover{color:var(--red);}
+.todo-sep{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:0.9rem 0 0.2rem;}
+@media(max-width:900px){
+  .mobile-bar{display:flex;align-items:center;gap:10px;height:56px;padding:0 0.75rem;background:var(--navy);color:#fff;position:sticky;top:0;z-index:100;}
+  .mb-title{font-family:'Playfair Display',serif;font-size:1.1rem;}
+  .sidebar{top:56px;height:auto;}
+  .tabs{top:56px;}
+}
+
 </style>
 </head>
 <body>
@@ -332,34 +363,30 @@ body.is-student .sidebar,body.is-student .menu-btn{display:none;}
 </div>
 
 <div id="main-app">
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <button type="button" class="menu-btn" id="menu-btn" onclick="toggleSidebar()" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <div class="top-logo"><b id="top-title">Mon terminal</b><span id="top-role-label">Groupe C.M.P</span></div>
-    </div>
-    <div class="top-right">
-      <div class="save-badge" id="save-badge">☁️ —</div>
-      <a class="top-tool" href="https://legroupecmp.github.io/screener-cmp/" target="_blank" title="Screener CMP" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🔍</a>
-      <a class="top-tool" href="https://legroupecmp.github.io/BearLedger/" target="_blank" title="Vérificateur Bear Ledger" style="font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✅</a>
-      <a class="top-tool" id="reel-btn" href="reel-maker.html" target="_blank" title="Reel Maker" style="display:none;font-size:1.4rem;text-decoration:none;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;line-height:1;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🎥</a>
-      <button class="top-tool" onclick="watchlistOpen()" title="Watchlist matinale" style="font-size:1.4rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:4px 9px;line-height:1;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📋</button>
-      <div class="top-user"><div class="user-dot" id="top-avatar">?</div><span id="top-name">—</span></div>
-      <button class="btn-logout" onclick="logout()">Déconnexion</button>
-    </div>
+  <div class="mobile-bar">
+    <button type="button" class="menu-btn" id="menu-btn" onclick="toggleSidebar()" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="mb-title">Mon terminal</div>
   </div>
   <div class="shell">
   <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
-    <button type="button" class="nav-item" data-section="home" onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Accueil</button>
+    <div class="sb-head"><div class="sb-title" id="top-title">Mon terminal</div><div class="sb-sub" id="top-role-label">Groupe C.M.P</div></div>
+    <button type="button" class="nav-item" data-section="home" data-prof onclick="switchTab('home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Accueil</button>
     <button type="button" class="nav-item" data-section="journal" onclick="switchTab(lastJournalTab)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Journal de trading</button>
-    <button type="button" class="nav-item" data-section="entreprises" onclick="switchTab('entreprises')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/></svg>Mes entreprises</button>
-    <button type="button" class="nav-item" data-section="etudiants" onclick="switchTab('upsell')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.4c1.8.8 3 2.6 3 5.6"/></svg>Étudiants CMP</button>
+    <button type="button" class="nav-item" data-section="entreprises" data-prof onclick="switchTab('entreprises')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/></svg>Mes entreprises</button>
+    <button type="button" class="nav-item" data-section="etudiants" data-prof onclick="switchTab('upsell')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.4c1.8.8 3 2.6 3 5.6"/></svg>Étudiants CMP</button>
     <div class="nav-tools">
       <div class="nav-sep"></div>
       <div class="nav-label">Outils</div>
-      <a class="nav-item" href="https://legroupecmp.github.io/screener-cmp/" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>Screener</a>
-      <a class="nav-item" href="https://legroupecmp.github.io/BearLedger/" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12.5l3 3 5-6"/></svg>Bear Ledger</a>
-      <a class="nav-item" href="reel-maker.html" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l6-3.5v10l-6-3.5"/></svg>Reel Maker</a>
+      <a class="nav-item" href="https://legroupecmp.github.io/screener-cmp/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>Screener</a>
+      <a class="nav-item" href="https://legroupecmp.github.io/BearLedger/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12.5l3 3 5-6"/></svg>Bear Ledger</a>
+      <a class="nav-item" id="reel-btn" data-prof href="reel-maker.html" target="_blank" rel="noopener" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l6-3.5v10l-6-3.5"/></svg>Reel Maker</a>
       <button type="button" class="nav-item" onclick="closeSidebar();watchlistOpen()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Watchlist matinale</button>
+    </div>
+    <div class="sb-spacer"></div>
+    <div class="sb-foot">
+      <div class="sb-badge" id="save-badge">☁️ —</div>
+      <div class="sb-user"><div class="user-dot" id="top-avatar">?</div><span id="top-name">—</span></div>
+      <button type="button" class="nav-item sb-logout" onclick="logout()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Déconnexion</button>
     </div>
   </aside>
   <div class="sidebar-scrim" onclick="closeSidebar()"></div>
@@ -401,33 +428,32 @@ body.is-student .sidebar,body.is-student .menu-btn{display:none;}
 
       <div class="home-grid">
         <div class="q-card" style="margin-bottom:0;">
-          <div class="q-card-title">Courbe de trading de l'année</div>
-          <div style="position:relative;width:100%;height:220px;"><canvas id="home-chart"></canvas></div>
-          <div id="home-chart-empty" class="loading-msg" style="display:none;">Aucun trade cette année</div>
-        </div>
-        <div class="q-card" style="margin-bottom:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <div class="q-card-title" style="margin-bottom:0;">Mes entreprises</div>
-            <button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.6rem;">
+            <div class="q-card-title" style="margin-bottom:0;">À faire</div>
+            <div class="stat-sub" id="todo-count"></div>
           </div>
-          <div id="home-ent-list"><div class="loading-msg">Chargement...</div></div>
-        </div>
-      </div>
-
-      <div class="home-grid2">
-        <div class="q-card" style="margin-bottom:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <div class="q-card-title" style="margin-bottom:0;">Derniers trades</div>
-            <button type="button" class="link-btn" onclick="switchTab('trades')">Journal</button>
+          <div style="display:flex;gap:8px;margin-bottom:0.75rem;">
+            <input class="q-input" id="todo-input" type="text" maxlength="200" placeholder="Écris une tâche, puis appuie sur Entrée" aria-label="Nouvelle tâche" onkeydown="if(event.key==='Enter')todoAdd()">
+            <button type="button" class="btn-next btn-sm" onclick="todoAdd()">Ajouter</button>
           </div>
-          <div id="home-trades"><div class="loading-msg">Aucun trade</div></div>
+          <div id="todo-list"><div class="loading-msg">Chargement...</div></div>
+          <div class="stat-sub" style="margin-top:0.6rem;">Une tâche cochée « terminée » disparaît toute seule après 5 jours.</div>
         </div>
-        <div class="q-card" style="margin-bottom:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <div class="q-card-title" style="margin-bottom:0;">Étudiants récents</div>
-            <button type="button" class="link-btn" onclick="switchTab('upsell')">Tout voir</button>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="q-card" style="margin-bottom:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+              <div class="q-card-title" style="margin-bottom:0;">Mes entreprises</div>
+              <button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button>
+            </div>
+            <div id="home-ent-list"><div class="loading-msg">Chargement...</div></div>
           </div>
-          <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
+          <div class="q-card" style="margin-bottom:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+              <div class="q-card-title" style="margin-bottom:0;">Étudiants récents</div>
+              <button type="button" class="link-btn" onclick="switchTab('upsell')">Tout voir</button>
+            </div>
+            <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1687,13 +1713,13 @@ async function startApp(){
   switchTab(prof?'home':'dashboard');
   await loadData();
   if(prof){
-    await Promise.all([upLoadCalls(),entLoad()]);
+    await Promise.all([upLoadCalls(),entLoad(),todoLoad()]);
     renderHome();
   }
 }
 
 function logout(){
-  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;
+  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
   clearSession();
   cpReset();
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
@@ -1751,22 +1777,6 @@ function renderHome(){
   el=document.getElementById('home-cmp-sub');if(el)el.textContent=cmp.length+' inscrit'+(cmp.length>1?'s':'')+' · '+actifs+' actif'+(actifs>1?'s':'')+' ce mois';
   el=document.getElementById('home-ent');if(el)el.textContent=entList.length;
 
-  /* Courbe de l'année */
-  var cv=document.getElementById('home-chart'),empty=document.getElementById('home-chart-empty');
-  if(homeChart){homeChart.destroy();homeChart=null;}
-  if(cv&&empty){
-    if(!trades.length){cv.style.display='none';empty.style.display='block';}
-    else{
-      cv.style.display='block';empty.style.display='none';
-      var sorted=trades.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
-      var cum=0,labels=[],data=[];
-      sorted.forEach(function(t){cum+=t.pnl;labels.push(t.date);data.push(parseFloat(cum.toFixed(2)));});
-      homeChart=new Chart(cv.getContext('2d'),{type:'line',
-        data:{labels:labels,datasets:[{data:data,borderColor:'#1a7a4a',backgroundColor:'rgba(26,122,74,0.08)',borderWidth:2,pointRadius:2,tension:0.3,fill:true}]},
-        options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{font:{size:10},callback:function(v){return '$'+v;}}}}}});
-    }
-  }
-
   /* Entreprises */
   var entEl=document.getElementById('home-ent-list');
   if(entEl){
@@ -1779,21 +1789,6 @@ function renderHome(){
       var b=document.createElement('button');b.type='button';b.className='link-btn';b.textContent='Ouvrir';
       b.addEventListener('click',function(){switchTab('entreprises');entOpen(e.id);});
       row.appendChild(l);row.appendChild(b);entEl.appendChild(row);
-    });
-  }
-
-  /* Derniers trades */
-  var trEl=document.getElementById('home-trades');
-  if(trEl){
-    trEl.innerHTML='';
-    var last=allTrades.slice(-5).reverse();
-    if(!last.length)trEl.innerHTML='<div class="loading-msg">Aucun trade</div>';
-    last.forEach(function(t){
-      var row=document.createElement('div');row.className='home-row';
-      var l=document.createElement('div');l.textContent=t.sym;
-      var sm=document.createElement('small');sm.textContent=t.date+' · '+t.dir;l.appendChild(sm);
-      var v=document.createElement('div');v.className=t.pnl>=0?'pnl-pos':'pnl-neg';v.textContent=moneySigned(t.pnl);
-      row.appendChild(l);row.appendChild(v);trEl.appendChild(row);
     });
   }
 
@@ -2179,7 +2174,8 @@ function cpNewHtml(){
    +'<div class="page-title" style="font-size:1.3rem;">Nouvelle transaction</div>'
    +'<div class="cp-seg"><button type="button" data-act="type" data-t="revenu" class="'+(rev?'on-rev':'')+'">Revenu</button><button type="button" data-act="type" data-t="depense" class="'+(!rev?'on-dep':'')+'">Dépense</button></div>'
    +'<div class="cp-methods"><button type="button" class="cp-method" data-act="upload"><b>Joindre un fichier</b><span>Photo ou PDF de la facture</span></button>'
-   +'<button type="button" class="cp-method" data-act="manual"><b>Saisie manuelle</b><span>Entrer les détails</span></button></div>'
+   +'<button type="button" class="cp-method" data-act="manual"><b>Saisie manuelle</b><span>Entrer les détails</span></button>'
+   +'<button type="button" class="cp-method" data-act="import" style="grid-column:1/-1;"><b>Importer mes données</b><span>Coller l\'export de l\'ancienne application</span></button></div>'
    +'<input type="file" id="cp-file" accept="image/*,application/pdf,.pdf" style="display:none;">';
 }
 
@@ -2485,6 +2481,77 @@ function cpDlYear(){
    +'<tr class="total"><td>Total</td>'+y.src.map(function(b){return '<td>'+cpMoney(b.total)+'</td>';}).join('')+'<td>'+cpMoney(y.dep)+'</td><td>'+cpMoney(y.solde)+'</td></tr></tbody></table>'
    +'<h2>Dépenses par catégorie</h2><table><thead><tr><th>Catégorie</th><th>Total</th></tr></thead><tbody>'+catRows+'</tbody></table>';
   cpDownload(cpReportShell('Bilan — '+cp.year,'Cumulatif annuel — '+cp.year,body),'bilan-'+toSlug(cp.company.name)+'-'+cp.year+'.html');
+}
+
+
+/* ---- À FAIRE (page d'accueil) ---- */
+var todoList=[],todoFailed=false,TODO_KEEP_MS=5*24*60*60*1000;
+
+function todoPurge(){
+  var now=Date.now(),n=todoList.length;
+  todoList=todoList.filter(function(t){return !(t.done&&t.doneAt&&now-t.doneAt>TODO_KEEP_MS);});
+  return todoList.length!==n;
+}
+async function todoLoad(){
+  todoFailed=false;
+  try{
+    await cpDb();
+    var snap=await window.fsGetDoc(cpRef('todo','list'));
+    todoList=snap.exists()&&snap.data().list?snap.data().list:[];
+    if(todoPurge())await todoPersist();
+  }catch(e){console.error('todoLoad',e);todoList=[];todoFailed=true;}
+  todoRender();
+}
+async function todoPersist(){
+  if(todoFailed){alert('La liste n\'a pas pu être chargée. Recharge la page avant de la modifier.');return false;}
+  setSaveBadge('☁️ Sauvegarde...');
+  var ok=await fsSave('todo/list',{list:todoList,updatedAt:new Date().toISOString()});
+  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+  return ok;
+}
+function todoRender(){
+  var box=document.getElementById('todo-list');if(!box)return;
+  if(todoPurge())todoPersist();
+  box.innerHTML='';
+  var pending=todoList.filter(function(t){return !t.done;}).sort(function(a,b){return a.createdAt-b.createdAt;});
+  var done=todoList.filter(function(t){return t.done;}).sort(function(a,b){return b.doneAt-a.doneAt;});
+  var cnt=document.getElementById('todo-count');
+  if(cnt)cnt.textContent=pending.length?pending.length+' à faire':'Rien à faire';
+  if(!todoList.length){box.innerHTML='<div class="loading-msg">Aucune tâche. Écris ta première ci-dessus.</div>';return;}
+  function row(t){
+    var r=document.createElement('div');r.className='todo-row'+(t.done?' done':'');
+    var cb=document.createElement('input');cb.type='checkbox';cb.checked=!!t.done;cb.setAttribute('aria-label','Terminée : '+t.text);
+    cb.addEventListener('change',function(){todoToggle(t.id);});
+    var tx=document.createElement('div');tx.className='todo-text';tx.textContent=t.text;
+    r.appendChild(cb);r.appendChild(tx);
+    if(t.done){
+      var left=Math.max(1,Math.ceil((t.doneAt+TODO_KEEP_MS-Date.now())/(24*60*60*1000)));
+      var n=document.createElement('div');n.className='todo-note';n.textContent='effacée dans '+left+' j';r.appendChild(n);
+    }
+    var d=document.createElement('button');d.type='button';d.className='todo-del';d.textContent='✕';d.setAttribute('aria-label','Supprimer la tâche');
+    d.addEventListener('click',function(){todoDelete(t.id);});
+    r.appendChild(d);return r;
+  }
+  pending.forEach(function(t){box.appendChild(row(t));});
+  if(done.length){
+    var s=document.createElement('div');s.className='todo-sep';s.textContent='Terminées';box.appendChild(s);
+    done.forEach(function(t){box.appendChild(row(t));});
+  }
+}
+function todoAdd(){
+  var inp=document.getElementById('todo-input');if(!inp)return;
+  var text=inp.value.trim();if(!text)return;
+  todoList.push({id:'td'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:text,createdAt:Date.now(),done:false,doneAt:null});
+  inp.value='';todoRender();todoPersist();inp.focus();
+}
+function todoToggle(id){
+  var t=todoList.find(function(x){return x.id===id;});if(!t)return;
+  t.done=!t.done;t.doneAt=t.done?Date.now():null;
+  todoRender();todoPersist();
+}
+function todoDelete(id){
+  todoList=todoList.filter(function(x){return x.id!==id;});
+  todoRender();todoPersist();
 }
 
 /* ---- WATCHLIST ---- */
