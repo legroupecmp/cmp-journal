@@ -310,6 +310,16 @@ body.is-student .nav-item[data-prof]{display:none !important;}
 .todo-del{background:none;border:none;color:var(--text3);cursor:pointer;min-width:40px;min-height:44px;font-size:16px;}
 .todo-del:hover{color:var(--red);}
 .todo-sep{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:0.9rem 0 0.2rem;}
+
+.todo-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text3);margin-bottom:0.7rem;}
+.todo-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+.todo-dot.red{background:#b03030;}.todo-dot.yellow{background:#d9a406;}.todo-dot.green{background:#1a7a4a;}
+.todo-row{flex-wrap:wrap;border-left:4px solid transparent;padding-left:8px;}
+.todo-row.u-red{border-left-color:#b03030;}.todo-row.u-yellow{border-left-color:#d9a406;}.todo-row.u-green{border-left-color:#1a7a4a;}
+.todo-main{flex:1;min-width:150px;}
+.todo-pill{display:inline-block;margin-top:2px;padding:1px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+.todo-pill.red{background:#fceaea;color:#9c2424;}.todo-pill.yellow{background:#fdf1c8;color:#6b4e00;}.todo-pill.green{background:#e8f4ec;color:#14633b;}
+.todo-date{width:140px;min-height:36px;padding:4px 8px;font-size:12px;border:1px solid var(--border2);border-radius:8px;background:#fff;color:var(--text2);font-family:'Lato',sans-serif;}
 @media(max-width:900px){
   .mobile-bar{display:flex;align-items:center;gap:10px;height:56px;padding:0 0.75rem;background:var(--navy);color:#fff;position:sticky;top:0;z-index:100;}
   .mb-title{font-family:'Playfair Display',serif;font-size:1.1rem;}
@@ -410,10 +420,12 @@ body.is-student .nav-item[data-prof]{display:none !important;}
             <div class="q-card-title" style="margin-bottom:0;">À faire</div>
             <div class="stat-sub" id="todo-count"></div>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:0.75rem;">
-            <input class="q-input" id="todo-input" type="text" maxlength="200" placeholder="Écris une tâche, puis appuie sur Entrée" aria-label="Nouvelle tâche" onkeydown="if(event.key==='Enter')todoAdd()">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0.5rem;">
+            <input class="q-input" id="todo-input" type="text" maxlength="200" style="flex:1;min-width:180px;" placeholder="Écris une tâche, puis appuie sur Entrée" aria-label="Nouvelle tâche" onkeydown="if(event.key==='Enter')todoAdd()">
+            <input class="q-input" id="todo-date" type="date" style="width:auto;" aria-label="Date limite (optionnel)" title="Date limite (optionnel)" onkeydown="if(event.key==='Enter')todoAdd()">
             <button type="button" class="btn-next btn-sm" onclick="todoAdd()">Ajouter</button>
           </div>
+          <div class="todo-legend"><span><i class="todo-dot red"></i>2 jours ou moins</span><span><i class="todo-dot yellow"></i>3 à 4 jours</span><span><i class="todo-dot green"></i>5 jours ou plus</span></div>
           <div id="todo-list"><div class="loading-msg">Chargement...</div></div>
           <div class="stat-sub" style="margin-top:0.6rem;">Une tâche cochée « terminée » disparaît toute seule après 5 jours.</div>
         </div>
@@ -2439,24 +2451,48 @@ async function todoPersist(){
   setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
   return ok;
 }
+function todoDays(due){
+  var p=due.split('-').map(Number),now=new Date();
+  var d=new Date(p[0],p[1]-1,p[2]),t=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round((d-t)/86400000);
+}
+function todoPill(days,due){
+  var cls=days<=2?'red':(days<=4?'yellow':'green'),txt;
+  if(days<0)txt='En retard de '+(-days)+' j';
+  else if(days===0)txt='Aujourd\'hui';
+  else if(days===1)txt='Demain';
+  else txt='Dans '+days+' jours';
+  return {cls:cls,text:txt};
+}
 function todoRender(){
   var box=document.getElementById('todo-list');if(!box)return;
   if(todoPurge())todoPersist();
   box.innerHTML='';
-  var pending=todoList.filter(function(t){return !t.done;}).sort(function(a,b){return a.createdAt-b.createdAt;});
+  var pending=todoList.filter(function(t){return !t.done;}).sort(function(a,b){
+    if(a.dueDate&&b.dueDate)return a.dueDate.localeCompare(b.dueDate)||a.createdAt-b.createdAt;
+    if(a.dueDate)return -1;if(b.dueDate)return 1;
+    return a.createdAt-b.createdAt;
+  });
   var done=todoList.filter(function(t){return t.done;}).sort(function(a,b){return b.doneAt-a.doneAt;});
   var cnt=document.getElementById('todo-count');
   if(cnt)cnt.textContent=pending.length?pending.length+' à faire':'Rien à faire';
   if(!todoList.length){box.innerHTML='<div class="loading-msg">Aucune tâche. Écris ta première ci-dessus.</div>';return;}
   function row(t){
-    var r=document.createElement('div');r.className='todo-row'+(t.done?' done':'');
+    var pill=(!t.done&&t.dueDate)?todoPill(todoDays(t.dueDate),t.dueDate):null;
+    var r=document.createElement('div');r.className='todo-row'+(t.done?' done':'')+(pill?' u-'+pill.cls:'');
     var cb=document.createElement('input');cb.type='checkbox';cb.checked=!!t.done;cb.setAttribute('aria-label','Terminée : '+t.text);
     cb.addEventListener('change',function(){todoToggle(t.id);});
-    var tx=document.createElement('div');tx.className='todo-text';tx.textContent=t.text;
-    r.appendChild(cb);r.appendChild(tx);
+    var main=document.createElement('div');main.className='todo-main';
+    var tx=document.createElement('div');tx.className='todo-text';tx.textContent=t.text;main.appendChild(tx);
+    if(pill){var pl=document.createElement('span');pl.className='todo-pill '+pill.cls;pl.textContent=pill.text;main.appendChild(pl);}
+    r.appendChild(cb);r.appendChild(main);
     if(t.done){
       var left=Math.max(1,Math.ceil((t.doneAt+TODO_KEEP_MS-Date.now())/(24*60*60*1000)));
       var n=document.createElement('div');n.className='todo-note';n.textContent='effacée dans '+left+' j';r.appendChild(n);
+    }else{
+      var di=document.createElement('input');di.type='date';di.className='todo-date';di.value=t.dueDate||'';di.setAttribute('aria-label','Date limite : '+t.text);
+      di.addEventListener('change',function(){todoSetDate(t.id,di.value);});
+      r.appendChild(di);
     }
     var d=document.createElement('button');d.type='button';d.className='todo-del';d.textContent='✕';d.setAttribute('aria-label','Supprimer la tâche');
     d.addEventListener('click',function(){todoDelete(t.id);});
@@ -2469,10 +2505,14 @@ function todoRender(){
   }
 }
 function todoAdd(){
-  var inp=document.getElementById('todo-input');if(!inp)return;
+  var inp=document.getElementById('todo-input'),dt=document.getElementById('todo-date');if(!inp)return;
   var text=inp.value.trim();if(!text)return;
-  todoList.push({id:'td'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:text,createdAt:Date.now(),done:false,doneAt:null});
-  inp.value='';todoRender();todoPersist();inp.focus();
+  todoList.push({id:'td'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),text:text,createdAt:Date.now(),done:false,doneAt:null,dueDate:(dt&&dt.value)||''});
+  inp.value='';if(dt)dt.value='';todoRender();todoPersist();inp.focus();
+}
+function todoSetDate(id,val){
+  var t=todoList.find(function(x){return x.id===id;});if(!t)return;
+  t.dueDate=val||'';todoRender();todoPersist();
 }
 function todoToggle(id){
   var t=todoList.find(function(x){return x.id===id;});if(!t)return;
