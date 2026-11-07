@@ -1,0 +1,23 @@
+name: Prix du soir
+
+on:
+  schedule:
+    # 22 h 30 UTC, du lundi au vendredi : après la fermeture de la Bourse de Toronto et de Wall Street
+    - cron: '30 22 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --no-save firebase-admin@12
+      - run: node scripts/maj-prix.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
