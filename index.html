@@ -2488,7 +2488,7 @@ function todoDelete(id){
 var IV_TYPES=[{k:'REER',label:'REER'},{k:'CELI',label:'CELI'},{k:'CELIAPP',label:'CELIAPP'},{k:'NR',label:'Non enregistré'}];
 var IV_COLORS={REER:'#2d4a8a',CELI:'#1a7a4a',CELIAPP:'#b8862e',NR:'#6e5b8a'};
 var IV_CATS=['Intérêts','Dividendes admissibles','Dividendes ordinaires','Gains en capital','Autre'];
-var iv={host:null,loaded:false,loading:false,needAuth:false,error:null,data:{accounts:[],contribs:[],income:[]},tab:'ports',year:String(new Date().getFullYear()),screen:'main',form:null,ftype:null,charts:[],specs:[]};
+var iv={prices:{updatedAt:'',list:[],errors:[]},host:null,loaded:false,loading:false,needAuth:false,error:null,data:{accounts:[],contribs:[],income:[]},tab:'ports',year:String(new Date().getFullYear()),screen:'main',form:null,ftype:null,charts:[],specs:[]};
 
 function ivLabel(k){var t=IV_TYPES.find(function(x){return x.k===k;});return t?t.label:k;}
 function ivNum(x){x=parseFloat(x);return isFinite(x)?x:0;}
@@ -2513,7 +2513,7 @@ function ivMount(){
   iv.host=host;host.onclick=ivClick;host.oninput=ivInput;host.onchange=ivChange;host.onkeydown=ivKey;
   ivLoad();
 }
-function ivReset(){iv.host=null;iv.loaded=false;iv.loading=false;iv.needAuth=false;iv.error=null;iv.data={accounts:[],contribs:[],income:[]};iv.screen='main';iv.form=null;}
+function ivReset(){iv.prices={updatedAt:'',list:[],errors:[]};iv.host=null;iv.loaded=false;iv.loading=false;iv.needAuth=false;iv.error=null;iv.data={accounts:[],contribs:[],income:[]};iv.screen='main';iv.form=null;}
 async function ivLoad(){
   iv.loading=true;iv.error=null;ivRender();
   try{
@@ -2523,6 +2523,9 @@ async function ivLoad(){
     var snap=await window.fsGetDoc(cpRef('invest','data'));
     var d=snap.exists()?snap.data():{};
     iv.data={accounts:d.accounts||[],contribs:d.contribs||[],income:d.income||[]};
+    iv.prices={updatedAt:'',list:[],errors:[]};
+    try{var ps=await window.fsGetDoc(cpRef('prices','latest'));if(ps.exists()){var pd=ps.data();iv.prices={updatedAt:pd.updatedAt||'',list:pd.list||[],errors:pd.errors||[]};}}catch(e){}
+    ivApplyAuto();
     iv.loaded=true;
   }catch(e){iv.error=cpErr(e);}
   iv.loading=false;ivRender();
@@ -2539,6 +2542,27 @@ async function ivCommit(fn){
   fn();
   try{await ivPersist();return true;}
   catch(e){iv.data=JSON.parse(backup);alert('Enregistrement impossible : '+cpErr(e));return false;}
+}
+
+/* ---- Prix automatiques (tâche du soir sur GitHub) ---- */
+function ivApplyAuto(){
+  var m={};iv.prices.list.forEach(function(p){m[String(p.symbol).toUpperCase()]=p;});
+  iv.data.accounts.forEach(function(a){(a.holdings||[]).forEach(function(h){
+    var p=m[String(h.symbol||'').toUpperCase()];
+    if(p&&ivNum(p.price)>0&&p.date&&p.date>(h.priceDate||a.pricesAt||'')){h.price=ivNum(p.price);h.priceDate=p.date;h.auto=true;}
+  });});
+}
+function ivAccPriceDate(a){var d=a.pricesAt||'';(a.holdings||[]).forEach(function(h){if(h.priceDate&&h.priceDate>d)d=h.priceDate;});return d;}
+function ivAutoNote(){
+  var p=iv.prices;
+  if(!iv.data.accounts.some(function(a){return (a.holdings||[]).length;}))return '';
+  if(!p.updatedAt)return '<div class="stat-sub" style="margin-bottom:0.8rem;">Mise à jour automatique des prix : pas encore activée. Les prix affichés sont ceux que tu entres à la main.</div>';
+  var latest='';p.list.forEach(function(x){if(x.date&&x.date>latest)latest=x.date;});
+  var days=Math.floor((Date.now()-new Date(p.updatedAt).getTime())/86400000);
+  var h='<div class="info-box" style="margin-bottom:0.8rem;">Prix de clôture mis à jour automatiquement chaque soir. Dernière mise à jour : <strong>'+escapeHtml(new Date(p.updatedAt).toLocaleDateString('fr-CA'))+'</strong>'+(latest?' (clôture du '+escapeHtml(latest)+')':'')+'.';
+  if(days>4)h+='<br><strong style="color:var(--red);">Attention : '+days+' jours sans mise à jour. Vérifie l\'onglet Actions de ton dépôt GitHub.</strong>';
+  if(p.errors&&p.errors.length)h+='<br>Prix introuvables pour : '+p.errors.map(function(e){return escapeHtml(e.symbol);}).join(', ')+'. Vérifie le symbole (titres canadiens : ajoute .TO, par exemple XEQT.TO).';
+  return h+'</div>';
 }
 
 /* ---- Rendu ---- */
@@ -2593,6 +2617,7 @@ function ivMainHtml(){
 function ivPortsHtml(totalValue){
   var d=iv.data;
   var h='<div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button type="button" class="btn-next btn-sm" data-act="addacc">+ Ajouter un compte</button></div>';
+  h+=ivAutoNote();
   if(!d.accounts.length)return h+'<div class="info-box"><strong style="color:var(--navy);">Première étape :</strong> ajoute un compte (REER, CELI, CELIAPP ou non enregistré), puis les positions qu\'il contient. Tu pourras ensuite suivre sa valeur et ses gains.</div>';
   /* Répartition par type */
   var byType=IV_TYPES.map(function(t){var v=0;d.accounts.forEach(function(a){if(a.type===t.k)v+=ivAccTot(a).value;});return {k:t.k,label:t.label,v:v};}).filter(function(x){return x.v>0;});
@@ -2613,14 +2638,14 @@ function ivPortsHtml(totalValue){
 function ivAccHtml(a){
   var t=ivAccTot(a),hs=a.holdings||[],id=cpAttr(a.id);
   var h='<div class="q-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:0.6rem;"><div><div style="font-size:15px;font-weight:700;color:var(--navy);">'+escapeHtml(ivAccName(a))+'</div>'
-   +'<div class="stat-sub">Coût '+cpMoney(t.cost)+(ivNum(a.cash)>0?' · Liquidités '+cpMoney(a.cash):'')+(a.pricesAt?' · Prix du '+escapeHtml(a.pricesAt):'')+'</div></div>'
+   +'<div class="stat-sub">Coût '+cpMoney(t.cost)+(ivNum(a.cash)>0?' · Liquidités '+cpMoney(a.cash):'')+(ivAccPriceDate(a)?' · Prix du '+escapeHtml(ivAccPriceDate(a)):'')+'</div></div>'
    +'<div style="text-align:right;"><div style="font-family:\'Playfair Display\',serif;font-size:1.3rem;color:var(--navy);">'+cpMoney(t.value)+'</div><div style="font-size:12px;">'+ivGainHtml(t.gain,t.cost).replace('<br><small>',' · <small>')+'</div></div></div>';
   if(!hs.length)h+='<div class="loading-msg" style="padding:1rem;">Aucune position dans ce compte.</div>';
   else{
     h+='<div style="overflow-x:auto;"><table class="cp-table" style="min-width:560px;"><thead><tr><th>Titre</th><th>Qté</th><th>Coût moy.</th><th>Prix</th><th>Valeur</th><th>Gain / perte</th><th></th></tr></thead><tbody>';
     hs.forEach(function(x){
       var hv=ivHoldVal(x),hc=ivHoldCost(x);
-      h+='<tr><td>'+escapeHtml(x.symbol)+'</td><td>'+ivQty(x.qty)+'</td><td>'+ivUnit(x.cost)+'</td><td>'+(ivNum(x.price)>0?ivUnit(x.price):'<small>—</small>')+'</td><td>'+cpMoney(hv)+'</td><td>'+(ivNum(x.price)>0?ivGainHtml(hv-hc,hc):'<small>—</small>')+'</td>'
+      h+='<tr><td>'+escapeHtml(x.symbol)+'</td><td>'+ivQty(x.qty)+'</td><td>'+ivUnit(x.cost)+'</td><td>'+(ivNum(x.price)>0?ivUnit(x.price)+(x.priceDate?'<br><small>'+escapeHtml(x.priceDate)+(x.auto?' · auto':'')+'</small>':''):'<small>—</small>')+'</td><td>'+cpMoney(hv)+'</td><td>'+(ivNum(x.price)>0?ivGainHtml(hv-hc,hc):'<small>—</small>')+'</td>'
        +'<td style="white-space:nowrap;"><button type="button" class="cp-clip" data-act="edithold" data-id="'+id+'" data-h="'+cpAttr(x.id)+'" aria-label="Modifier la position" title="Modifier">✎</button><button type="button" class="cp-del" data-act="delhold" data-id="'+id+'" data-h="'+cpAttr(x.id)+'" aria-label="Supprimer la position">✕</button></td></tr>';
     });
     h+='</tbody></table></div>';
@@ -2692,7 +2717,7 @@ function ivFormDef(){
     {k:'name',label:'Nom du compte (optionnel)',kind:'text',ph:'Ex. CELI — Questrade'},
     {k:'cash',label:'Liquidités dans le compte (optionnel)',kind:'number',hint:'Argent non investi, en $ CA.'}]};
   if(t==='holding')return {title:f.hid?'Modifier la position':'Nouvelle position',fields:[
-    {k:'symbol',label:'Titre ou fonds',kind:'text',ph:'Ex. XEQT, VFV, AAPL'},
+    {k:'symbol',label:'Titre ou fonds',kind:'text',ph:'Ex. XEQT.TO, VFV.TO, AAPL',hint:'Titres canadiens : ajoute .TO (ex. XEQT.TO). Titres américains : sans suffixe (ex. AAPL). Sert à la mise à jour automatique des prix.'},
     {k:'qty',label:'Quantité',kind:'number'},
     {k:'cost',label:'Coût moyen par part ($ CA)',kind:'number',hint:'Ton prix d\'achat moyen.'},
     {k:'price',label:'Prix actuel par part (optionnel)',kind:'number',hint:'Tu pourras le mettre à jour plus tard.'}]};
@@ -2800,8 +2825,8 @@ async function ivSave(){
     if(f.cost===''||ivNum(f.cost)<0){fail('Entre le coût moyen par part.');return;}
     ok=await ivCommit(function(){
       var a=ivAcc(f.accId);a.holdings=a.holdings||[];
-      if(f.hid){var h=a.holdings.find(function(x){return x.id===f.hid;});h.symbol=sym;h.qty=ivNum(f.qty);h.cost=ivNum(f.cost);h.price=ivNum(f.price);}
-      else a.holdings.push({id:ivId('h'),symbol:sym,qty:ivNum(f.qty),cost:ivNum(f.cost),price:ivNum(f.price)});
+      if(f.hid){var h=a.holdings.find(function(x){return x.id===f.hid;});h.symbol=sym;h.qty=ivNum(f.qty);h.cost=ivNum(f.cost);var np=ivNum(f.price);if(np!==ivNum(h.price)){h.price=np;h.priceDate=np>0?cpToday():'';h.auto=false;}}
+      else a.holdings.push({id:ivId('h'),symbol:sym,qty:ivNum(f.qty),cost:ivNum(f.cost),price:ivNum(f.price),priceDate:ivNum(f.price)>0?cpToday():'',auto:false});
       if(ivNum(f.price)>0)a.pricesAt=cpToday();
     });
   }else{
@@ -2822,7 +2847,7 @@ async function ivSave(){
 async function ivSavePrices(){
   var f=iv.form,a=ivAcc(f.id);if(!a)return;
   var ok=await ivCommit(function(){
-    (a.holdings||[]).forEach(function(h){var v=f.prices[h.id];if(v!==''&&v!=null&&ivNum(v)>=0)h.price=ivNum(v);});
+    (a.holdings||[]).forEach(function(h){var v=f.prices[h.id];if(v!==''&&v!=null&&ivNum(v)>=0){var nv=ivNum(v);if(nv!==ivNum(h.price)){h.price=nv;h.priceDate=cpToday();h.auto=false;}}});
     a.pricesAt=cpToday();
   });
   if(ok){iv.screen='main';iv.form=null;ivRender();}
