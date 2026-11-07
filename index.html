@@ -320,6 +320,10 @@ body.is-student .nav-item[data-prof]{display:none !important;}
 .todo-pill{display:inline-block;margin-top:2px;padding:1px 9px;border-radius:999px;font-size:11px;font-weight:700;}
 .todo-pill.red{background:#fceaea;color:#9c2424;}.todo-pill.yellow{background:#fdf1c8;color:#6b4e00;}.todo-pill.green{background:#e8f4ec;color:#14633b;}
 .todo-date{width:140px;min-height:36px;padding:4px 8px;font-size:12px;border:1px solid var(--border2);border-radius:8px;background:#fff;color:var(--text2);font-family:'Lato',sans-serif;}
+.tj-ico{background:none;border:none;cursor:pointer;font-size:16px;min-width:36px;min-height:36px;padding:2px 6px;border-radius:8px;}
+.tj-ico:hover{background:var(--cream2);}
+.tj-add{opacity:0.45;font-weight:700;}
+.tj-img{display:block;max-width:100%;max-height:72vh;margin:0 auto;border-radius:10px;border:1px solid var(--border);}
 @media(max-width:900px){
   .mobile-bar{display:flex;align-items:center;gap:10px;height:56px;padding:0 0.75rem;background:var(--navy);color:#fff;position:sticky;top:0;z-index:100;}
   .mb-title{font-family:'Playfair Display',serif;font-size:1.1rem;}
@@ -531,7 +535,11 @@ body.is-student .nav-item[data-prof]{display:none !important;}
         <div class="mini-stat"><div class="mini-stat-v" id="tr-losses" style="color:var(--red)">0</div><div class="mini-stat-l">Perdants</div></div>
         <div class="mini-stat"><div class="mini-stat-v" id="tr-pnl">—</div><div class="mini-stat-l">P&L Net</div></div>
       </div>
-      <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <input class="q-input" id="tr-search" type="text" style="width:190px;" placeholder="Chercher (symbole, date)" aria-label="Chercher un trade" oninput="trVisibleCount=10;renderTrades()">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);cursor:pointer;min-height:44px;"><input type="checkbox" id="tr-only-img" onchange="trVisibleCount=10;renderTrades()" style="width:18px;height:18px;"> Avec image seulement</label>
+        </div>
         <button class="btn-danger" onclick="confirmReset()">🗑 Effacer mes trades</button>
       </div>
       <div style="overflow-x:auto;">
@@ -541,7 +549,7 @@ body.is-student .nav-item[data-prof]{display:none !important;}
               <th style="width:95px">Date</th><th style="width:70px">Symbole</th><th style="width:60px">Dir.</th>
               <th style="width:65px">Qté</th><th style="width:85px">Entrée moy.</th><th style="width:85px">Sortie moy.</th>
               <th style="width:70px">Frais</th><th style="width:85px">P&L Net</th><th style="width:60px">Résultat</th>
-              <th style="width:40px"></th>
+              <th style="width:44px">Image</th><th style="width:40px"></th>
             </tr></thead>
             <tbody id="trades-body"><tr><td colspan="9" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade</td></tr></tbody>
           </table>
@@ -636,6 +644,10 @@ body.is-student .nav-item[data-prof]{display:none !important;}
           <div>
             <label class="input-label">Frais $ (optionnel)</label>
             <input class="q-input" type="number" id="man-fees" placeholder="ex: 5.00" min="0" step="0.01" oninput="manCalcPnl()">
+          </div>
+          <div>
+            <label class="input-label" for="man-img">Image du trade (optionnel)</label>
+            <input class="q-input" type="file" id="man-img" accept="image/*">
           </div>
         </div>
         <!-- Aperçu PNL -->
@@ -798,6 +810,22 @@ body.is-student .nav-item[data-prof]{display:none !important;}
   </div>
 </div>
 
+<!-- IMAGE D'UN TRADE -->
+<div id="tj-overlay" style="position:fixed;inset:0;background:rgba(20,25,40,0.72);display:none;align-items:center;justify-content:center;z-index:250;padding:16px;" onclick="if(event.target===this)tjClose()">
+  <div style="background:#fff;border-radius:var(--radius);width:100%;max-width:980px;max-height:92vh;overflow-y:auto;padding:1rem 1.25rem;box-shadow:var(--shadow);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:0.75rem;">
+      <div style="font-weight:700;color:var(--navy);font-size:14px;" id="tj-title">—</div>
+      <button type="button" class="btn-back btn-sm" onclick="tjClose()">Fermer</button>
+    </div>
+    <div id="tj-img-box"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:0.85rem;flex-wrap:wrap;">
+      <button type="button" class="btn-back btn-sm" onclick="tjPick(tjViewIdx)">Remplacer l'image</button>
+      <button type="button" class="btn-back btn-sm" style="color:var(--red);" onclick="tjRemove()">Retirer l'image</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="tj-file" accept="image/*" style="display:none;" onchange="tjOnFile(this.files[0]);this.value=''">
+
 <script>
 var PROF_PASS='cmp2024';
 var currentUser=null,currentRole=null,currentSlug=null;
@@ -887,23 +915,33 @@ async function saveTrades(){
 
 
 var trVisibleCount=10;
-
 function renderTrades(reset){
   if(reset)trVisibleCount=10;
   var tbody=document.getElementById('trades-body');
+  var mb=document.getElementById('tr-more-btn');
   if(!allTrades.length){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistre</td></tr>';
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade enregistre</td></tr>';
     document.getElementById('tr-count').textContent=0;
     document.getElementById('tr-wins').textContent=0;
     document.getElementById('tr-losses').textContent=0;
     document.getElementById('tr-pnl').textContent='--';
-    var mb=document.getElementById('tr-more-btn');if(mb)mb.style.display='none';
+    if(mb)mb.style.display='none';
     return;
   }
+  var q=((document.getElementById('tr-search')||{}).value||'').trim().toLowerCase();
+  var onlyImg=!!(document.getElementById('tr-only-img')&&document.getElementById('tr-only-img').checked);
+  var rows=[];
+  for(var i=allTrades.length-1;i>=0;i--){
+    var tt=allTrades[i];
+    if(onlyImg&&!tt.img)continue;
+    if(q&&String(tt.sym).toLowerCase().indexOf(q)<0&&String(tt.date).indexOf(q)<0)continue;
+    rows.push(i);
+  }
   var html='';
-  var visible=Math.min(trVisibleCount,allTrades.length);
+  var visible=Math.min(trVisibleCount,rows.length);
+  if(!rows.length)html='<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:1.5rem;font-style:italic;">Aucun trade ne correspond à ta recherche</td></tr>';
   for(var ri=0;ri<visible;ri++){
-    var realIdx=allTrades.length-1-ri;
+    var realIdx=rows[ri];
     var t=allTrades[realIdx];
     var win=t.pnl>=0;
     var pnlStr=(win?'+ ':'-')+' $'+Math.abs(t.pnl).toFixed(2);
@@ -920,19 +958,16 @@ function renderTrades(reset){
     html+='<td>-$'+t.fees.toFixed(2)+'</td>';
     html+='<td class="'+pnlClass+'">'+pnlStr+'</td>';
     html+='<td><span class="badge '+resClass+'">'+(win?'WIN':'LOSS')+'</span></td>';
+    html+='<td>'+(t.img
+      ?'<button type="button" class="tj-ico" onclick="tjShow('+realIdx+')" aria-label="Voir l\'image du trade" title="Voir l\'image">🖼</button>'
+      :'<button type="button" class="tj-ico tj-add" onclick="tjPick('+realIdx+')" aria-label="Ajouter une image au trade" title="Ajouter une image">＋</button>')+'</td>';
     html+='<td><button onclick="deleteTrade('+realIdx+')" style="background:none;border:none;cursor:pointer;color:#b03030;font-size:14px;padding:2px 6px;">X</button></td>';
     html+='</tr>';
   }
   tbody.innerHTML=html;
-  /* Bouton "Voir plus" */
-  var mb=document.getElementById('tr-more-btn');
   if(mb){
-    if(visible<allTrades.length){
-      mb.style.display='block';
-      mb.textContent='Voir plus ('+( allTrades.length-visible)+' restants)';
-    } else {
-      mb.style.display='none';
-    }
+    if(visible<rows.length){mb.style.display='block';mb.textContent='Voir plus ('+(rows.length-visible)+' restants)';}
+    else mb.style.display='none';
   }
   var total=allTrades.reduce(function(s,t){return s+t.pnl;},0);
   var wins=allTrades.filter(function(t){return t.pnl>=0;}).length;
@@ -941,6 +976,7 @@ function renderTrades(reset){
   document.getElementById('tr-losses').textContent=allTrades.length-wins;
   document.getElementById('tr-pnl').textContent=allTrades.length?(total>=0?'+ ':'-')+' $'+Math.abs(total).toFixed(2):'--';
 }
+
 
 function trLoadMore(){
   trVisibleCount+=10;
@@ -1116,13 +1152,14 @@ async function processCSV(text){
 
 function handleFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){processCSV(e.target.result);};r.readAsText(f,'utf-8');ev.target.value='';}
 function parseCSVText(){var t=document.getElementById('csv-text').value.trim();if(!t)return;processCSV(t);document.getElementById('csv-text').value='';}
-async function confirmReset(){if(!confirm('Effacer TOUS tes trades ?'))return;allTrades=[];await saveTrades();renderAll();}
+async function confirmReset(){if(!confirm('Effacer TOUS tes trades (et leurs images) ?'))return;allTrades.forEach(function(t){if(t.img)tjDel(t.img.id,t.img.chunks).catch(function(){});});allTrades=[];await saveTrades();renderAll();}
 
 async function deleteTrade(idx){
   var t=allTrades[idx];
   if(!t)return;
   if(!confirm('Supprimer ce trade ?\n'+t.date+' · '+t.sym+' · '+(t.pnl>=0?'+':'')+' $'+t.pnl.toFixed(2)))return;
   allTrades.splice(idx,1);
+  if(t.img)tjDel(t.img.id,t.img.chunks).catch(function(){});
   await saveTrades();
   renderAll();
 }
@@ -1595,9 +1632,15 @@ async function manAddTrade(){
     if(!confirm('Un trade similaire existe déjà. Ajouter quand même ?'))return;
   }
 
+  var imgInput=document.getElementById('man-img'),imgFile=imgInput&&imgInput.files[0];
+  if(imgFile){
+    try{var ip=await tjRead(imgFile),iid=tjNewId();await tjWrite(iid,ip.chunks);trade.img={id:iid,name:ip.name,type:ip.type,chunks:ip.chunks.length};}
+    catch(e){alert('Image non enregistrée : '+(e.message||e)+'\nLe trade sera ajouté sans image.');}
+  }
   allTrades.push(trade);
   await saveTrades();
   renderAll();
+  if(imgInput)imgInput.value='';
 
   /* Feedback et réinitialisation */
   var btn=document.querySelector('[onclick="manAddTrade()"]');
@@ -2892,6 +2935,80 @@ async function ivSavePrices(){
   });
   if(ok){iv.screen='main';iv.form=null;ivRender();}
 }
+
+/* ---- IMAGES DES TRADES (stockées en morceaux dans Firestore : trade_images) ---- */
+var tjTarget=null,tjViewIdx=null;
+
+function tjNewId(){return 'ti'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function tjRead(file){
+  if(!file||!/^image\//.test(file.type))return Promise.reject(new Error('Choisis une image (capture d\'écran ou photo).'));
+  return cpReadFile(file);
+}
+async function tjWrite(id,chunks){
+  for(var i=0;i<chunks.length;i++)await window.fsSetDoc(cpRef('trade_images',id+'_'+i),{i:i,data:chunks[i]});
+}
+async function tjDel(id,n){
+  for(var i=0;i<n;i++)await window.fsDeleteDoc(cpRef('trade_images',id+'_'+i));
+}
+async function tjLoad(img){
+  var parts=[];
+  for(var i=0;i<img.chunks;i++){
+    var s=await window.fsGetDoc(cpRef('trade_images',img.id+'_'+i));
+    if(!s.exists())throw new Error('L\'image de ce trade est incomplète.');
+    parts.push(s.data().data);
+  }
+  return 'data:'+img.type+';base64,'+parts.join('');
+}
+
+function tjPick(idx){
+  if(idx==null||!allTrades[idx])return;
+  tjTarget=idx;
+  var f=document.getElementById('tj-file');if(f)f.click();
+}
+async function tjOnFile(file){
+  var t=allTrades[tjTarget];if(!t||!file)return;
+  try{
+    setSaveBadge('☁️ Envoi de l\'image...');
+    var p=await tjRead(file),id=tjNewId();
+    await tjWrite(id,p.chunks);
+    var old=t.img;
+    t.img={id:id,name:p.name,type:p.type,chunks:p.chunks.length};
+    await saveTrades();
+    if(old)tjDel(old.id,old.chunks).catch(function(){});
+    renderTrades();
+    if(tjViewIdx===tjTarget)tjShow(tjTarget);
+  }catch(e){setSaveBadge('⚠ Erreur');alert('Image non enregistrée : '+(e.message||e));}
+}
+async function tjShow(idx){
+  var t=allTrades[idx];if(!t||!t.img)return;
+  tjViewIdx=idx;
+  document.getElementById('tj-overlay').style.display='flex';
+  document.getElementById('tj-title').textContent=t.date+' · '+t.sym+' · '+t.dir+' · '+(t.pnl>=0?'+ ':'− ')+'$'+Math.abs(t.pnl).toFixed(2);
+  var box=document.getElementById('tj-img-box');
+  box.innerHTML='<div class="loading-msg">Chargement de l\'image...</div>';
+  try{
+    var url=await tjLoad(t.img);
+    if(tjViewIdx!==idx)return;
+    var im=document.createElement('img');im.src=url;im.className='tj-img';im.alt='Image du trade '+t.sym+' du '+t.date;
+    box.innerHTML='';box.appendChild(im);
+  }catch(e){
+    box.innerHTML='';var d=document.createElement('div');d.className='login-error';d.style.display='block';d.textContent=cpErr(e);box.appendChild(d);
+  }
+}
+function tjClose(){
+  tjViewIdx=null;
+  var ov=document.getElementById('tj-overlay');if(ov)ov.style.display='none';
+  var box=document.getElementById('tj-img-box');if(box)box.innerHTML='';
+}
+async function tjRemove(){
+  var t=allTrades[tjViewIdx];if(!t||!t.img)return;
+  if(!confirm('Retirer l\'image de ce trade ?'))return;
+  var old=t.img;delete t.img;
+  await saveTrades();
+  tjDel(old.id,old.chunks).catch(function(){});
+  tjClose();renderTrades();
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&tjViewIdx!=null)tjClose();});
 
 /* ---- UTILITAIRES ---- */
 
