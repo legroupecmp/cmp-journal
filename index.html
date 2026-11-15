@@ -289,6 +289,41 @@ body{background:var(--cream);font-family:'Lato',sans-serif;font-weight:300;color
 .fc-det .fc-form{margin-top:0.5rem;}
 @media(max-width:700px){.fc-form{grid-template-columns:1fr;}}
 @media(max-width:1000px){}
+.hm-kicker{font-size:10.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.hm-hello{font-family:'Playfair Display',serif;font-size:2rem;line-height:1.15;color:var(--navy);}
+.hm-year{display:flex;align-items:center;background:#fff;border:1px solid var(--border2);border-radius:999px;font-size:13px;color:var(--navy);}
+.hm-year button{min-width:40px;min-height:44px;border:none;background:transparent;font-size:17px;color:var(--navy);cursor:pointer;}
+.hm-year>span{padding:0 2px;white-space:nowrap;}
+.hm-row{display:grid;gap:12px;margin-bottom:12px;}
+.hm-row-a{grid-template-columns:1.45fr 1fr;}
+.hm-row-b{grid-template-columns:1fr 1fr;}
+.hm-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:0.8rem;}
+.hm-head .q-card-title{margin-bottom:0;}
+.hm-legend{display:flex;gap:14px;font-size:11px;color:var(--text2);}
+.hm-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+.hm-ent{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--cream);border:none;border-radius:10px;padding:0.75rem 0.9rem;margin-bottom:8px;cursor:pointer;font-family:'Lato',sans-serif;min-height:44px;}
+.hm-ent b{display:block;font-size:13px;color:var(--navy);}
+.hm-ent small{display:block;font-size:11px;color:var(--text3);margin-top:2px;}
+.hm-ent .amt{font-family:'Playfair Display',serif;font-size:1.05rem;white-space:nowrap;}
+.hm-dash{display:block;width:100%;min-height:44px;background:transparent;border:1.5px dashed var(--border2);border-radius:10px;font-family:'Lato',sans-serif;font-size:12.5px;color:var(--text2);cursor:pointer;}
+.hm-dash:hover{border-color:var(--blue-light);color:var(--navy);}
+.hm-inv{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:0.7rem 0;cursor:pointer;font-family:'Lato',sans-serif;min-height:44px;}
+.hm-inv:last-child{border-bottom:none;}
+.hm-inv svg{flex-shrink:0;color:var(--text3);}
+.hm-inv .nm{flex:1;min-width:0;}
+.hm-inv b{display:block;font-size:12.5px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hm-inv small{display:block;font-size:11px;color:var(--text3);}
+.hm-inv .amt{font-weight:700;font-size:12.5px;color:var(--navy);white-space:nowrap;}
+.hm-note{font-size:11px;color:var(--text2);margin-top:0.8rem;}
+.hm-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0.6rem;}
+.hm-mini>div{background:var(--cream);border-radius:10px;padding:0.7rem 0.8rem;}
+.hm-head .link-btn{min-height:0;padding:6px 4px;}
+.hm-mini .stat-val{font-size:1.05rem;white-space:nowrap;}
+.hm-head .btn-sm{white-space:nowrap;}
+.hm-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;}
+.hm-badge.on{background:#e3f2e9;color:#14633b;}.hm-badge.off{background:#efe9dc;color:#6b5f3f;}
+@media(max-width:1000px){.hm-row-a,.hm-row-b{grid-template-columns:1fr;}}
+@media(max-width:600px){.hm-hello{font-size:1.6rem;}.home-actions{flex-wrap:wrap;}}
 @media(max-width:1000px){
   .home-kpis{grid-template-columns:1fr 1fr;}.home-kpi-main{grid-column:1/-1;}
   .home-grid,.home-grid2{grid-template-columns:1fr;}
@@ -437,47 +472,59 @@ body.is-student .nav-item[data-prof]{display:none !important;}
     <div id="tab-home" class="tab-content active">
       <div class="home-head">
         <div>
-          <div class="page-sub" id="home-date" style="margin-bottom:0.2rem;"></div>
-          <div class="page-title" style="margin-bottom:0;">Bonjour</div>
+          <div class="hm-kicker" id="home-date"></div>
+          <div class="hm-hello" id="home-hello">Bonjour</div>
           <div class="page-sub" style="margin-bottom:0;">Voici où tu en es cette année.</div>
         </div>
         <div class="home-actions">
           <button type="button" class="home-bell" id="home-bell" onclick="switchTab('todo')" aria-label="Aucune tâche pour aujourd'hui" title="Aucune tâche pour aujourd'hui"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="bell-badge" id="home-bell-n">0</span></button>
-          <div class="year-switch" role="group" aria-label="Année affichée">
+          <div class="hm-year" role="group" aria-label="Année affichée">
             <button type="button" onclick="homeYearShift(-1)" aria-label="Année précédente">‹</button>
-            <span id="home-year">—</span>
+            <span>Année <span id="home-year">—</span></span>
             <button type="button" onclick="homeYearShift(1)" aria-label="Année suivante">›</button>
           </div>
+          <button type="button" class="btn-next" onclick="homeAddEntry()">+ Ajouter une entrée</button>
         </div>
       </div>
 
       <div class="home-kpis">
         <div class="home-kpi-main">
-          <div class="stat-label">Rendement de l'année</div>
+          <div class="stat-label">Rendement total de l'année</div>
           <div class="big" id="home-total">—</div>
-          <div class="stat-sub">Trading + ma part de la formation CMP</div>
+          <div class="stat-sub">Trading + entreprises, après frais</div>
         </div>
         <div class="stat-card"><div class="stat-label">Trading</div><div class="stat-val" id="home-trading">—</div><div class="stat-sub" id="home-trading-sub">—</div></div>
+        <div class="stat-card"><div class="stat-label">Entreprises</div><div class="stat-val" id="home-ent">—</div><div class="stat-sub">Revenus − dépenses</div></div>
         <div class="stat-card"><div class="stat-label">Formation CMP</div><div class="stat-val" id="home-cmp">—</div><div class="stat-sub" id="home-cmp-sub">—</div></div>
-        <div class="stat-card"><div class="stat-label">Entreprises</div><div class="stat-val" id="home-ent">—</div><div class="stat-sub">Comptabilité dans chaque fiche</div></div>
       </div>
 
-      <div class="home-grid2">
-        <div style="display:contents;">
-          <div class="q-card" style="margin-bottom:0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-              <div class="q-card-title" style="margin-bottom:0;">Mes entreprises</div>
-              <button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button>
-            </div>
-            <div id="home-ent-list"><div class="loading-msg">Chargement...</div></div>
+      <div class="hm-row hm-row-a">
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Courbe de l'année</div>
+            <div class="hm-legend"><span><i style="background:#1a2744"></i>Total</span><span><i style="background:#1a7a4a"></i>Trading</span></div></div>
+          <div style="position:relative;height:230px;"><canvas id="home-chart" aria-label="Courbe de l'année : total et trading"></canvas></div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Mes entreprises</div><button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button></div>
+          <div id="home-ent-list"><div class="loading-msg">Chargement...</div></div>
+          <button type="button" class="hm-dash" onclick="switchTab('entreprises');entOpenModal()">+ Ajouter une entreprise</button>
+        </div>
+      </div>
+
+      <div class="hm-row hm-row-b">
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Factures récentes</div><button type="button" class="btn-next btn-sm" onclick="switchTab('factures')">Téléverser un fichier</button></div>
+          <div id="home-invoices"><div class="loading-msg">Chargement...</div></div>
+          <div class="hm-note">Les fichiers sont rangés par entreprise et par année, et restent sur ta plateforme.</div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Étudiants — Formation CMP</div><button type="button" class="btn-next btn-sm" onclick="switchTab('upsell');nsOpenModal()">+ Nouvel étudiant</button></div>
+          <div class="hm-mini">
+            <div><div class="stat-label">Inscrits</div><div class="stat-val" id="home-st-n">—</div></div>
+            <div><div class="stat-label">Collecté</div><div class="stat-val green" id="home-st-col">—</div></div>
+            <div><div class="stat-label">Ma part</div><div class="stat-val green" id="home-st-part">—</div></div>
           </div>
-          <div class="q-card" style="margin-bottom:0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-              <div class="q-card-title" style="margin-bottom:0;">Étudiants récents</div>
-              <button type="button" class="link-btn" onclick="switchTab('upsell')">Tout voir</button>
-            </div>
-            <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
-          </div>
+          <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
         </div>
       </div>
     </div>
@@ -1780,7 +1827,7 @@ async function startApp(){
 function logout(){
   currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
   clearSession();
-  cpReset();ivReset();fc.loaded=false;fc.data=null;fc.folderId=null;fc.catId=null;fc.view='docs';
+  cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;fc.loaded=false;fc.data=null;fc.folderId=null;fc.catId=null;fc.view='docs';
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
   if(perfChart){perfChart.destroy();perfChart=null;}
   if(homeChart){homeChart.destroy();homeChart=null;}
@@ -1799,68 +1846,161 @@ function logout(){
 /* ---- ACCUEIL ---- */
 var homeYear=new Date().getFullYear(),homeChart=null;
 
-function homeYearShift(n){homeYear+=n;renderHome();}
+function homeYearShift(n){homeYear+=n;renderHome(true);}
 
 function moneySigned(v){return (v>=0?'+ ':'− ')+'$'+Math.abs(v).toFixed(2);}
-
-function renderHome(){
+function hmMoney(v,signed){
+  v=Math.round((Number(v)||0)*100)/100;var neg=v<0,a=Math.abs(v).toFixed(2).split('.');
+  return (neg?'− ':(signed?'+ ':''))+'$ '+a[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+a[1];
+}
+var homeComp={loaded:false,loading:false,map:{}};
+async function homeCompLoad(){
+  if(homeComp.loading)return;homeComp.loading=true;
+  try{
+    var u=await cpUser();
+    if(u){
+      var map={};
+      for(var i=0;i<entList.length;i++){
+        var snap=await window.fsGetDoc(cpRef('compta',entList[i].id));
+        map[entList[i].id]=snap.exists()?(snap.data().entries||[]):[];
+      }
+      homeComp.map=map;homeComp.loaded=true;
+    }
+  }catch(e){console.error('homeCompLoad',e);}
+  homeComp.loading=false;
+  if(homeComp.loaded)renderHome(true);
+}
+function homeAddEntry(){
+  switchTab('entreprises');
+  if(entList.length===1)entOpen(entList[0].id);
+}
+function homeIcon(){return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>';}
+function renderHome(skipLoad){
   if(currentRole!=='prof')return;
+  if(!skipLoad&&!homeComp.loading){homeComp.loaded=false;homeCompLoad();}
   var now=new Date();
   var DAYS_FULL=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
   var el=document.getElementById('home-date');
   if(el)el.textContent=DAYS_FULL[now.getDay()]+' '+now.getDate()+' '+MONTHS[now.getMonth()].toLowerCase()+' '+now.getFullYear();
+  el=document.getElementById('home-hello');if(el)el.textContent='Bonjour, Odryk';
   el=document.getElementById('home-year');if(el)el.textContent=homeYear;
-  var ys=String(homeYear);
+  var ys=String(homeYear),curY=now.getFullYear();
+  todoBell();
 
-  /* Trading de l'année */
+  /* Trading de l'année (en $ ici, car le total s'additionne ; le % est dans le journal) */
   var trades=allTrades.filter(function(t){return (t.date||'').slice(0,4)===ys;});
   var pnl=trades.reduce(function(s,t){return s+t.pnl;},0);
   var wins=trades.filter(function(t){return t.pnl>=0;}).length;
   var pnlPct=pctSum(trades);
 
-  /* Formation CMP : ma part des étudiants qui débutent cette année */
+  /* Entreprises : revenus − dépenses de l'année */
+  var entNet=0,monthEnt=[];for(var mi=0;mi<12;mi++)monthEnt.push(0);
+  var perEnt={};
+  entList.forEach(function(e){
+    var list=(homeComp.map[e.id]||[]).filter(function(x){return (x.datePaiement||'').slice(0,4)===ys;});
+    var net=0,files=0,toSort=0;
+    list.forEach(function(x){
+      var v=(x.type==='revenu'?1:-1)*(Number(x.montantTotal)||0);net+=v;
+      var m=parseInt((x.datePaiement||'').slice(5,7),10)-1;if(m>=0&&m<12)monthEnt[m]+=v;
+      if(x.file)files++;else if(x.type!=='revenu')toSort++;
+    });
+    perEnt[e.id]={net:net,files:files,toSort:toSort};entNet+=net;
+  });
+
+  /* Formation CMP */
   var cmp=upNstu.filter(function(s){return (s.cohorte||'').slice(0,4)===ys;});
   var part=cmp.reduce(function(s,x){return s+(parseFloat(x.ma_part)||0);},0);
+  var coll=cmp.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
   var actifs=upNstu.filter(function(s){return nsIsActive(s,now.getFullYear(),now.getMonth());}).length;
 
-  var total=pnl+part;
-  el=document.getElementById('home-total');if(el){el.textContent=moneySigned(total);}
-  el=document.getElementById('home-trading');if(el){el.textContent=trades.length?pctStr(pnlPct):'—';el.className='stat-val'+(trades.length?(pnlPct>=0?' green':' red'):'');}
-  el=document.getElementById('home-trading-sub');if(el)el.textContent=trades.length?trades.length+' trades · '+Math.round(wins/trades.length*100)+' % gagnants':'Aucun trade';
-  el=document.getElementById('home-cmp');if(el){el.textContent=cmp.length?'$'+part.toFixed(2):'—';}
-  el=document.getElementById('home-cmp-sub');if(el)el.textContent=cmp.length+' inscrit'+(cmp.length>1?'s':'')+' · '+actifs+' actif'+(actifs>1?'s':'')+' ce mois';
-  el=document.getElementById('home-ent');if(el)el.textContent=entList.length;
+  var total=pnl+entNet;
+  el=document.getElementById('home-total');if(el)el.textContent=hmMoney(total,true);
+  el=document.getElementById('home-trading');if(el){el.textContent=hmMoney(pnl,true);el.className='stat-val'+(trades.length?(pnl>=0?' green':' red'):'');}
+  el=document.getElementById('home-trading-sub');if(el)el.textContent=trades.length?trades.length+' trade'+(trades.length>1?'s':'')+' · '+Math.round(wins/trades.length*100)+' % gagnants · '+pctStr(pnlPct):'0 trade · 0 % gagnants';
+  el=document.getElementById('home-ent');if(el){el.textContent=hmMoney(entNet,true);el.className='stat-val'+(entNet>0?' green':(entNet<0?' red':''));}
+  el=document.getElementById('home-cmp');if(el)el.textContent=hmMoney(part).replace('$ ','')+' $';
+  el=document.getElementById('home-cmp-sub');if(el)el.textContent='Ma part · '+actifs+' étudiant'+(actifs>1?'s':'')+' actif'+(actifs>1?'s':'');
 
-  /* Entreprises */
+  /* Courbe de l'année */
+  var cv=document.getElementById('home-chart');
+  if(cv&&window.Chart){
+    var last=(homeYear===curY)?now.getMonth():11,MS=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+    var mt=[];for(var q=0;q<12;q++)mt.push(0);
+    trades.forEach(function(t){var m=parseInt((t.date||'').slice(5,7),10)-1;if(m>=0&&m<12)mt[m]+=t.pnl;});
+    var lab=[],dT=[],dA=[],cT=0,cA=0;
+    for(var k=0;k<=last;k++){cT+=mt[k];cA+=mt[k]+monthEnt[k];lab.push(MS[k]);dT.push(Math.round(cT*100)/100);dA.push(Math.round(cA*100)/100);}
+    if(homeChart){homeChart.destroy();homeChart=null;}
+    homeChart=new Chart(cv,{type:'line',data:{labels:lab,datasets:[
+      {label:'Total',data:dA,borderColor:'#1a2744',borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:0.35,fill:false},
+      {label:'Trading',data:dT,borderColor:'#1a7a4a',borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:0.35,fill:false}]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+' : '+hmMoney(c.parsed.y);}}}},
+        scales:{x:{grid:{display:false},ticks:{font:{family:'Lato',size:10},color:'#7a8599'}},y:{grid:{color:'rgba(26,39,68,0.07)'},border:{display:false},ticks:{display:false}}}}});
+  }
+
+  /* Mes entreprises */
   var entEl=document.getElementById('home-ent-list');
   if(entEl){
     entEl.innerHTML='';
-    if(!entList.length){entEl.innerHTML='<div class="loading-msg">Aucune entreprise</div>';}
-    else entList.slice(0,4).forEach(function(e){
-      var row=document.createElement('div');row.className='home-row';
-      var l=document.createElement('div');l.textContent=e.name;
-      if(e.type){var sm=document.createElement('small');sm.textContent=e.type;l.appendChild(sm);}
-      var b=document.createElement('button');b.type='button';b.className='link-btn';b.textContent='Ouvrir';
+    if(!entList.length)entEl.innerHTML='<div class="loading-msg">Aucune entreprise</div>';
+    entList.slice(0,3).forEach(function(e){
+      var d=perEnt[e.id]||{net:0,files:0,toSort:0};
+      var b=document.createElement('button');b.type='button';b.className='hm-ent';
+      var l=document.createElement('div');var nm=document.createElement('b');nm.textContent=e.name;var sm=document.createElement('small');
+      sm.textContent=d.files+' facture'+(d.files>1?'s':'')+' · '+d.toSort+' à classer';l.appendChild(nm);l.appendChild(sm);
+      var am=document.createElement('div');am.className='amt '+(d.net>=0?'pnl-pos':'pnl-neg');am.textContent=hmMoney(d.net).replace(',00','');
+      b.appendChild(l);b.appendChild(am);
       b.addEventListener('click',function(){switchTab('entreprises');entOpen(e.id);});
-      row.appendChild(l);row.appendChild(b);entEl.appendChild(row);
+      entEl.appendChild(b);
     });
   }
 
-  /* Étudiants récents */
+  /* Factures récentes (pièces jointes de la comptabilité + archives du dossier Factures) */
+  var inv=[];
+  entList.forEach(function(e){(homeComp.map[e.id]||[]).forEach(function(x){
+    if(x.file)inv.push({name:x.file.name||x.description,ent:e.name,date:x.datePaiement||'',cat:x.categorie||'',amt:Number(x.montantTotal)||0,go:function(){switchTab('entreprises');entOpen(e.id);}});
+  });});
+  if(fc.data)fc.data.files.forEach(function(f){
+    var fo=fc.data.folders.find(function(x){return x.id===f.folderId;}),ca=fo&&fo.cats.find(function(x){return x.id===f.catId;});
+    inv.push({name:f.name,ent:'Factures',date:f.added||'',cat:(fo?fcMonthName(fo.ym):'')+(ca?' / '+ca.name:''),amt:null,go:function(){switchTab('factures');}});
+  });
+  inv.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var ivEl=document.getElementById('home-invoices');
+  if(ivEl){
+    ivEl.innerHTML='';
+    if(!inv.length)ivEl.innerHTML='<div class="loading-msg">Aucune facture pour l\'instant</div>';
+    inv.slice(0,3).forEach(function(x){
+      var b=document.createElement('button');b.type='button';b.className='hm-inv';
+      b.insertAdjacentHTML('beforeend',homeIcon());
+      var l=document.createElement('div');l.className='nm';var nm=document.createElement('b');nm.textContent=x.name;var sm=document.createElement('small');
+      sm.textContent=[x.ent,x.date?fcDateFr(x.date):'',x.cat].filter(function(t){return t;}).join(' · ');l.appendChild(nm);l.appendChild(sm);
+      b.appendChild(l);
+      if(x.amt!=null){var am=document.createElement('div');am.className='amt';am.textContent=hmMoney(x.amt);b.appendChild(am);}
+      b.addEventListener('click',x.go);ivEl.appendChild(b);
+    });
+  }
+  if(!fc.loaded&&!fc.failed&&!homeComp.fcAsked){homeComp.fcAsked=true;fcLoad().then(function(){renderHome(true);});}
+
+  /* Étudiants */
+  el=document.getElementById('home-st-n');if(el)el.textContent=cmp.length;
+  el=document.getElementById('home-st-col');if(el)el.textContent=hmMoney(coll);
+  el=document.getElementById('home-st-part');if(el)el.textContent=hmMoney(part);
   var stEl=document.getElementById('home-students');
   if(stEl){
     stEl.innerHTML='';
-    var recent=upNstu.slice().sort(function(a,b){return (b.cohorte||'').localeCompare(a.cohorte||'');}).slice(0,4);
+    var recent=upNstu.slice().sort(function(a,b){return (b.cohorte||'').localeCompare(a.cohorte||'');}).slice(0,3);
     if(!recent.length)stEl.innerHTML='<div class="loading-msg">Aucun étudiant</div>';
     recent.forEach(function(s){
-      var row=document.createElement('div');row.className='home-row';
-      var l=document.createElement('div');l.textContent=s.name;
-      var sm=document.createElement('small');
+      var row=document.createElement('button');row.type='button';row.className='hm-inv';row.style.justifyContent='space-between';
+      var l=document.createElement('div');l.className='nm';var nm=document.createElement('b');nm.textContent=s.name;var sm=document.createElement('small');
       var cd=s.cohorte?new Date(s.cohorte+'T00:00:00'):null;
-      sm.textContent=cd?'Début '+MONTHS[cd.getMonth()].toLowerCase()+' '+cd.getFullYear():'Début non précisé';
-      l.appendChild(sm);
-      var v=document.createElement('div');v.className='pnl-pos';v.textContent=parseFloat(s.ma_part)>0?'$'+parseFloat(s.ma_part).toFixed(2):'—';
-      row.appendChild(l);row.appendChild(v);stEl.appendChild(row);
+      sm.textContent=(cd?'Début '+MONTHS[cd.getMonth()].toLowerCase()+' '+cd.getFullYear():'Début non précisé')+(s.phone?' · '+s.phone:'');
+      l.appendChild(nm);l.appendChild(sm);
+      var active=nsIsActive(s,now.getFullYear(),now.getMonth());
+      var bd=document.createElement('span');bd.className='hm-badge '+(active?'on':'off');bd.textContent=active?'En cours':'Terminé';
+      row.appendChild(l);row.appendChild(bd);
+      row.addEventListener('click',function(){switchTab('upsell');nsOpenModal(s.id);});
+      stEl.appendChild(row);
     });
   }
 }
