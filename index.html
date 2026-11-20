@@ -1001,18 +1001,53 @@ function clearSession(){
 
 
 
+var tradesStamp='',tradesSaving=false,tradesDeleted={};
 async function loadData(){
   setSaveBadge('☁️ Chargement...');
   var tradesData=await fsLoad('trades/'+currentSlug);
   allTrades=tradesData&&tradesData.list?tradesData.list:[];
+  tradesStamp=(tradesData&&tradesData.updatedAt)||'';
   renderAll();
   setSaveBadge('☁️ Synchronisé');
 }
 
-async function saveTrades(){
+/* Reprend la version la plus récente du journal quand un autre appareil l'a modifiée */
+async function refreshTrades(){
+  if(currentRole!=='prof'||tradesSaving||document.hidden)return;
+  var d=await fsLoad('trades/'+currentSlug);
+  if(tradesSaving||!d||!d.list)return;
+  if((d.updatedAt||'')>tradesStamp){
+    allTrades=d.list;tradesStamp=d.updatedAt||'';
+    renderAll();setSaveBadge('☁️ Synchronisé');
+  }
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshTrades();});
+window.addEventListener('focus',function(){refreshTrades();});
+setInterval(refreshTrades,45000);
+
+/* Sauvegarde sans écraser ce qu'un autre appareil a ajouté entre-temps (trades et images) */
+async function saveTrades(opts){
+  opts=opts||{};
+  tradesSaving=true;
   setSaveBadge('☁️ Sauvegarde...');
-  var ok=await fsSave('trades/'+currentSlug,{list:allTrades,updatedAt:new Date().toISOString()});
-  setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+  try{
+    if(!opts.replaceAll){
+      var remote=await fsLoad('trades/'+currentSlug);
+      if(remote&&remote.list&&(remote.updatedAt||'')>tradesStamp){
+        var local={};allTrades.forEach(function(t){local[tradeKey(t)]=t;});
+        remote.list.forEach(function(r){
+          var k=tradeKey(r),l=local[k];
+          if(l){if(!l.img&&r.img&&!tradesDeleted[k])l.img=r.img;}
+          else if(!tradesDeleted[k])allTrades.push(r);
+        });
+      }
+    }
+    var stamp=new Date().toISOString();
+    var ok=await fsSave('trades/'+currentSlug,{list:allTrades,updatedAt:stamp});
+    if(ok){tradesStamp=stamp;tradesDeleted={};}
+    setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
+    return ok;
+  }finally{tradesSaving=false;}
 }
 
 
@@ -1265,13 +1300,13 @@ async function processCSV(text){
 
 function handleFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){processCSV(e.target.result);};r.readAsText(f,'utf-8');ev.target.value='';}
 function parseCSVText(){var t=document.getElementById('csv-text').value.trim();if(!t)return;processCSV(t);document.getElementById('csv-text').value='';}
-async function confirmReset(){if(!confirm('Effacer TOUS tes trades (et leurs images) ?'))return;allTrades.forEach(function(t){if(t.img)tjDel(t.img.id,t.img.chunks).catch(function(){});});allTrades=[];await saveTrades();renderAll();}
+async function confirmReset(){if(!confirm('Effacer TOUS tes trades (et leurs images) ?'))return;allTrades.forEach(function(t){if(t.img)tjDel(t.img.id,t.img.chunks).catch(function(){});});allTrades=[];await saveTrades({replaceAll:true});renderAll();}
 
 async function deleteTrade(idx){
   var t=allTrades[idx];
   if(!t)return;
   if(!confirm('Supprimer ce trade ?\n'+t.date+' · '+t.sym+' · '+(t.pnl>=0?'+':'')+' $'+t.pnl.toFixed(2)))return;
-  allTrades.splice(idx,1);
+  allTrades.splice(idx,1);tradesDeleted[tradeKey(t)]=true;
   if(t.img)tjDel(t.img.id,t.img.chunks).catch(function(){});
   await saveTrades();
   renderAll();
@@ -1751,7 +1786,7 @@ async function manAddTrade(){
     catch(e){alert('Image non enregistrée : '+(e.message||e)+'\nLe trade sera ajouté sans image.');}
   }
   allTrades.push(trade);
-  await saveTrades();
+  if(!(await saveTrades()))alert('Le trade n\'a pas pu être enregistré dans Firebase. Vérifie ta connexion et réessaie.');
   renderAll();
   if(imgInput)imgInput.value='';
 
@@ -1827,7 +1862,7 @@ async function startApp(){
 function logout(){
   currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
   clearSession();
-  cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;fc.loaded=false;fc.data=null;fc.folderId=null;fc.catId=null;fc.view='docs';
+  cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;fc.loaded=false;fc.data=null;fc.needAuth=false;fc.stamp='';fc.removed={};fc.folderId=null;fc.catId=null;fc.view='docs';
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
   if(perfChart){perfChart.destroy();perfChart=null;}
   if(homeChart){homeChart.destroy();homeChart=null;}
@@ -3190,7 +3225,8 @@ async function tjOnFile(file){
     await tjWrite(id,p.chunks);
     var old=t.img;
     t.img={id:id,name:p.name,type:p.type,chunks:p.chunks.length};
-    await saveTrades();
+    var saved=await saveTrades();
+    if(!saved){if(old)t.img=old;else delete t.img;renderTrades();alert('L\'image a été envoyée mais le trade n\'a pas pu être mis à jour dans Firebase. Réessaie dans un instant.');return;}
     if(old)tjDel(old.id,old.chunks).catch(function(){});
     renderTrades();
     if(tjViewIdx===tjTarget)tjShow(tjTarget);
@@ -3229,7 +3265,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&tjViewIdx!=
 
 
 /* ---- FACTURES : documents par mois / catégorie + générateur PDF ---- */
-var fc={loaded:false,failed:false,data:null,view:'docs',folderId:null,catId:null,busy:false};
+var fc={loaded:false,failed:false,needAuth:false,error:null,stamp:'',removed:{},data:null,view:'docs',folderId:null,catId:null,busy:false};
 function fcBlank(){return {folders:[],files:[],invoices:[],settings:{issuer:{name:'Groupe Création, Multiplication, Préservation',address:'Odryk Savoie',email:'LegroupeCMP@gmail.com',phone:'819-354-3334',taxNo:'NEQ: 2278779626 | No TPS: 74296 4554 RT0001 | No TVQ: 4027159261 TQ0001',
  pay:'Virement Interac : (819) 354-3334 (Question : Nom compagnie / Réponse : Groupe CMP)\nTransfert Bancaire : Numéro d\'institution 004 |Numéro transit 49721 | Numéro compte 5214916',thanks:'Merci de votre confiance et de votre collaboration pour la croissance de vos ventes !'},
  client:{name:'9513-3526 Québec inc.',address:''},last:'2026-011',item:'Formation éducative en investissement autonome (Forfait Mensuel)',
@@ -3258,15 +3294,7 @@ function fcNextNum(last){
   if(ym&&ym[1]!==yr)return yr+'-'+'1'.padStart(n.length,'0');
   return pre+String(parseInt(n,10)+1).padStart(n.length,'0');
 }
-async function fcLoad(){
-  if(fc.loaded)return;
-  var d=null;
-  try{
-    await cpDb();
-    var snap=await window.fsGetDoc(cpRef('compta','_factures'));
-    d=snap.exists()?snap.data():null;
-    fc.failed=false;
-  }catch(e){console.error('fcLoad',e);fc.failed=true;}
+function fcParse(d){
   var b=fcBlank();
   if(d){
     b.folders=d.folders||[];b.files=d.files||[];b.invoices=d.invoices||[];
@@ -3275,34 +3303,111 @@ async function fcLoad(){
     b.settings.client=Object.assign(b.settings.client,s.client||{});
     if(s.last)b.settings.last=s.last;if(s.desc)b.settings.desc=s.desc;if(s.item)b.settings.item=s.item;if(s.taxes!==undefined)b.settings.taxes=!!s.taxes;
   }
-  fc.data=b;fc.loaded=!fc.failed;
+  return b;
+}
+async function fcFetch(){
+  var u=await cpUser();
+  if(!u){var e=new Error('auth');e.needAuth=true;throw e;}
+  var snap=await window.fsGetDoc(cpRef('compta','_factures'));
+  return snap.exists()?snap.data():null;
+}
+async function fcLoad(){
+  if(fc.loaded)return;
+  fc.needAuth=false;fc.error=null;fc.failed=false;
+  try{
+    var d=await fcFetch();
+    fc.data=fcParse(d);fc.stamp=(d&&d.updatedAt)||'';fc.loaded=true;
+  }catch(e){
+    console.error('fcLoad',e);fc.failed=true;fc.data=null;
+    if(e.needAuth||e.code==='permission-denied')fc.needAuth=true;else fc.error=cpErr(e);
+  }
+}
+/* Reprend la version la plus récente quand un autre appareil a ajouté des factures */
+async function fcRefresh(){
+  if(!fc.loaded||fc.busy)return;
+  try{
+    var d=await fcFetch();
+    if(d&&(d.updatedAt||'')>fc.stamp){
+      fc.data=fcParse(d);fc.stamp=d.updatedAt||'';
+      var tab=document.getElementById('tab-factures');
+      if(tab&&tab.classList.contains('active')&&fc.view==='docs')fcRender();
+    }
+  }catch(e){console.error('fcRefresh',e);}
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)fcRefresh();});
+window.addEventListener('focus',function(){fcRefresh();});
+setInterval(function(){if(!document.hidden)fcRefresh();},45000);
+function fcMerge(remote){
+  var D=fc.data,R=fcParse(remote),rm=fc.removed;
+  function ids(list){var m={};list.forEach(function(x){m[x.id]=x;});return m;}
+  var lf=ids(D.folders);
+  R.folders.forEach(function(rf){
+    if(rm[rf.id])return;
+    var l=lf[rf.id];
+    if(!l){D.folders.push(rf);return;}
+    var lc=ids(l.cats);rf.cats.forEach(function(c){if(!lc[c.id]&&!rm[c.id])l.cats.push(c);});
+  });
+  var lfi=ids(D.files);R.files.forEach(function(f){if(!lfi[f.id]&&!rm[f.id]&&D.folders.some(function(x){return x.id===f.folderId;}))D.files.push(f);});
+  var li={};D.invoices.forEach(function(x){li[x.num+'|'+x.created]=1;});
+  R.invoices.forEach(function(x){var k=x.num+'|'+x.created;if(!li[k]&&!rm[k])D.invoices.push(x);});
+  D.invoices.sort(function(a,b){return (b.created||0)-(a.created||0);});
+  if(String(R.settings.last)>String(D.settings.last)&&/^\d{4}-\d+$/.test(R.settings.last))D.settings.last=R.settings.last;
 }
 async function fcPersist(){
   if(fc.failed||!fc.data){alert('Les factures n\'ont pas pu être chargées. Recharge la page avant de modifier.');return false;}
   try{
     await cpDb();
-    await window.fsSetDoc(cpRef('compta','_factures'),{folders:fc.data.folders,files:fc.data.files,invoices:fc.data.invoices,settings:fc.data.settings,updatedAt:new Date().toISOString()});
+    var remote=await fcFetch();
+    if(remote&&(remote.updatedAt||'')>fc.stamp)fcMerge(remote);
+    var stamp=new Date().toISOString();
+    await window.fsSetDoc(cpRef('compta','_factures'),{folders:fc.data.folders,files:fc.data.files,invoices:fc.data.invoices,settings:fc.data.settings,updatedAt:stamp});
+    fc.stamp=stamp;fc.removed={};
     return true;
-  }catch(e){console.error('fcPersist',e);alert('Enregistrement impossible : '+cpErr(e));return false;}
+  }catch(e){console.error('fcPersist',e);alert('Enregistrement impossible : '+(e.needAuth?'tu n\'es pas connecté. Reviens à l\'onglet Factures et connecte-toi.':cpErr(e)));return false;}
 }
 async function fcDelFileDocs(f){
   for(var i=0;i<f.chunks;i++){try{await window.fsDeleteDoc(cpRef('compta_files',f.id+'_'+i));}catch(e){console.error(e);}}
 }
 async function fcMount(){
   var root=document.getElementById('fc-root');if(!root)return;
-  if(!fc.loaded){root.innerHTML='<div class="loading-msg">Chargement...</div>';await fcLoad();}
-  fcRender();
+  if(!fc.loaded){root.innerHTML='<div class="loading-msg">Chargement...</div>';await fcLoad();fcRender();}
+  else{fcRender();fcRefresh();}
 }
 function fcRender(){
   var root=document.getElementById('fc-root');if(!root)return;
   root.innerHTML='';
-  if(!fc.data){root.appendChild(fcEl('div','loading-msg','Chargement impossible. Recharge la page.'));return;}
+  if(fc.needAuth){fcAuthCard(root);return;}
+  if(!fc.data){var er=fcEl('div','login-error',fc.error||'Chargement impossible.');er.style.display='block';root.appendChild(er);root.appendChild(fcBtn('Réessayer','btn-back btn-sm',function(){fc.loaded=false;fcMount();}));return;}
   var tabs=fcEl('div','fc-tabs');
   [['docs','Documents'],['gen','Générateur de factures']].forEach(function(x){
     var b=fcBtn(x[1],'fc-tab'+(fc.view===x[0]?' active':''),function(){fc.view=x[0];fcRender();});tabs.appendChild(b);
   });
   root.appendChild(tabs);
   if(fc.view==='gen')fcRenderGen(root);else fcRenderDocs(root);
+}
+function fcAuthCard(root){
+  var c=fcEl('div','q-card');c.appendChild(fcEl('div','q-card-title','Connexion sécurisée'));
+  c.appendChild(fcEl('div','info-box','Tes factures sont protégées et partagées entre tes appareils. Connecte-toi une seule fois sur cet appareil avec le même compte Google que sur ton ordinateur.'));
+  var er=fcEl('div','login-error');
+  function after(){fc.loaded=false;fc.needAuth=false;fcMount();}
+  var g=fcBtn('Se connecter avec Google','btn-next',async function(){
+    er.style.display='none';
+    if(!window.fbSignInGoogle){er.textContent='Le module de connexion n\'est pas chargé. Recharge la page.';er.style.display='block';return;}
+    try{await window.fbSignInGoogle();after();}catch(e){er.textContent=cpErr(e);er.style.display='block';}
+  });
+  g.style.cssText='width:100%;justify-content:center;margin-bottom:1rem;';c.appendChild(g);
+  var or=fcEl('div','stat-sub','ou avec un courriel et un mot de passe');or.style.cssText='text-align:center;margin-bottom:0.75rem;';c.appendChild(or);
+  var row=fcEl('div','fc-form');
+  var em=document.createElement('input');em.type='email';em.className='q-input';em.placeholder='Courriel';em.autocomplete='username';em.setAttribute('aria-label','Courriel');
+  var pw=document.createElement('input');pw.type='password';pw.className='q-input';pw.placeholder='Mot de passe';pw.autocomplete='current-password';pw.setAttribute('aria-label','Mot de passe');
+  row.appendChild(em);row.appendChild(pw);c.appendChild(row);c.appendChild(er);
+  var b=fcBtn('Se connecter','btn-next',async function(){
+    er.style.display='none';
+    if(!em.value||!pw.value){er.textContent='Entre ton courriel et ton mot de passe.';er.style.display='block';return;}
+    if(!window.fbSignIn){er.textContent='Le module de connexion n\'est pas chargé. Recharge la page.';er.style.display='block';return;}
+    try{await window.fbSignIn(window.fbAuth,em.value.trim(),pw.value);after();}catch(e){er.textContent=cpErr(e);er.style.display='block';}
+  });
+  b.style.marginTop='0.8rem';c.appendChild(b);root.appendChild(c);
 }
 /* ----- Documents ----- */
 function fcCount(folderId,catId){
@@ -3368,6 +3473,7 @@ function fcRenderDocs(root){
       var n=fcCount(folder.id);
       if(!confirm('Supprimer le dossier '+fcMonthName(folder.ym)+(n?' et ses '+n+' fichier(s)':'')+' ?'))return;
       var fl=d.files.filter(function(f){return f.folderId===folder.id;});
+      fc.removed[folder.id]=1;folder.cats.forEach(function(k){fc.removed[k.id]=1;});fl.forEach(function(f){fc.removed[f.id]=1;});
       for(var i=0;i<fl.length;i++)await fcDelFileDocs(fl[i]);
       d.files=d.files.filter(function(f){return f.folderId!==folder.id;});
       d.folders=d.folders.filter(function(f){return f.id!==folder.id;});
@@ -3394,7 +3500,7 @@ function fcRenderDocs(root){
     bt.appendChild(fcBtn('Voir','btn-back btn-sm',function(){fcView(f);}));
     bt.appendChild(fcBtn('✕','btn-back btn-sm fc-danger',async function(){
       if(!confirm('Supprimer « '+f.name+' » ?'))return;
-      await fcDelFileDocs(f);d.files=d.files.filter(function(x){return x.id!==f.id;});
+      fc.removed[f.id]=1;await fcDelFileDocs(f);d.files=d.files.filter(function(x){return x.id!==f.id;});
       if(await fcPersist())fcRender();
     }));
     r.appendChild(l);r.appendChild(bt);card.appendChild(r);
@@ -3402,6 +3508,7 @@ function fcRenderDocs(root){
   var del2=fcBtn('Supprimer cette catégorie','btn-back btn-sm fc-danger',async function(){
     var n=list.length;
     if(!confirm('Supprimer la catégorie « '+cat.name+' »'+(n?' et ses '+n+' fichier(s)':'')+' ?'))return;
+    fc.removed[cat.id]=1;list.forEach(function(f){fc.removed[f.id]=1;});
     for(var i=0;i<list.length;i++)await fcDelFileDocs(list[i]);
     d.files=d.files.filter(function(f){return !(f.folderId===folder.id&&f.catId===cat.id);});
     folder.cats=folder.cats.filter(function(k){return k.id!==cat.id;});fc.catId=null;
@@ -3522,7 +3629,7 @@ function fcRenderGen(root){
     bt.appendChild(fcBtn('PDF','btn-back btn-sm',async function(){try{await fcMakePdf(r,d.settings.issuer);}catch(e){alert('Le PDF n\'a pas pu être créé : '+(e.message||e));}}));
     bt.appendChild(fcBtn('✕','btn-back btn-sm fc-danger',async function(){
       if(!confirm('Retirer la facture '+r.num+' de la liste ? (Le numéro suivant ne change pas.)'))return;
-      d.invoices=d.invoices.filter(function(x){return x!==r;});await fcPersist();fcRender();
+      fc.removed[r.num+'|'+r.created]=1;d.invoices=d.invoices.filter(function(x){return x!==r;});await fcPersist();fcRender();
     }));
     row.appendChild(l);row.appendChild(bt);h.appendChild(row);
   });
