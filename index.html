@@ -549,6 +549,7 @@ body.is-student .qbar{display:none;}
 .tx-sim-res{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;color:var(--text2);}
 .tx-sim-res b{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);}
 .tx-warn{color:#b03030;font-weight:700;}
+.tx-print{margin-left:auto;}
 .tx-flag{background:#fdf1c8;color:#6b4e00;border-radius:99px;padding:1px 7px;font-size:9.5px;font-weight:700;letter-spacing:0;text-transform:none;white-space:nowrap;}
 .tx-ov{border-color:#d9a406;background:#fffaf0;}
 .tx-sel{width:96px;min-width:0;padding:4px 8px;height:34px;margin-left:auto;display:block;}
@@ -570,7 +571,7 @@ body.is-student .qbar{display:none;}
 .tx-chip{display:inline-block;padding:1px 9px;border-radius:999px;font-size:10.5px;font-weight:700;}
 .tx-chip.red{background:#fceaea;color:#9c2424;}.tx-chip.yellow{background:#fdf1c8;color:#6b4e00;}.tx-chip.green{background:#e8f4ec;color:#14633b;}.tx-chip.ok{background:#e8f4ec;color:#14633b;}.tx-chip.past{background:#eceff4;color:#5d6a82;}
 @media(max-width:1000px){.tx-kpis{grid-template-columns:1fr 1fr;}.tx-main{grid-column:1/-1;}.tx-two,.tx-three{grid-template-columns:1fr;}}
-@media(max-width:600px){.tx-dl{flex-direction:column;gap:6px;}.tx-dl-d{flex:none;flex-direction:row;align-items:center;gap:10px;}.tx-sim{grid-template-columns:1fr;}.tx-kpis .stat-val{font-size:1.25rem;}.tx-main .stat-val{font-size:1.7rem;}.tx-bar-top .link-btn{margin-left:auto;}}
+@media(max-width:600px){.tx-dl{flex-direction:column;gap:6px;}.tx-dl-d{flex:none;flex-direction:row;align-items:center;gap:10px;}.tx-sim{grid-template-columns:1fr;}.tx-kpis .stat-val{font-size:1.25rem;}.tx-main .stat-val{font-size:1.7rem;}.tx-bar-top .link-btn{margin-left:0;}.tx-print{margin-left:0;width:100%;justify-content:center;}}
 
 </style>
 </head>
@@ -3492,7 +3493,7 @@ function txToolbar(M){
   var cur=new Date().getFullYear();
   var h='<div class="tx-bar-top"><div class="hm-year" role="group" aria-label="Année fiscale"><button type="button" data-act="yr" data-d="-1" aria-label="Année précédente">‹</button><span>Année <b>'+tx.year+'</b></span><button type="button" data-act="yr" data-d="1" aria-label="Année suivante">›</button></div>';
   if(tx.year===cur)h+='<div class="tx-seg" role="group" aria-label="Période"><button type="button" data-act="proj" data-v="0" class="'+(tx.proj?'':'on')+'">À ce jour</button><button type="button" data-act="proj" data-v="1" class="'+(tx.proj?'on':'')+'">Projection 12 mois</button></div>';
-  h+='<button type="button" class="link-btn" data-act="refresh">Actualiser</button></div>';
+  h+='<button type="button" class="link-btn" data-act="refresh">Actualiser</button><button type="button" class="btn-next btn-sm tx-print" data-act="print">Imprimer le sommaire</button></div>';
   if(M.B._base!==tx.year)h+='<div class="info-box">Les barèmes de '+M.B._base+' sont utilisés pour '+tx.year+'. Mets-les à jour dans l\'onglet Barèmes quand ils sortent.</div>';
   return h;
 }
@@ -3682,6 +3683,7 @@ function txClick(e){
   else if(a==='proj'){tx.proj=b.getAttribute('data-v')==='1';txRender();}
   else if(a==='refresh'){tx.loaded=false;txLoad();}
   else if(a==='csv')txCsv();
+  else if(a==='print')txPrint();
   else if(a==='resetbar'){
     if(!confirm('Rétablir les valeurs officielles pour '+tx.year+' ?'))return;
     var o={};TX_FIELDS.forEach(function(f){o[f[1].replace(/\./g,'_')]=null;});
@@ -3706,6 +3708,85 @@ function txChange(e){
   if(g){txPatch(txNest(g,t.value)).then(txRender);return;}
   var b=t.getAttribute('data-b');
   if(b){var bo={};bo[b]=t.value===''?null:Number(t.value);txPatchY({bar:bo}).then(txRender);}
+}
+
+/* ---------- sommaire imprimable ---------- */
+function txReportHtml(M){
+  var R=M.R,A=M.A,B=M.B,S=txSchedule(M),y=tx.year,e=escapeHtml;
+  var li=document.querySelector('.login-header img'),logo=li?li.src:'';
+  var now=new Date(),dstr=now.getDate()+' '+MONTHS[now.getMonth()].toLowerCase()+' '+now.getFullYear();
+  var all=R.total+M.gst,paidAll=S.qcPaid+S.fedPaid+S.taxPaid,left=Math.max(0,all-paidAll);
+  var rate=R.biz>0?R.total/R.biz*100:0;
+  var tr=function(c,cls){return '<tr'+(cls?' class="'+cls+'"':'')+'>'+c.map(function(x,i){return '<'+(i?'td':'th')+'>'+x+'</'+(i?'td':'th')+'>';}).join('')+'</tr>';};
+  var tb=function(head,rows,foot){return '<table><thead><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join('')+'</tr></thead><tbody>'+rows.join('')+(foot||'')+'</tbody></table>';};
+  var td=function(c,cls){return '<tr'+(cls?' class="'+cls+'"':'')+'>'+c.map(function(x){return '<td>'+x+'</td>';}).join('')+'</tr>';};
+  var h='';
+  h+='<div class="kpis"><div class="k main"><span>Reste à mettre de côté</span><b>'+txM2(left)+'</b></div>'
+    +'<div class="k"><span>Revenus (avant taxes)</span><b>'+txM2(M.rev)+'</b></div>'
+    +'<div class="k"><span>Dépenses déductibles</span><b>'+txM2(M.dep)+'</b></div>'
+    +'<div class="k"><span>Revenu net d\'entreprise</span><b>'+txM2(M.biz)+'</b></div>'
+    +'<div class="k"><span>Estimation de l\'année</span><b>'+txM2(all)+'</b></div>'
+    +'<div class="k"><span>Déjà versé</span><b>'+txM2(paidAll)+'</b></div></div>';
+  if(tx.proj&&y===now.getFullYear())h+='<p class="note">Les totaux ci-dessus sont une projection sur 12 mois. Les tableaux de détail montrent les montants réels à ce jour.</p>';
+  h+='<h2>1. Estimation des impôts et cotisations</h2>'+tb(['Poste','Montant'],[
+    td(['Revenu net d\'entreprise',txM2(R.biz)]),
+    td(['Cotisations REER déduites',txM2(M.reer)]),
+    td(['Revenu net après déductions',txM2(R.net)]),
+    td(['Impôt fédéral (après abattement du Québec)',txM2(R.fed)]),
+    td(['Impôt du Québec',txM2(R.qc)]),
+    td(['RRQ (cotisation du travailleur autonome)',txM2(R.rrq)]),
+    td(['RQAP',txM2(R.rqap)])],
+    td(['Total impôts et cotisations',txM2(R.total)],'total')+td(['TPS/TVQ à remettre (perçue moins récupérable)',txM2(M.gst)])+td(['Estimation totale de l\'année',txM2(all)],'total')+td(['Déjà versé (acomptes et TPS/TVQ)',txM2(paidAll)])+td(['Reste à mettre de côté',txM2(left)],'total'))
+    +'<p class="note">Taux moyen d\'impôts et de cotisations : '+txP(rate)+' du revenu net d\'entreprise. Reste pour toi après impôts et cotisations (sans la TPS/TVQ, qui est perçue pour l\'État) : '+txM2(R.biz-R.total)+'.'+(M.other?' Inclut '+txM2(M.other)+' d\'autres revenus d\'entreprise entrés manuellement.':'')+'</p>';
+  h+='<h2>2. Résultats par entreprise ('+y+', à ce jour)</h2>'+tb(['Entreprise','Revenus','Dépenses déductibles','Net','Dépenses sans pièce'],A.ents.map(function(a){return td([e(a.name),txM2(a.rev),txM2(a.dep),txM2(a.net),String(a.noFile)]);}),td(['Total',txM2(A.tot.rev),txM2(A.tot.dep),txM2(A.tot.rev-A.tot.dep),String(A.tot.noFile)],'total'));
+  var freq=tx.cfg.freq==='quarterly'?'trimestrielle':'annuelle';
+  h+='<h2>3. TPS et TVQ ('+y+', production '+freq+')</h2>'+tb(['Entreprise','TPS perçue','TVQ perçue','TPS payée','TVQ payée','À remettre'],A.ents.map(function(a){return td([e(a.name),txM2(a.tpsC),txM2(a.tvqC),txM2(a.tpsP),txM2(a.tvqP),txM2(a.tpsC+a.tvqC-a.tpsP-a.tvqP)]);}),td(['Total',txM2(A.tot.tpsC),txM2(A.tot.tvqC),txM2(A.tot.tpsP),txM2(A.tot.tvqP),txM2(A.tot.tpsC+A.tot.tvqC-A.tot.tpsP-A.tot.tvqP)],'total'));
+  if(tx.cfg.freq==='quarterly')h+='<div class="sp"></div>'+tb(['Trimestre','Perçue','Payée','À remettre'],A.q.map(function(q,i){var c=q.tpsC+q.tvqC,p=q.tpsP+q.tvqP;return td(['T'+(i+1),txM2(c),txM2(p),txM2(c-p)]);}));
+  h+='<h2>4. Échéances et versements '+y+'</h2>';
+  var rows=[];
+  S.L.forEach(function(x){
+    var d=txDays(x.iso);
+    if(!x.pays||!x.pays.length){rows.push(td([txDateFr(x.iso),e(x.title),'—','—','—']));return;}
+    x.pays.forEach(function(p,i){
+      var st=S.paid[p.key]?'Payé':(!p.need&&!p.ov?'Non requis':(d<0?'Échéance passée, non coché':'À payer'));
+      rows.push(td([i?'':txDateFr(x.iso),i?'':e(x.title),e(p.who),txM2(p.eff),st]));
+    });
+  });
+  h+='<div class="sch">'+tb(['Date','Échéance','Organisme','Montant','Statut'],rows)+'</div><p class="note">Versements cochés comme payés : Revenu Québec '+txM2(S.qcPaid)+' · ARC '+txM2(S.fedPaid)+' · TPS/TVQ '+txM2(S.taxPaid)+'.</p>';
+  h+='<h2>5. Droits de cotisation '+y+'</h2>';
+  var rooms=M.yc.rooms||{},crow=[['REER','reer',M.reer],['CELI','celi',txContribY('CELI')],['CELIAPP','celiapp',txContribY('CELIAPP')]].map(function(d){
+    var r=parseFloat(rooms[d[1]]),has=isFinite(r);return td([d[0],has?txM2(r):'Non inscrit',txM2(d[2]),has?txM2(Math.max(0,r-d[2])):'—']);});
+  h+=tb(['Compte','Droit disponible','Cotisé en '+y,'Droit restant'],crow)+'<p class="note">Plafonds de l\'année : REER '+txM2(B.reg.reer)+', CELI '+txM2(B.reg.celi)+', CELIAPP '+txM2(B.reg.celiapp)+' par année ('+txM2(B.reg.celiappLife)+' à vie).</p>';
+  h+='<h2>6. Revenus et dépenses par catégorie ('+y+', à ce jour)</h2>';
+  var rr=Object.keys(A.cats.rev).map(function(c){var x=A.cats.rev[c];return td([e(c),txM2(x.amt),txRevOk(c)?'Inclus':'Exclu']);});
+  h+=tb(['Revenus : catégorie','Montant avant taxes','Traitement'],rr.length?rr:[td(['Aucun revenu','',''])]);
+  var dr=Object.keys(A.cats.dep).map(function(c){var x=A.cats.dep[c],p=txDepPct(c);return td([e(c),txM2(x.amt),p+' %',txM2(x.amt*p/100)]);});
+  h+='<div class="sp"></div>'+tb(['Dépenses : catégorie','Montant avant taxes','Part déductible','Montant retenu'],dr.length?dr:[td(['Aucune dépense','','',''])]);
+  h+='<h2>7. Hypothèses et barèmes utilisés ('+B._base+')</h2><ul class="hyp">'
+    +'<li>Travailleur autonome résidant au Québec, sans conjoint ni personne à charge. Revenus et dépenses selon la date de paiement, avant taxes.</li>'
+    +'<li>Le trading n\'est pas calculé, sauf s\'il est ajouté dans « Autres revenus d\'entreprise »'+(M.other?' ('+txM2(M.other)+' ajoutés)':'')+'.</li>'
+    +'<li>Impôt fédéral : paliers de '+B.fed.br.map(txM).join(', ')+' ; taux '+B.fed.rt.join(' %, ')+' % ; abattement du Québec '+B.fed.abat+' %.</li>'
+    +'<li>Impôt du Québec : paliers de '+B.qc.br.map(txM).join(', ')+' ; taux '+B.qc.rt.join(' %, ')+' %.</li>'
+    +'<li>Montants personnels de base : fédéral '+txM(B.fed.bpaMax)+' (minimum '+txM(B.fed.bpaMin)+'), Québec '+txM(B.qc.bpa)+'.</li>'
+    +'<li>RRQ : maximum des gains admissibles '+txM(B.rrq.mga)+', exemption '+txM(B.rrq.exempt)+', deuxième plafond '+txM(B.rrq.mgap)+'. RQAP : '+B.rqap.rate+' % jusqu\'à '+txM(B.rqap.max)+'.</li>'
+    +'<li>Acomptes provisionnels : requis au-delà de '+txM(B.inst)+' d\'impôt à payer ; versements les 15 mars, juin, septembre et décembre.</li></ul>'
+    +'<p class="disc">Ce document est une estimation à titre indicatif, produite à partir des données de Mon terminal. Il ne remplace ni une déclaration de revenus ni l\'avis d\'un comptable. Certains paramètres (répartition du taux du RRQ, deuxième plafond, revenu maximal assurable du RQAP, déduction pour travailleur du Québec) restent à valider.</p>';
+  var css='@page{size:letter;margin:16mm 14mm}*{box-sizing:border-box}body{font-family:Georgia,"Times New Roman",serif;color:#10233B;margin:0;padding:24px;font-size:12.5px;line-height:1.45}'
+   +'.hd{display:flex;align-items:center;gap:18px;border-bottom:3px solid #10233B;padding-bottom:14px;margin-bottom:18px}.hd img{height:70px}.hd .t{flex:1}.hd h1{font-size:24px;margin:0 0 2px}.hd .s{font-family:Arial,sans-serif;font-size:12px;color:#5B6B7C}.hd .d{font-family:Arial,sans-serif;font-size:11px;color:#5B6B7C;text-align:right}'
+   +'.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}.k{border:1px solid #D5DBE4;border-radius:8px;padding:10px 12px;font-family:Arial,sans-serif}.k span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:#5B6B7C}.k b{display:block;font-size:17px;margin-top:3px;font-family:Georgia,serif}.k.main{background:#10233B;color:#fff;border-color:#10233B}.k.main span{color:#C9D3E3}'
+   +'h2{font-size:14px;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid #10233B;break-after:avoid}table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11.5px;break-inside:auto}tr{break-inside:avoid}th{padding:6px 8px;border-bottom:2px solid #10233B;font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;text-align:right;color:#10233B}td{padding:6px 8px;border-bottom:1px solid #E3E7EC;text-align:right}th:first-child,td:first-child{text-align:left}tr.total td{border-top:2px solid #10233B;border-bottom:none;font-weight:700}'
+   +'.sch td:nth-child(2),.sch td:nth-child(3),.sch th:nth-child(2),.sch th:nth-child(3){text-align:left}.note{font-family:Arial,sans-serif;font-size:10.5px;color:#5B6B7C;margin:6px 0 0}.sp{height:10px}.hyp{font-family:Arial,sans-serif;font-size:11px;margin:0;padding-left:18px}.hyp li{margin-bottom:3px}.disc{font-family:Arial,sans-serif;font-size:10.5px;color:#5B6B7C;border-top:1px solid #D5DBE4;padding-top:8px;margin-top:14px}'
+   +'.bar{font-family:Arial,sans-serif;text-align:center;margin-bottom:16px}.bar button{background:#10233B;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;cursor:pointer}@media print{.bar{display:none}body{padding:0}}';
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Sommaire fiscal '+y+'</title><style>'+css+'</style></head><body>'
+    +'<div class="bar"><button onclick="window.print()">Imprimer ou enregistrer en PDF</button></div>'
+    +'<div class="hd">'+(logo?'<img src="'+logo+'" alt="Groupe C.M.P">':'')+'<div class="t"><h1>Sommaire fiscal '+y+'</h1><div class="s">Odryk Savoie, travailleur autonome · Groupe C.M.P</div></div><div class="d">Généré le '+dstr+'<br>'+(tx.proj&&y===now.getFullYear()?'Projection sur 12 mois':'Situation à ce jour')+'</div></div>'
+    +h+'<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},500);});<\/script></body></html>';
+}
+function txPrint(){
+  var html=txReportHtml(txModel());
+  var url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  var w=window.open(url,'_blank');
+  if(!w)alert('Le navigateur a bloqué la nouvelle fenêtre. Autorise les fenêtres pour ce site, puis recommence.');
 }
 function txCsv(){
   var A=txAgg(tx.year),q=function(s){s=String(s==null?'':s);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
