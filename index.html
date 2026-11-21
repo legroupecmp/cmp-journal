@@ -400,6 +400,72 @@ body.is-student .nav-item[data-prof]{display:none !important;}
   .tabs{top:56px;}
 }
 
+/* ===== v4 : apparence compacte (idée 3) + bandeau de cotes ===== */
+body{font-size:13px;}
+.page-title{font-size:1.35rem;margin-bottom:0.2rem;}
+.page-sub{font-size:12px;margin-bottom:0.8rem;}
+.q-card{padding:0.7rem 0.9rem;border-radius:9px;margin-bottom:0.6rem;border-color:rgba(26,39,68,0.07);box-shadow:0 1px 2px rgba(26,39,68,0.06);}
+.q-card-title{font-size:10px;letter-spacing:0.13em;margin-bottom:0.55rem;}
+.stat-card{padding:0.65rem 0.85rem;border-radius:9px;border-color:rgba(26,39,68,0.07);box-shadow:0 1px 2px rgba(26,39,68,0.06);}
+.stat-label{font-size:9px;letter-spacing:0.14em;margin-bottom:0.25rem;}
+.stat-val{font-size:1.15rem;}
+.stat-sub{font-size:10.5px;}
+.stat-grid{gap:8px;margin-bottom:0.8rem;}
+.trades-table{font-size:11.5px;}
+.trades-table th{font-size:9px;padding:0 0.5rem 0.4rem;}
+.trades-table td{padding:0.4rem 0.5rem;}
+.q-input{padding:7px 10px;font-size:12px;border-radius:7px;}
+.input-label{font-size:9px;margin-bottom:4px;}
+.btn-next{padding:8px 16px;font-size:11px;border-radius:7px;}
+.btn-back{padding:8px 14px;font-size:11px;border-radius:7px;}
+.home-row{padding:0.4rem 0;font-size:12px;}
+.shell-main .body{max-width:1400px;}
+.home-kpis{gap:9px;margin-bottom:9px;}
+.home-kpi-main,.home-kpis .stat-card{border-radius:9px;}
+.home-kpi-main{padding:0.7rem 0.95rem;}
+.home-kpi-main .big{font-size:1.65rem;margin:2px 0;}
+.hm-kicker{font-size:9.5px;margin-bottom:4px;}
+.hm-hello{font-size:1.5rem;}
+.home-head{margin-bottom:0.7rem;}
+.hm-row{gap:9px;margin-bottom:9px;}
+.hm-row-b{grid-template-columns:1fr 1fr 1fr;}
+.hm-head{margin-bottom:0.55rem;}
+.hm-ent{padding:0.5rem 0.7rem;margin-bottom:6px;border-radius:8px;}
+.hm-ent b{font-size:12px;}.hm-ent small{font-size:10.5px;}.hm-ent .amt{font-size:0.95rem;}
+.hm-dash{min-height:36px;font-size:11.5px;border-radius:8px;}
+.hm-inv{padding:0.45rem 0;min-height:0;}
+.hm-inv b{font-size:12px;}.hm-inv small{font-size:10.5px;}.hm-inv .amt{font-size:12px;}
+.hm-mini{gap:6px;margin-bottom:0.4rem;}
+.hm-mini>div{padding:0.5rem 0.65rem;border-radius:8px;}
+.hm-mini .stat-val{font-size:0.95rem;}
+.hm-note{font-size:10.5px;margin-top:0.5rem;}
+.hm-kpi-row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.hm-kpi-row svg{flex-shrink:0;}
+.hm-tr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0.42rem 0;border-bottom:1px solid var(--border);font-size:12px;}
+.hm-tr:last-child{border-bottom:none;}
+.hm-tr b{color:var(--navy);}.hm-tr em{font-style:normal;color:var(--text3);font-size:10px;margin-left:5px;font-weight:400;}
+.hm-tr i{font-style:normal;color:var(--text3);font-size:10.5px;font-weight:400;}
+.qbar{display:flex;align-items:center;gap:22px;padding:8px 22px;border-bottom:1px solid var(--cream3);font-size:11px;color:#5c6680;overflow-x:auto;white-space:nowrap;scrollbar-width:none;background:var(--cream);}
+.qbar::-webkit-scrollbar{display:none;}
+.qbar .q b{color:var(--navy);font-weight:700;margin-right:4px;}
+.qbar .up{color:var(--green);}.qbar .dn{color:var(--red);}
+.qbar .age{margin-left:auto;color:#9aa1b2;font-size:10px;flex-shrink:0;padding-left:12px;}
+.qbar .age.old{color:var(--red);}
+body.is-student .qbar{display:none;}
+@media(min-width:901px){
+  .sidebar{width:196px;padding:16px 10px 12px;}
+  .nav-item{min-height:36px;font-size:12.5px;gap:10px;padding:0 10px;border-radius:7px;}
+  .nav-label{font-size:9.5px;padding:3px 10px 5px;}
+  .nav-sep{margin:8px 8px;}
+  .sb-title{font-size:1.05rem;}.sb-sub{font-size:9px;}
+  .hm-year button,.home-bell{min-height:34px;}.home-bell{min-width:34px;}
+  .hm-year button{min-width:34px;}
+  .link-btn{min-height:30px;}
+}
+@media(max-width:1100px){.hm-row-b{grid-template-columns:1fr;}}
+@media(max-width:900px){.qbar{padding:8px 14px;gap:18px;}}
+@media(max-width:600px){.home-kpis .stat-card .hm-kpi-row svg{display:none;}.home-kpis .stat-val{white-space:nowrap;}}
+
 </style>
 </head>
 <body>
@@ -459,6 +525,7 @@ body.is-student .nav-item[data-prof]{display:none !important;}
   </aside>
   <div class="sidebar-scrim" onclick="closeSidebar()"></div>
   <div class="shell-main">
+  <div class="qbar" id="qbar" role="region" aria-label="Cotes des marchés"><span class="q" style="color:#9aa1b2;">Cotes…</span></div>
   <div class="tabs" id="journal-tabs" style="display:none;">
     <div class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Tableau de bord</div>
     <div class="tab" data-tab="trades" onclick="switchTab('trades')">Trades</div>
@@ -490,19 +557,19 @@ body.is-student .nav-item[data-prof]{display:none !important;}
       <div class="home-kpis">
         <div class="home-kpi-main">
           <div class="stat-label">Rendement total de l'année</div>
-          <div class="big" id="home-total">—</div>
+          <div class="hm-kpi-row"><div class="big" id="home-total">—</div><span id="sp-total"></span></div>
           <div class="stat-sub">Trading + entreprises, après frais</div>
         </div>
-        <div class="stat-card"><div class="stat-label">Trading</div><div class="stat-val" id="home-trading">—</div><div class="stat-sub" id="home-trading-sub">—</div></div>
-        <div class="stat-card"><div class="stat-label">Entreprises</div><div class="stat-val" id="home-ent">—</div><div class="stat-sub">Revenus − dépenses</div></div>
-        <div class="stat-card"><div class="stat-label">Formation CMP</div><div class="stat-val" id="home-cmp">—</div><div class="stat-sub" id="home-cmp-sub">—</div></div>
+        <div class="stat-card"><div class="stat-label">Trading</div><div class="hm-kpi-row"><div class="stat-val" id="home-trading">—</div><span id="sp-trading"></span></div><div class="stat-sub" id="home-trading-sub">—</div></div>
+        <div class="stat-card"><div class="stat-label">Entreprises</div><div class="hm-kpi-row"><div class="stat-val" id="home-ent">—</div><span id="sp-ent"></span></div><div class="stat-sub">Revenus − dépenses</div></div>
+        <div class="stat-card"><div class="stat-label">Formation CMP</div><div class="hm-kpi-row"><div class="stat-val" id="home-cmp">—</div><span id="sp-cmp"></span></div><div class="stat-sub" id="home-cmp-sub">—</div></div>
       </div>
 
       <div class="hm-row hm-row-a">
         <div class="q-card" style="margin-bottom:0;">
           <div class="hm-head"><div class="q-card-title">Courbe de l'année</div>
             <div class="hm-legend"><span><i style="background:#1a2744"></i>Total</span><span><i style="background:#1a7a4a"></i>Trading</span></div></div>
-          <div style="position:relative;height:230px;"><canvas id="home-chart" aria-label="Courbe de l'année : total et trading"></canvas></div>
+          <div style="position:relative;height:190px;"><canvas id="home-chart" aria-label="Courbe de l'année : total et trading"></canvas></div>
         </div>
         <div class="q-card" style="margin-bottom:0;">
           <div class="hm-head"><div class="q-card-title">Mes entreprises</div><button type="button" class="link-btn" onclick="switchTab('entreprises')">Tout voir</button></div>
@@ -512,6 +579,10 @@ body.is-student .nav-item[data-prof]{display:none !important;}
       </div>
 
       <div class="hm-row hm-row-b">
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Derniers trades</div><button type="button" class="link-btn" onclick="switchTab('trades')">Tout voir</button></div>
+          <div id="home-trades"><div class="loading-msg">Aucun trade</div></div>
+        </div>
         <div class="q-card" style="margin-bottom:0;">
           <div class="hm-head"><div class="q-card-title">Factures récentes</div><button type="button" class="btn-next btn-sm" onclick="switchTab('factures')">Téléverser un fichier</button></div>
           <div id="home-invoices"><div class="loading-msg">Chargement...</div></div>
@@ -1854,6 +1925,7 @@ async function startApp(){
   switchTab(prof?'home':'dashboard');
   await loadData();
   if(prof){
+    qtStart();
     await Promise.all([upLoadCalls(),entLoad(),todoLoad()]);
     renderHome();
   }
@@ -1862,7 +1934,7 @@ async function startApp(){
 function logout(){
   currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
   clearSession();
-  cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;fc.loaded=false;fc.data=null;fc.needAuth=false;fc.stamp='';fc.removed={};fc.folderId=null;fc.catId=null;fc.view='docs';
+  cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;qt.items=[];qt.updatedAt='';fc.loaded=false;fc.data=null;fc.needAuth=false;fc.stamp='';fc.removed={};fc.folderId=null;fc.catId=null;fc.view='docs';
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
   if(perfChart){perfChart.destroy();perfChart=null;}
   if(homeChart){homeChart.destroy();homeChart=null;}
@@ -1905,6 +1977,70 @@ async function homeCompLoad(){
   homeComp.loading=false;
   if(homeComp.loaded)renderHome(true);
 }
+function hmSpark(id,vals,color){
+  var el=document.getElementById(id);if(!el)return;
+  if(vals.length<2)vals=[0,0];
+  var w=72,h=24,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),r=(mx-mn)||1;
+  var pts=vals.map(function(v,i){return (i*w/(vals.length-1)).toFixed(1)+','+(h-2-(v-mn)/r*(h-4)).toFixed(1);});
+  el.innerHTML='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" aria-hidden="true"><polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
+/* ---- BANDEAU DE COTES (prices/quotes, mis à jour toutes les 10 min par GitHub Actions) ---- */
+var qt={items:[],updatedAt:'',timer:null,btcTimer:null,auth:true,error:false};
+function qtFmt(key,v){
+  var d=key==='btc'?0:2,a=Math.abs(v).toFixed(d).split('.');
+  return a[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+(a[1]?','+a[1]:'');
+}
+function qtRender(){
+  var bar=document.getElementById('qbar');if(!bar)return;
+  bar.innerHTML='';
+  if(!qt.items.length){
+    var m=document.createElement('span');m.className='q';m.style.color='#9aa1b2';
+    m.textContent=qt.auth?(qt.error?'Cotes indisponibles pour le moment':'Chargement des cotes…'):'Cotes : connecte-toi avec Google (onglet Factures) pour les voir sur cet appareil';
+    bar.appendChild(m);return;
+  }
+  qt.items.forEach(function(it){
+    var s=document.createElement('span');s.className='q';
+    var b=document.createElement('b');b.textContent=it.name;s.appendChild(b);
+    s.appendChild(document.createTextNode((it.key==='btc'||it.key==='brent'?'$ ':'')+qtFmt(it.key,it.price)+' '));
+    if(it.pct!=null){var c=document.createElement('span');c.className=it.pct>=0?'up':'dn';c.textContent=(it.pct>=0?'+':'−')+Math.abs(it.pct).toFixed(2).replace('.',',')+' %';s.appendChild(c);}
+    bar.appendChild(s);
+  });
+  var ag=document.createElement('span');ag.className='age';
+  if(qt.updatedAt){
+    var mins=Math.max(0,Math.round((Date.now()-new Date(qt.updatedAt).getTime())/60000));
+    ag.textContent=mins<1?'à jour':'il y a '+(mins>=60?Math.floor(mins/60)+' h':mins+' min');
+    if(mins>30)ag.classList.add('old');
+  }
+  bar.appendChild(ag);
+}
+async function qtLoad(){
+  if(currentRole!=='prof'||document.hidden)return;
+  try{
+    var u=await cpUser();
+    if(!u){qt.auth=false;qt.items=[];qtRender();return;}
+    qt.auth=true;
+    var snap=await window.fsGetDoc(cpRef('prices','quotes'));
+    if(snap.exists()){var d=snap.data();qt.items=(d.items||[]).slice();qt.updatedAt=d.updatedAt||'';qt.error=false;}
+    else{qt.error=true;}
+  }catch(e){console.error('qtLoad',e);qt.error=true;}
+  qtRender();qtBtc();
+}
+/* Bitcoin en direct (source publique, sans serveur) ; la variation du jour vient de Yahoo */
+async function qtBtc(){
+  var it=qt.items.find(function(x){return x.key==='btc';});if(!it||document.hidden)return;
+  try{
+    var ctl=new AbortController();var to=setTimeout(function(){ctl.abort();},6000);
+    var res=await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot',{signal:ctl.signal});clearTimeout(to);
+    var j=await res.json(),pr=parseFloat(j&&j.data&&j.data.amount);
+    if(pr>0){it.price=pr;if(it.prev>0)it.pct=Math.round((pr-it.prev)/it.prev*10000)/100;qtRender();}
+  }catch(e){}
+}
+function qtStart(){
+  qtLoad();
+  if(qt.timer)clearInterval(qt.timer);if(qt.btcTimer)clearInterval(qt.btcTimer);
+  qt.timer=setInterval(qtLoad,60000);qt.btcTimer=setInterval(qtBtc,30000);
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&currentRole==='prof')qtLoad();});
 function homeAddEntry(){
   switchTab('entreprises');
   if(entList.length===1)entOpen(entList[0].id);
@@ -1964,6 +2100,10 @@ function renderHome(skipLoad){
     trades.forEach(function(t){var m=parseInt((t.date||'').slice(5,7),10)-1;if(m>=0&&m<12)mt[m]+=t.pnl;});
     var lab=[],dT=[],dA=[],cT=0,cA=0;
     for(var k=0;k<=last;k++){cT+=mt[k];cA+=mt[k]+monthEnt[k];lab.push(MS[k]);dT.push(Math.round(cT*100)/100);dA.push(Math.round(cA*100)/100);}
+    var mc=[];for(var q2=0;q2<12;q2++)mc.push(0);
+    cmp.forEach(function(x){var m=parseInt((x.cohorte||'').slice(5,7),10)-1;if(m>=0&&m<12)mc[m]+=(parseFloat(x.ma_part)||0);});
+    var dE=[],dC=[],cE=0,cC=0;for(var k2=0;k2<=last;k2++){cE+=monthEnt[k2];cC+=mc[k2];dE.push(cE);dC.push(cC);}
+    hmSpark('sp-total',dA,'#7fe0b0');hmSpark('sp-trading',dT,'#1a7a4a');hmSpark('sp-ent',dE,'#1a7a4a');hmSpark('sp-cmp',dC,'#1a2744');
     if(homeChart){homeChart.destroy();homeChart=null;}
     homeChart=new Chart(cv,{type:'line',data:{labels:lab,datasets:[
       {label:'Total',data:dA,borderColor:'#1a2744',borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:0.35,fill:false},
@@ -1971,6 +2111,20 @@ function renderHome(skipLoad){
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+' : '+hmMoney(c.parsed.y);}}}},
         scales:{x:{grid:{display:false},ticks:{font:{family:'Lato',size:10},color:'#7a8599'}},y:{grid:{color:'rgba(26,39,68,0.07)'},border:{display:false},ticks:{display:false}}}}});
+  }
+
+  /* Derniers trades */
+  var trEl=document.getElementById('home-trades');
+  if(trEl){
+    trEl.innerHTML='';
+    if(!allTrades.length)trEl.innerHTML='<div class="loading-msg">Aucun trade</div>';
+    allTrades.slice(-5).reverse().forEach(function(t){
+      var row=document.createElement('div');row.className='hm-tr';
+      var l=document.createElement('div');var b=document.createElement('b');b.textContent=t.sym;var em=document.createElement('em');em.textContent=t.dir;l.appendChild(b);l.appendChild(em);
+      var r=document.createElement('div');r.className=t.pnl>=0?'pnl-pos':'pnl-neg';r.textContent=pctStr(tPct(t))+' ';
+      var i=document.createElement('i');i.textContent=(t.pnl>=0?'+':'−')+'$'+Math.abs(t.pnl).toFixed(0);r.appendChild(i);
+      row.appendChild(l);row.appendChild(r);trEl.appendChild(row);
+    });
   }
 
   /* Mes entreprises */
