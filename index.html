@@ -3463,7 +3463,8 @@ function txModel(){
   var reerAuto=txReerAuto();
   var reer=(yc.reer!==undefined&&yc.reer!==null&&yc.reer!=='')?Number(yc.reer):reerAuto;
   var biz=rev-dep+other;
-  return {B:B,A:A,k:k,rev:rev,dep:dep,other:other,biz:biz,reerAuto:reerAuto,reer:reer,R:txCalc(biz,reer,B),yc:yc};
+  var gst=(A.tot.tpsC+A.tot.tvqC-A.tot.tpsP-A.tot.tvqP)*k;
+  return {B:B,A:A,k:k,rev:rev,dep:dep,other:other,biz:biz,reerAuto:reerAuto,reer:reer,R:txCalc(biz,reer,B),yc:yc,gst:gst};
 }
 
 /* ---------- affichage ---------- */
@@ -3502,21 +3503,22 @@ function txRow(label,val,pct,color){
 }
 function txApercu(M){
   var R=M.R,h='';
-  var rate=R.biz>0?R.total/R.biz*100:0;
+  var rate=R.biz>0?R.total/R.biz*100:0,all=R.total+M.gst;
   h+='<div class="tx-kpis">'
-    +'<div class="stat-card tx-main"><div class="stat-label">À mettre de côté'+(tx.proj?' (projection)':'')+'</div><div class="stat-val">'+txM(R.total)+'</div><div class="stat-sub">'+(R.biz>0?'Soit '+txP(rate)+' de ton revenu net d\'entreprise':'Aucun revenu net pour l\'instant')+'</div></div>'
+    +'<div class="stat-card tx-main"><div class="stat-label">À mettre de côté'+(tx.proj?' (projection)':'')+'</div><div class="stat-val">'+txM(all)+'</div><div class="stat-sub">Impôts et cotisations : '+txM(R.total)+(R.biz>0?' ('+txP(rate)+' de ton revenu net)':'')+' · TPS/TVQ à remettre : '+txM(M.gst)+'</div></div>'
     +txKpi('Revenus (avant taxes)',txM(M.rev),'Revenus d\'entreprise')
     +txKpi('Dépenses déductibles',txM(M.dep),'Après le pourcentage déductible')
     +txKpi('Revenu net d\'entreprise',txM(M.biz),M.other?'Inclut '+txM(M.other)+' d\'autres revenus':'Revenus − dépenses')
     +'</div>';
-  var tot=Math.max(R.total,1);
+  var tot=Math.max(all,1);
   h+='<div class="tx-two"><div class="q-card"><div class="q-card-title">Où va l\'argent</div>'
     +txRow('Impôt fédéral',txM(R.fed),R.fed/tot*100,'#2d4a8a')
     +txRow('Impôt du Québec',txM(R.qc),R.qc/tot*100,'#1a7a4a')
     +txRow('RRQ (les deux parts)',txM(R.rrq),R.rrq/tot*100,'#b8862e')
     +txRow('RQAP',txM(R.rqap),R.rqap/tot*100,'#6e5b8a')
-    +'<div class="tx-sum"><span>Reste après impôts et cotisations</span><b>'+txM(R.biz-R.total)+'</b></div>'
-    +'<div class="stat-sub" style="margin-top:6px;">Taux moyen : '+txP(rate)+' · Impôt sur le revenu seulement : '+txM(R.tax)+'</div></div>';
+    +txRow('TPS/TVQ à remettre',txM(M.gst),Math.max(0,M.gst)/tot*100,'#c0392b')
+    +'<div class="tx-sum"><span>Reste pour toi après impôts et cotisations</span><b>'+txM(R.biz-R.total)+'</b></div>'
+    +'<div class="stat-sub" style="margin-top:6px;">Taux moyen : '+txP(rate)+' · Impôt sur le revenu seulement : '+txM(R.tax)+'. La TPS/TVQ est de l\'argent perçu pour l\'État : elle n\'est pas dans ton revenu net, donc elle ne diminue pas le « reste pour toi ».</div></div>';
   h+='<div class="q-card"><div class="q-card-title">Ajustements</div>'
     +'<label class="input-label" for="tx-other">Autres revenus d\'entreprise (ex. trading)</label><input type="number" step="0.01" class="q-input" id="tx-other" data-y="other" value="'+cpAttr(txNum(M.yc.other))+'" placeholder="0">'
     +'<div class="stat-sub" style="margin:4px 0 12px;">Ton trading n\'est pas calculé ici. Quand tu auras tes relevés, entre le revenu net d\'entreprise à ajouter.</div>'
