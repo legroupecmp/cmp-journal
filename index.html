@@ -3505,9 +3505,9 @@ function txRow(label,val,pct,color){
 }
 function txApercu(M){
   var R=M.R,h='';
-  var rate=R.biz>0?R.total/R.biz*100:0,all=R.total+M.gst;
+  var rate=R.biz>0?R.total/R.biz*100:0,all=R.total+M.gst,S=txSchedule(M),paidAll=S.qcPaid+S.fedPaid+S.taxPaid,left=Math.max(0,all-paidAll);
   h+='<div class="tx-kpis">'
-    +'<div class="stat-card tx-main"><div class="stat-label">À mettre de côté'+(tx.proj?' (projection)':'')+'</div><div class="stat-val">'+txM(all)+'</div><div class="stat-sub">Impôts et cotisations : '+txM(R.total)+(R.biz>0?' ('+txP(rate)+' de ton revenu net)':'')+' · TPS/TVQ à remettre : '+txM(M.gst)+'</div></div>'
+    +'<div class="stat-card tx-main"><div class="stat-label">Reste à mettre de côté'+(tx.proj?' (projection)':'')+'</div><div class="stat-val">'+txM(left)+'</div><div class="stat-sub">Estimation de l\'année : '+txM(all)+' ('+txM(R.total)+' d\'impôts et cotisations + '+txM(M.gst)+' de TPS/TVQ) · déjà versé : '+txM(paidAll)+'</div></div>'
     +txKpi('Revenus (avant taxes)',txM(M.rev),'Revenus d\'entreprise')
     +txKpi('Dépenses déductibles',txM(M.dep),'Après le pourcentage déductible')
     +txKpi('Revenu net d\'entreprise',txM(M.biz),M.other?'Inclut '+txM(M.other)+' d\'autres revenus':'Revenus − dépenses')
@@ -3519,6 +3519,8 @@ function txApercu(M){
     +txRow('RRQ (les deux parts)',txM(R.rrq),R.rrq/tot*100,'#b8862e')
     +txRow('RQAP',txM(R.rqap),R.rqap/tot*100,'#6e5b8a')
     +txRow('TPS/TVQ à remettre',txM(M.gst),Math.max(0,M.gst)/tot*100,'#c0392b')
+    +'<div class="tx-sum"><span>Déjà versé (acomptes et TPS/TVQ cochés dans Échéances)</span><b>'+txM(paidAll)+'</b></div>'
+    +'<div class="tx-sum"><span>Reste à mettre de côté</span><b>'+txM(left)+'</b></div>'
     +'<div class="tx-sum"><span>Reste pour toi après impôts et cotisations</span><b>'+txM(R.biz-R.total)+'</b></div>'
     +'<div class="stat-sub" style="margin-top:6px;">Taux moyen : '+txP(rate)+' · Impôt sur le revenu seulement : '+txM(R.tax)+'. La TPS/TVQ est de l\'argent perçu pour l\'État : elle n\'est pas dans ton revenu net, donc elle ne diminue pas le « reste pour toi ».</div></div>';
   h+='<div class="q-card"><div class="q-card-title">Ajustements</div>'
@@ -3554,7 +3556,7 @@ function txStatus(iso,done){
   if(d===0)return '<span class="tx-chip red">Aujourd\'hui</span>';
   return '<span class="tx-chip '+(d<=14?'red':(d<=45?'yellow':'green'))+'">Dans '+d+' j</span>';
 }
-function txEcheances(M){
+function txSchedule(M){
   var y=tx.year,R=M.R,B=M.B,paid=M.yc.paid||{},L=[];
   var qcDue=R.qc+R.rrq+R.rqap,needQc=qcDue>B.inst,needFed=R.fed>B.inst;
   [['03-15','1er'],['06-15','2e'],['09-15','3e'],['12-15','4e']].forEach(function(d){
@@ -3579,7 +3581,11 @@ function txEcheances(M){
   var amtOv=M.yc.amt||{};
   L.forEach(function(x){(x.pays||[]).forEach(function(p){var o=amtOv[p.key];p.ov=(o!==undefined&&o!==null&&o!=='');p.eff=p.ov?Number(o):p.amt;});});
   var sumP=function(pre){var t=0;L.forEach(function(x){(x.pays||[]).forEach(function(p){if(p.key.indexOf(pre)===0&&paid[p.key])t+=p.eff;});});return t;};
-  var qcPaid=sumP('qc-'),fedPaid=sumP('fed-'),qcAll=R.qc+R.rrq+R.rqap;
+  var qcPaid=sumP('qc-'),fedPaid=sumP('fed-'),taxPaid=sumP('tax-'),qcAll=R.qc+R.rrq+R.rqap;
+  return {L:L,paid:paid,needQc:needQc,needFed:needFed,qcAll:qcAll,qcPaid:qcPaid,fedPaid:fedPaid,taxPaid:taxPaid,y:y,R:R,B:B};
+}
+function txEcheances(M){
+  var S=txSchedule(M),L=S.L,paid=S.paid,needQc=S.needQc,needFed=S.needFed,qcAll=S.qcAll,qcPaid=S.qcPaid,fedPaid=S.fedPaid,y=S.y,R=S.R,B=S.B;
   var next=L.find(function(x){return txDays(x.iso)>=0&&!(x.pays||[]).every(function(p){return paid[p.key];})&&(x.pays?x.pays.some(function(p){return p.need;}):true);});
   var h='<div class="info-box">Acomptes : l\'ARC et Revenu Québec en exigent quand l\'impôt à payer dépasse '+txM(B.inst)+' (selon ton estimation : Québec '+(needQc?'<b>oui</b>':'non')+', fédéral '+(needFed?'<b>oui</b>':'non')+'). Chaque montant est modifiable : laisse le champ vide pour revenir au quart de l\'estimation annuelle.</div>';
   h+='<div class="q-card"><div class="q-card-title">Acomptes de '+y+'</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:340px;"><thead><tr><th>Organisme</th><th>Estimation annuelle</th><th>Déjà versé</th><th>Reste</th></tr></thead><tbody><tr><td>Revenu Québec (impôt, RRQ, RQAP)</td><td>'+txM2(qcAll)+'</td><td>'+txM2(qcPaid)+'</td><td><b>'+txM2(qcAll-qcPaid)+'</b></td></tr><tr><td>Agence du revenu du Canada</td><td>'+txM2(R.fed)+'</td><td>'+txM2(fedPaid)+'</td><td><b>'+txM2(R.fed-fedPaid)+'</b></td></tr></tbody></table></div><div class="hm-note">« Déjà versé » additionne les versements dont la case est cochée. Un reste négatif veut dire que tu as versé plus que l\'estimation.</div></div>';
