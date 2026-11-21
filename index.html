@@ -521,6 +521,55 @@ body.is-student .qbar{display:none;}
 @keyframes mtwave{0%,100%{transform:skewY(-3deg);}50%{transform:skewY(3deg);}}
 @media(max-width:600px){.nb input{font-size:16px;}}
 
+/* v8 : page Impôts */
+.tx-bar-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:0.9rem;}
+.tx-seg{display:inline-flex;border:1px solid var(--border2);border-radius:999px;overflow:hidden;background:#fff;}
+.tx-seg button{border:none;background:none;padding:7px 14px;font-family:'Lato',sans-serif;font-size:12px;color:var(--text2);cursor:pointer;min-height:36px;}
+.tx-seg button.on{background:var(--navy);color:#fff;}
+.tx-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:1rem;padding-bottom:2px;}
+.tx-tabs button{flex-shrink:0;border:1px solid var(--border2);background:#fff;border-radius:999px;padding:8px 14px;font-family:'Lato',sans-serif;font-size:12.5px;color:var(--text2);cursor:pointer;min-height:38px;white-space:nowrap;}
+.tx-tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700;}
+.tx-kpis{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.tx-main{background:var(--navy);color:#fff;}
+.tx-main .stat-label,.tx-main .stat-sub{color:rgba(255,255,255,.78);}
+.tx-main .stat-val{color:#fff;font-size:1.9rem;}
+.tx-two{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-bottom:12px;}
+.tx-two .q-card{margin-bottom:0;}
+.tx-three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.tx-three .q-card{margin-bottom:0;}
+.tx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.tx-row{margin-bottom:12px;}
+.tx-row-h{display:flex;justify-content:space-between;font-size:12.5px;color:var(--navy);margin-bottom:4px;}
+.tx-meter{height:8px;border-radius:99px;background:var(--cream2);overflow:hidden;}
+.tx-meter.big{height:12px;margin:12px 0 8px;}
+.tx-meter i{display:block;height:100%;border-radius:99px;transition:width .6s;}
+.tx-sum{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:6px 0;border-top:1px solid var(--border);color:var(--text2);}
+.tx-sum b{color:var(--navy);}
+.tx-sim{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;}
+.tx-sim-res{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;color:var(--text2);}
+.tx-sim-res b{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);}
+.tx-warn{color:#b03030;font-weight:700;}
+.tx-flag{background:#fdf1c8;color:#6b4e00;border-radius:99px;padding:1px 7px;font-size:9.5px;font-weight:700;letter-spacing:0;text-transform:none;white-space:nowrap;}
+.tx-ov{border-color:#d9a406;background:#fffaf0;}
+.tx-sel{width:96px;min-width:0;padding:4px 8px;height:34px;margin-left:auto;display:block;}
+.tx-src{padding:5px 0;font-size:12.5px;}
+.tx-src a{color:var(--blue-light,#2d4a8a);}
+.tx-dl{display:flex;gap:14px;padding:0.8rem 0;border-bottom:1px solid var(--border);}
+.tx-dl:last-of-type{border-bottom:none;}
+.tx-dl.past{opacity:.55;}
+.tx-dl.next{background:#f4f7fc;border-radius:10px;padding-left:10px;padding-right:10px;margin:0 -10px;border-bottom-color:transparent;}
+.tx-dl-d{flex:0 0 150px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;font-size:12.5px;color:var(--navy);}
+.tx-dl-m{flex:1;min-width:0;}
+.tx-dl-t{font-size:13px;font-weight:700;color:var(--navy);}
+.tx-pay{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--text2);cursor:pointer;}
+.tx-pay span{flex:1;min-width:0;}.tx-pay b{color:var(--navy);white-space:nowrap;}
+.tx-pay input{width:18px;height:18px;accent-color:var(--green);}
+.tx-pay.off{color:var(--text3);cursor:default;}
+.tx-chip{display:inline-block;padding:1px 9px;border-radius:999px;font-size:10.5px;font-weight:700;}
+.tx-chip.red{background:#fceaea;color:#9c2424;}.tx-chip.yellow{background:#fdf1c8;color:#6b4e00;}.tx-chip.green{background:#e8f4ec;color:#14633b;}.tx-chip.ok{background:#e8f4ec;color:#14633b;}.tx-chip.past{background:#eceff4;color:#5d6a82;}
+@media(max-width:1000px){.tx-kpis{grid-template-columns:1fr 1fr;}.tx-main{grid-column:1/-1;}.tx-two,.tx-three{grid-template-columns:1fr;}}
+@media(max-width:600px){.tx-dl{flex-direction:column;gap:6px;}.tx-dl-d{flex:none;flex-direction:row;align-items:center;gap:10px;}.tx-sim{grid-template-columns:1fr;}.tx-kpis .stat-val{font-size:1.25rem;}.tx-main .stat-val{font-size:1.7rem;}.tx-bar-top .link-btn{margin-left:auto;}}
+
 </style>
 </head>
 <body>
@@ -557,6 +606,7 @@ body.is-student .qbar{display:none;}
     <button type="button" class="nav-item" data-section="entreprises" data-prof onclick="switchTab('entreprises')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/></svg>Mes entreprises</button>
     <button type="button" class="nav-item" data-section="factures" data-prof onclick="switchTab('factures')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>Factures</button>
     <button type="button" class="nav-item" data-section="invest" data-prof onclick="switchTab('invest')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>Investissements</button>
+    <button type="button" class="nav-item" data-section="impots" data-prof onclick="switchTab('impots')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 7.5h8"/><path d="M9 12.5h.01M12 12.5h.01M15 12.5h.01M9 16.5h.01M12 16.5h.01M15 16.5h.01"/></svg>Impôts</button>
     <button type="button" class="nav-item" data-section="todo" data-prof onclick="switchTab('todo')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.5 6l1.2 1.2L7 4.8M3.5 12l1.2 1.2L7 10.8M3.5 18l1.2 1.2L7 16.8"/></svg>À faire</button>
     <button type="button" class="nav-item" data-section="etudiants" data-prof onclick="switchTab('upsell')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.4c1.8.8 3 2.6 3 5.6"/></svg>Étudiants CMP</button>
     <div class="nav-tools">
@@ -689,6 +739,13 @@ body.is-student .qbar{display:none;}
           <div id="todo-list"><div class="loading-msg">Chargement...</div></div>
           <div class="stat-sub" style="margin-top:0.6rem;">Une tâche cochée « terminée » disparaît toute seule après 5 jours.</div>
         </div>
+    </div>
+
+    <!-- IMPÔTS -->
+    <div id="tab-impots" class="tab-content">
+      <div class="page-title">Impôts</div>
+      <div class="page-sub">Travail autonome au Québec : combien mettre de côté, tes échéances, tes droits de cotisation et ta TPS/TVQ.</div>
+      <div id="tx-root"><div class="loading-msg">Chargement...</div></div>
     </div>
 
     <!-- FACTURES -->
@@ -1947,7 +2004,7 @@ async function manAddTrade(){
 }
 
 /* ---- NAVIGATION ---- */
-var SECTION_OF={home:'home',dashboard:'journal',trades:'journal',calendrier:'journal',details:'journal',import:'journal',entreprises:'entreprises',invest:'invest',upsell:'etudiants',todo:'todo',factures:'factures'};
+var SECTION_OF={home:'home',dashboard:'journal',trades:'journal',calendrier:'journal',details:'journal',import:'journal',entreprises:'entreprises',invest:'invest',upsell:'etudiants',todo:'todo',factures:'factures',impots:'impots'};
 var lastJournalTab='dashboard';
 
 function toggleSidebar(){document.body.classList.toggle('nav-open');}
@@ -1969,6 +2026,7 @@ function switchTab(name){
   if(name==='entreprises')entRender();
   if(name==='invest')ivMount();
   if(name==='factures')fcMount();
+  if(name==='impots')txMount();
   if(name==='todo')todoRender();
   if(name==='import'){var d=document.getElementById('man-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
   closeSidebar();
@@ -3250,6 +3308,400 @@ function todoDelete(id){
   todoRender();todoPersist();
 }
 
+/* ---- IMPÔTS (travailleur autonome, Québec) ---- */
+var TX_BAR={2026:{
+  fed:{br:[58523,117045,181440,258482],rt:[14,20.5,26,29,33],bpaMax:16452,bpaMin:14829,credit:14,abat:16.5},
+  qc:{br:[54345,108680,132245],rt:[14,19,24,25.75],bpa:18952,credit:14,workRate:6,workMax:1450},
+  rrq:{mga:74600,exempt:3500,mgap:85000,base:5.3,supp1:1,supp2:4},
+  rqap:{rate:0.764,max:103000},
+  reg:{reer:33810,celi:7000,celiapp:8000,celiappLife:40000},
+  inst:1800
+}};
+/* [groupe, clé, libellé, unité, à valider] */
+var TX_FIELDS=[
+ ['Impôt fédéral','fed.br.0','Palier 1 : jusqu\'à','$'],['Impôt fédéral','fed.br.1','Palier 2 : jusqu\'à','$'],['Impôt fédéral','fed.br.2','Palier 3 : jusqu\'à','$'],['Impôt fédéral','fed.br.3','Palier 4 : jusqu\'à','$'],
+ ['Impôt fédéral','fed.rt.0','Taux palier 1','%'],['Impôt fédéral','fed.rt.1','Taux palier 2','%'],['Impôt fédéral','fed.rt.2','Taux palier 3','%'],['Impôt fédéral','fed.rt.3','Taux palier 4','%'],['Impôt fédéral','fed.rt.4','Taux palier 5','%'],
+ ['Impôt fédéral','fed.bpaMax','Montant personnel de base (max.)','$'],['Impôt fédéral','fed.bpaMin','Montant personnel de base (min.)','$'],['Impôt fédéral','fed.credit','Taux des crédits non remboursables','%'],['Impôt fédéral','fed.abat','Abattement du Québec','%'],
+ ['Impôt du Québec','qc.br.0','Palier 1 : jusqu\'à','$'],['Impôt du Québec','qc.br.1','Palier 2 : jusqu\'à','$'],['Impôt du Québec','qc.br.2','Palier 3 : jusqu\'à','$'],
+ ['Impôt du Québec','qc.rt.0','Taux palier 1','%'],['Impôt du Québec','qc.rt.1','Taux palier 2','%'],['Impôt du Québec','qc.rt.2','Taux palier 3','%'],['Impôt du Québec','qc.rt.3','Taux palier 4','%'],
+ ['Impôt du Québec','qc.bpa','Montant personnel de base','$'],['Impôt du Québec','qc.credit','Taux des crédits non remboursables','%'],
+ ['Impôt du Québec','qc.workRate','Déduction pour travailleur : taux','%',1],['Impôt du Québec','qc.workMax','Déduction pour travailleur : maximum','$'],
+ ['RRQ (travailleur autonome)','rrq.mga','Maximum des gains admissibles','$'],['RRQ (travailleur autonome)','rrq.exempt','Exemption de base','$'],['RRQ (travailleur autonome)','rrq.mgap','Deuxième plafond','$',1],
+ ['RRQ (travailleur autonome)','rrq.base','Cotisation de base (part du travailleur)','%',1],['RRQ (travailleur autonome)','rrq.supp1','Première cotisation supplémentaire (part du travailleur)','%',1],['RRQ (travailleur autonome)','rrq.supp2','Deuxième cotisation supplémentaire (part du travailleur)','%',1],
+ ['RQAP (travailleur autonome)','rqap.rate','Taux de cotisation','%'],['RQAP (travailleur autonome)','rqap.max','Revenu maximal assurable','$',1],
+ ['Comptes enregistrés','reg.reer','REER : plafond de l\'année','$'],['Comptes enregistrés','reg.celi','CELI : plafond de l\'année','$'],['Comptes enregistrés','reg.celiapp','CELIAPP : plafond annuel','$'],['Comptes enregistrés','reg.celiappLife','CELIAPP : plafond à vie','$'],
+ ['Autres','inst','Seuil des acomptes provisionnels','$']
+];
+var TX_SOURCES=[
+ ['Taux fédéraux 2026 (ARC)','https://www.canada.ca/fr/agence-revenu/services/impot/particuliers/taux-imposition-tranches-revenu/annee-en-cours.html'],
+ ['Montants indexés 2026 (ARC)','https://www.canada.ca/en/revenue-agency/services/tax/individuals/frequently-asked-questions-individuals/adjustment-personal-income-tax-benefit-amounts.html'],
+ ['Paramètres du régime d\'impôt 2026 (Québec)','https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/finances/publications-adm/parametres/AUTFR_RegimeImpot2026.pdf'],
+ ['Taux du RQAP 2026','https://www.quebec.ca/entreprises-et-travailleurs-autonomes/administrer-gerer/embauche-gestion-personnel/assurance-parentale/taux-cotisations'],
+ ['Cotisations au RRQ 2026 (Retraite Québec)','https://www.rrq.gouv.qc.ca/fra/cnrrsp/Content/Resources/Documents/Infonormes_sommaire_2026_vol_39_no_1.pdf'],
+ ['Plafonds REER et CELI (ARC)','https://www.canada.ca/en/revenue-agency/services/tax/registered-plans-administrators/whats-new.html'],
+ ['Dates des acomptes provisionnels (ARC)','https://www.canada.ca/fr/agence-revenu/services/paiements/paiements-arc/paiements-particuliers/impots-acomptes-provisionnels/dates-limites.html']
+];
+var TX_REV_DEF={'Salaire':0,'Travail autonome':1,'Placements':0,'Remboursement':0,'Autre revenu':1};
+var TX_DEP_DEF={'Logement':0,'Alimentation':50,'Transport':100,'Santé':0,'Assurances':100,'Prêts':0,'Frais bancaires':100,'Publicité':100,'Outils de travail':100,'Loisirs':0,'Éducation':100,'Abonnements':100,'Autre dépense':100};
+var TX_TABS=[['apercu','Aperçu'],['echeances','Échéances'],['cotis','Cotisations'],['taxes','TPS / TVQ'],['depenses','Dépenses'],['baremes','Barèmes']];
+var tx={loaded:false,loading:false,needAuth:false,error:null,year:new Date().getFullYear(),tab:'apercu',proj:false,cfg:{},ent:{},contribs:[],investErr:false,at:0,host:null,sim:{rev:'',reer:''}};
+
+/* ---------- accès aux données ---------- */
+function txGet(o,p){return p.split('.').reduce(function(a,k){return a==null?a:a[k];},o);}
+function txSetVal(o,p,v){var ks=p.split('.'),a=o;for(var i=0;i<ks.length-1;i++)a=a[ks[i]];a[ks[ks.length-1]]=v;}
+function txYC(){return ((tx.cfg.years||{})[String(tx.year)])||{};}
+function txBar(y){
+  var ks=Object.keys(TX_BAR).map(Number).sort(),use=ks[0];
+  ks.forEach(function(k){if(k<=y)use=k;});
+  var B=JSON.parse(JSON.stringify(TX_BAR[use]));
+  var ov=(((tx.cfg.years||{})[String(y)])||{}).bar||{};
+  TX_FIELDS.forEach(function(f){var v=ov[f[1].replace(/\./g,'_')];if(v!==undefined&&v!==null&&v!==''&&isFinite(Number(v)))txSetVal(B,f[1],Number(v));});
+  B._base=use;return B;
+}
+function txMerge(dst,src){Object.keys(src).forEach(function(k){var v=src[k];if(v&&typeof v==='object'&&!Array.isArray(v)){if(!dst[k]||typeof dst[k]!=='object')dst[k]={};txMerge(dst[k],v);}else dst[k]=v;});}
+async function txPatch(obj){
+  txMerge(tx.cfg,obj);
+  setSaveBadge('☁️ Sauvegarde...');
+  try{
+    await cpDb();
+    await window.fsSetDoc(cpRef('compta','_impots'),Object.assign({},obj,{updatedAt:new Date().toISOString()}),{merge:true});
+    setSaveBadge('☁️ Sauvegardé');return true;
+  }catch(e){console.error('txPatch',e);setSaveBadge('⚠ Erreur');alert('Enregistrement impossible : '+cpErr(e));return false;}
+}
+function txPatchY(sub){var o={years:{}};o.years[String(tx.year)]=sub;return txPatch(o);}
+function txNest(path,val){var ks=path.split('.'),o={},a=o;for(var i=0;i<ks.length-1;i++){a[ks[i]]={};a=a[ks[i]];}a[ks[ks.length-1]]=val;return o;}
+
+async function txLoad(){
+  tx.loading=true;tx.error=null;txRender();
+  try{
+    var u=await cpUser();
+    if(!u){tx.needAuth=true;tx.loading=false;txRender();return;}
+    tx.needAuth=false;
+    var s=await window.fsGetDoc(cpRef('compta','_impots'));
+    tx.cfg=s.exists()?s.data():{};
+    var map={};
+    for(var i=0;i<entList.length;i++){
+      var sn=await window.fsGetDoc(cpRef('compta',entList[i].id));
+      map[entList[i].id]=sn.exists()?(sn.data().entries||[]):[];
+    }
+    tx.ent=map;
+    tx.investErr=false;tx.contribs=[];
+    try{var sv=await window.fsGetDoc(cpRef('invest','data'));tx.contribs=sv.exists()?(sv.data().contribs||[]):[];}catch(e){tx.investErr=true;}
+    tx.loaded=true;tx.at=Date.now();
+  }catch(e){tx.error=cpErr(e);}
+  tx.loading=false;txRender();
+}
+function txMount(){
+  tx.host=document.getElementById('tx-root');
+  if(!tx.host)return;
+  if(!tx.loaded||Date.now()-tx.at>60000){if(!tx.loading)txLoad();else txRender();}
+  else txRender();
+}
+
+/* ---------- calculs ---------- */
+function txParts(e){
+  var sub=Number(e.sousTotal)||0,tps=Number(e.tps)||0,tvq=Number(e.tvq)||0,tip=Number(e.pourboire)||0,tot=Number(e.montantTotal)||0;
+  if(!sub)sub=Math.max(0,tot-tps-tvq-tip);
+  return {sub:sub,tps:tps,tvq:tvq,tip:tip,tot:tot};
+}
+function txRevOk(cat){var o=(tx.cfg.rev||{})[cat];if(o!==undefined&&o!==null&&o!=='')return !!Number(o);return TX_REV_DEF[cat]!==undefined?TX_REV_DEF[cat]:1;}
+function txDepPct(cat){var o=(tx.cfg.dep||{})[cat];if(o!==undefined&&o!==null&&o!=='')return Number(o)||0;return TX_DEP_DEF[cat]!==undefined?TX_DEP_DEF[cat]:100;}
+function txAgg(year){
+  var ys=String(year),out={ents:[],tot:{rev:0,dep:0,tpsC:0,tvqC:0,tpsP:0,tvqP:0,noFile:0,n:0},cats:{rev:{},dep:{}},rows:[],q:[0,1,2,3].map(function(){return {tpsC:0,tvqC:0,tpsP:0,tvqP:0};})};
+  entList.forEach(function(en){
+    var a={id:en.id,name:en.name,rev:0,dep:0,tpsC:0,tvqC:0,tpsP:0,tvqP:0,noFile:0,n:0};
+    (tx.ent[en.id]||[]).forEach(function(e){
+      if((e.datePaiement||'').slice(0,4)!==ys)return;
+      var p=txParts(e),isRev=e.type==='revenu',cat=e.categorie||'';
+      var pct=isRev?(txRevOk(cat)?100:0):txDepPct(cat),f=pct/100;
+      var q=Math.min(3,Math.max(0,Math.floor((parseInt((e.datePaiement||'').slice(5,7),10)-1)/3)));
+      var bucket=out.cats[isRev?'rev':'dep'];var c=bucket[cat]||(bucket[cat]={n:0,amt:0});c.n++;c.amt+=p.sub+(isRev?0:p.tip);
+      var ded;
+      if(isRev){ded=pct?p.sub:0;if(pct){a.rev+=p.sub;a.tpsC+=p.tps;a.tvqC+=p.tvq;out.q[q].tpsC+=p.tps;out.q[q].tvqC+=p.tvq;}}
+      else{ded=(p.sub+p.tip)*f;a.dep+=ded;a.tpsP+=p.tps*f;a.tvqP+=p.tvq*f;out.q[q].tpsP+=p.tps*f;out.q[q].tvqP+=p.tvq*f;if(!e.file)a.noFile++;}
+      a.n++;
+      out.rows.push([en.name,e.datePaiement,isRev?'Revenu':'Dépense',cat,e.description||'',p.sub,p.tps,p.tvq,p.tip,p.tot,pct,ded,e.file?'oui':'non']);
+    });
+    a.net=a.rev-a.dep;out.ents.push(a);
+    ['rev','dep','tpsC','tvqC','tpsP','tvqP','noFile','n'].forEach(function(k){out.tot[k]+=a[k];});
+  });
+  return out;
+}
+function txBr(inc,br,rt){var t=0,prev=0;for(var i=0;i<rt.length;i++){var top=i<br.length?br[i]:Infinity;if(inc>prev)t+=(Math.min(inc,top)-prev)*rt[i]/100;prev=top;if(inc<=top)break;}return t;}
+function txCalc(biz,reer,B){
+  var r={biz:biz},P=Math.max(0,biz),rr=B.rrq;
+  var b1=Math.max(0,Math.min(P,rr.mga)-rr.exempt),b2=Math.max(0,Math.min(P,rr.mgap)-rr.mga);
+  var base=2*rr.base/100*b1,s1=2*rr.supp1/100*b1,s2=2*rr.supp2/100*b2;
+  r.rrq=base+s1+s2;
+  var ded=base/2+s1+s2,cred=base/2;
+  r.rqap=B.rqap.rate/100*Math.min(P,B.rqap.max);
+  var net=Math.max(0,biz-ded-reer);r.net=net;
+  var bpa=net<=B.fed.br[2]?B.fed.bpaMax:(net>=B.fed.br[3]?B.fed.bpaMin:B.fed.bpaMax-(B.fed.bpaMax-B.fed.bpaMin)*(net-B.fed.br[2])/(B.fed.br[3]-B.fed.br[2]));
+  var fedBasic=Math.max(0,txBr(net,B.fed.br,B.fed.rt)-(bpa+cred+r.rqap)*B.fed.credit/100);
+  r.fed=fedBasic*(1-B.fed.abat/100);
+  var work=Math.min(B.qc.workMax,B.qc.workRate/100*P);
+  var qcTax=txBr(Math.max(0,net-work),B.qc.br,B.qc.rt);
+  r.qc=Math.max(0,qcTax-(B.qc.bpa+cred+r.rqap)*B.qc.credit/100);
+  r.tax=r.fed+r.qc;r.total=r.fed+r.qc+r.rrq+r.rqap;
+  return r;
+}
+function txReerAuto(){
+  var ys=String(tx.year);
+  return tx.contribs.filter(function(c){return c.type==='REER'&&(c.date||'').slice(0,4)===ys;}).reduce(function(s,c){return s+(parseFloat(c.amount)||0);},0);
+}
+function txContribY(type){
+  var ys=String(tx.year);
+  return tx.contribs.filter(function(c){return c.type===type&&(c.date||'').slice(0,4)===ys;}).reduce(function(s,c){return s+(parseFloat(c.amount)||0);},0);
+}
+function txModel(){
+  var B=txBar(tx.year),A=txAgg(tx.year),yc=txYC(),now=new Date(),k=1;
+  if(tx.proj&&tx.year===now.getFullYear()){
+    var dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+    var frac=(now.getMonth()+now.getDate()/dim)/12;k=Math.min(12,1/Math.max(frac,0.01));
+  }
+  var rev=A.tot.rev*k,dep=A.tot.dep*k,other=Number(yc.other)||0;
+  var reerAuto=txReerAuto();
+  var reer=(yc.reer!==undefined&&yc.reer!==null&&yc.reer!=='')?Number(yc.reer):reerAuto;
+  var biz=rev-dep+other;
+  return {B:B,A:A,k:k,rev:rev,dep:dep,other:other,biz:biz,reerAuto:reerAuto,reer:reer,R:txCalc(biz,reer,B),yc:yc};
+}
+
+/* ---------- affichage ---------- */
+function txM(n){return (Number(n)||0).toLocaleString('fr-CA',{style:'currency',currency:'CAD',maximumFractionDigits:0});}
+function txM2(n){return (Number(n)||0).toLocaleString('fr-CA',{style:'currency',currency:'CAD'});}
+function txP(n){return (Number(n)||0).toLocaleString('fr-CA',{maximumFractionDigits:1})+' %';}
+function txNum(v){return v===undefined||v===null||v===''?'':String(v);}
+function txRender(){
+  var root=tx.host||document.getElementById('tx-root');if(!root)return;tx.host=root;
+  if(!root.__wired){
+    root.addEventListener('click',txClick);root.addEventListener('change',txChange);root.addEventListener('input',txInput);root.__wired=true;
+  }
+  root.innerHTML='';
+  if(tx.needAuth){fcAuthCard(root,function(){tx.loaded=false;tx.needAuth=false;txMount();},'Tes données fiscales sont protégées (comme ta comptabilité). Connecte-toi une seule fois sur cet appareil avec le même compte Google que sur ton ordinateur.');return;}
+  if(tx.error){root.innerHTML='<div class="q-card"><div class="login-error" style="display:block;">'+escapeHtml(tx.error)+'</div><button type="button" class="btn-next" data-act="refresh" style="margin-top:0.8rem;">Réessayer</button></div>';return;}
+  if(!tx.loaded){root.innerHTML='<div class="loading-msg">Chargement...</div>';return;}
+  var M=txModel();
+  var h=txToolbar(M)+txTabs();
+  var fn={apercu:txApercu,echeances:txEcheances,cotis:txCotis,taxes:txTaxes,depenses:txDepenses,baremes:txBaremes}[tx.tab]||txApercu;
+  root.innerHTML=h+fn(M);
+}
+function txToolbar(M){
+  var cur=new Date().getFullYear();
+  var h='<div class="tx-bar-top"><div class="hm-year" role="group" aria-label="Année fiscale"><button type="button" data-act="yr" data-d="-1" aria-label="Année précédente">‹</button><span>Année <b>'+tx.year+'</b></span><button type="button" data-act="yr" data-d="1" aria-label="Année suivante">›</button></div>';
+  if(tx.year===cur)h+='<div class="tx-seg" role="group" aria-label="Période"><button type="button" data-act="proj" data-v="0" class="'+(tx.proj?'':'on')+'">À ce jour</button><button type="button" data-act="proj" data-v="1" class="'+(tx.proj?'on':'')+'">Projection 12 mois</button></div>';
+  h+='<button type="button" class="link-btn" data-act="refresh">Actualiser</button></div>';
+  if(M.B._base!==tx.year)h+='<div class="info-box">Les barèmes de '+M.B._base+' sont utilisés pour '+tx.year+'. Mets-les à jour dans l\'onglet Barèmes quand ils sortent.</div>';
+  return h;
+}
+function txTabs(){
+  return '<div class="tx-tabs" role="tablist">'+TX_TABS.map(function(t){return '<button type="button" role="tab" data-act="tab" data-t="'+t[0]+'" class="'+(tx.tab===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>';
+}
+function txKpi(label,val,sub,cls){return '<div class="stat-card'+(cls?' '+cls:'')+'"><div class="stat-label">'+label+'</div><div class="stat-val">'+val+'</div><div class="stat-sub">'+sub+'</div></div>';}
+function txRow(label,val,pct,color){
+  return '<div class="tx-row"><div class="tx-row-h"><span>'+label+'</span><b>'+val+'</b></div><div class="tx-meter"><i style="width:'+Math.max(0,Math.min(100,pct)).toFixed(1)+'%;background:'+color+'"></i></div></div>';
+}
+function txApercu(M){
+  var R=M.R,h='';
+  var rate=R.biz>0?R.total/R.biz*100:0;
+  h+='<div class="tx-kpis">'
+    +'<div class="stat-card tx-main"><div class="stat-label">À mettre de côté'+(tx.proj?' (projection)':'')+'</div><div class="stat-val">'+txM(R.total)+'</div><div class="stat-sub">'+(R.biz>0?'Soit '+txP(rate)+' de ton revenu net d\'entreprise':'Aucun revenu net pour l\'instant')+'</div></div>'
+    +txKpi('Revenus (avant taxes)',txM(M.rev),'Revenus d\'entreprise')
+    +txKpi('Dépenses déductibles',txM(M.dep),'Après le pourcentage déductible')
+    +txKpi('Revenu net d\'entreprise',txM(M.biz),M.other?'Inclut '+txM(M.other)+' d\'autres revenus':'Revenus − dépenses')
+    +'</div>';
+  var tot=Math.max(R.total,1);
+  h+='<div class="tx-two"><div class="q-card"><div class="q-card-title">Où va l\'argent</div>'
+    +txRow('Impôt fédéral',txM(R.fed),R.fed/tot*100,'#2d4a8a')
+    +txRow('Impôt du Québec',txM(R.qc),R.qc/tot*100,'#1a7a4a')
+    +txRow('RRQ (les deux parts)',txM(R.rrq),R.rrq/tot*100,'#b8862e')
+    +txRow('RQAP',txM(R.rqap),R.rqap/tot*100,'#6e5b8a')
+    +'<div class="tx-sum"><span>Reste après impôts et cotisations</span><b>'+txM(R.biz-R.total)+'</b></div>'
+    +'<div class="stat-sub" style="margin-top:6px;">Taux moyen : '+txP(rate)+' · Impôt sur le revenu seulement : '+txM(R.tax)+'</div></div>';
+  h+='<div class="q-card"><div class="q-card-title">Ajustements</div>'
+    +'<label class="input-label" for="tx-other">Autres revenus d\'entreprise (ex. trading)</label><input type="number" step="0.01" class="q-input" id="tx-other" data-y="other" value="'+cpAttr(txNum(M.yc.other))+'" placeholder="0">'
+    +'<div class="stat-sub" style="margin:4px 0 12px;">Ton trading n\'est pas calculé ici. Quand tu auras tes relevés, entre le revenu net d\'entreprise à ajouter.</div>'
+    +'<label class="input-label" for="tx-reer">Cotisations REER à déduire</label><input type="number" step="0.01" class="q-input" id="tx-reer" data-y="reer" value="'+cpAttr(txNum(M.yc.reer))+'" placeholder="'+cpAttr(M.reerAuto.toFixed(2))+'">'
+    +'<div class="stat-sub" style="margin-top:4px;">'+(tx.investErr?'Placements illisibles pour l\'instant. ':'Vide = cotisations REER de '+tx.year+' inscrites dans Investissements ('+txM2(M.reerAuto)+').')+'</div></div></div>';
+  h+='<div class="q-card"><div class="q-card-title">Et si... ?</div><div class="tx-sim"><div><label class="input-label" for="tx-sim-rev">Revenu net additionnel</label><input type="number" step="100" class="q-input" id="tx-sim-rev" value="'+cpAttr(tx.sim.rev)+'" placeholder="0"></div>'
+    +'<div><label class="input-label" for="tx-sim-reer">Cotisation REER additionnelle</label><input type="number" step="100" class="q-input" id="tx-sim-reer" value="'+cpAttr(tx.sim.reer)+'" placeholder="0"></div></div><div id="tx-sim-out">'+txSimHtml(M)+'</div></div>';
+  h+='<div class="q-card"><div class="q-card-title">Par entreprise ('+tx.year+')</div><div style="overflow-x:auto;"><table class="cp-table"><thead><tr><th>Entreprise</th><th>Revenus</th><th>Dépenses</th><th>Net</th><th>Sans pièce</th></tr></thead><tbody>';
+  M.A.ents.forEach(function(a){h+='<tr><td>'+escapeHtml(a.name)+'</td><td>'+txM(a.rev)+'</td><td>'+txM(a.dep)+'</td><td><b>'+txM(a.net)+'</b></td><td>'+(a.noFile?'<span class="tx-warn">'+a.noFile+'</span>':'0')+'</td></tr>';});
+  if(!M.A.ents.length)h+='<tr><td colspan="5" style="text-align:center;color:var(--text3);">Aucune entreprise</td></tr>';
+  h+='<tr class="total"><td>Total</td><td>'+txM(M.A.tot.rev)+'</td><td>'+txM(M.A.tot.dep)+'</td><td>'+txM(M.A.tot.rev-M.A.tot.dep)+'</td><td>'+M.A.tot.noFile+'</td></tr></tbody></table></div>'
+    +'<div class="hm-note">Montants avant taxes, selon la date de paiement. « Sans pièce » : dépenses sans facture jointe, que tu devrais pouvoir justifier en cas de vérification.</div></div>';
+  h+='<div class="info-box">Estimation à titre indicatif, calculée avec les barèmes de '+M.B._base+' pour un travailleur autonome sans conjoint ni personne à charge. Elle ne remplace pas ta déclaration : fais-la valider par ton comptable.</div>';
+  return h;
+}
+function txSimHtml(M){
+  var a=parseFloat(tx.sim.rev)||0,b=parseFloat(tx.sim.reer)||0;
+  if(!a&&!b)return '<div class="stat-sub">Entre un montant pour voir l\'effet sur ton impôt. Chaque 1 000 $ de revenu additionnel te coûte environ <b>'+txM(txCalc(M.biz+1000,M.reer,M.B).total-M.R.total)+'</b> d\'impôt et de cotisations.</div>';
+  var R2=txCalc(M.biz+a,M.reer+b,M.B),d=R2.total-M.R.total;
+  return '<div class="tx-sim-res"><span>Nouveau total à mettre de côté</span><b>'+txM(R2.total)+'</b></div><div class="stat-sub">'+(d>=0?'Environ '+txM(d)+' de plus':'Environ '+txM(-d)+' de moins')+' qu\'aujourd\'hui.'+(b>0?' Le REER seul réduit ton impôt, pas tes cotisations RRQ.':'')+'</div>';
+}
+
+/* ----- échéances ----- */
+function txDays(iso){var p=iso.split('-').map(Number),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((new Date(p[0],p[1]-1,p[2])-t)/86400000);}
+function txDateFr(iso){var p=iso.split('-').map(Number);return p[2]+' '+MONTHS[p[1]-1].toLowerCase()+' '+p[0];}
+function txIso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function txStatus(iso,done){
+  if(done)return '<span class="tx-chip ok">Payé</span>';
+  var d=txDays(iso);
+  if(d<0)return '<span class="tx-chip past">Passé</span>';
+  if(d===0)return '<span class="tx-chip red">Aujourd\'hui</span>';
+  return '<span class="tx-chip '+(d<=14?'red':(d<=45?'yellow':'green'))+'">Dans '+d+' j</span>';
+}
+function txEcheances(M){
+  var y=tx.year,R=M.R,B=M.B,paid=M.yc.paid||{},L=[];
+  var qcDue=R.qc+R.rrq+R.rqap,needQc=qcDue>B.inst,needFed=R.fed>B.inst;
+  [['03-15','1er'],['06-15','2e'],['09-15','3e'],['12-15','4e']].forEach(function(d){
+    L.push({iso:y+'-'+d[0],title:'Acompte provisionnel ('+d[1]+' versement)',pays:[
+      {key:'qc-'+d[0],who:'Revenu Québec',amt:needQc?qcDue/4:0,need:needQc},
+      {key:'fed-'+d[0],who:'Agence du revenu du Canada',amt:needFed?R.fed/4:0,need:needFed}]});
+  });
+  var reerD=new Date(y+1,0,60);
+  L.push({iso:txIso(reerD),title:'Dernier jour pour cotiser au REER et le déduire de '+y,note:'Les cotisations faites dans les 60 premiers jours de '+(y+1)+' peuvent compter pour '+y+'.'});
+  L.push({iso:(y+1)+'-04-30',title:'Solde d\'impôt à payer pour '+y,note:'Date limite de paiement, même si tu produis plus tard.'});
+  L.push({iso:(y+1)+'-06-15',title:'Production de la déclaration de '+y+' (travailleur autonome)',note:'Le paiement reste dû le 30 avril.'});
+  var freq=tx.cfg.freq||'annual',net=function(q){return (q.tpsC-q.tpsP)+(q.tvqC-q.tvqP);};
+  if(freq==='quarterly'){
+    [[0,y+'-04-30','1er trimestre'],[1,y+'-07-31','2e trimestre'],[2,y+'-10-31','3e trimestre'],[3,(y+1)+'-01-31','4e trimestre']].forEach(function(q){
+      L.push({iso:q[1],title:'TPS/TVQ : déclaration et paiement ('+q[2]+')',pays:[{key:'tax-q'+q[0],who:'Revenu Québec et ARC',amt:Math.max(0,net(M.A.q[q[0]])),need:true}]});
+    });
+  }else{
+    L.push({iso:(y+1)+'-04-30',title:'TPS/TVQ : paiement du solde de '+y,pays:[{key:'tax-a',who:'Revenu Québec et ARC',amt:Math.max(0,net({tpsC:M.A.tot.tpsC,tpsP:M.A.tot.tpsP,tvqC:M.A.tot.tvqC,tvqP:M.A.tot.tvqP})),need:true}]});
+    L.push({iso:(y+1)+'-06-15',title:'TPS/TVQ : production de la déclaration annuelle de '+y});
+  }
+  L.sort(function(a,b){return a.iso.localeCompare(b.iso);});
+  var next=L.find(function(x){return txDays(x.iso)>=0&&!(x.pays||[]).every(function(p){return paid[p.key];})&&(x.pays?x.pays.some(function(p){return p.need;}):true);});
+  var h='<div class="info-box">Acomptes : l\'ARC et Revenu Québec en exigent quand l\'impôt à payer dépasse '+txM(B.inst)+' (selon ton estimation : Québec '+(needQc?'<b>oui</b>':'non')+', fédéral '+(needFed?'<b>oui</b>':'non')+'). Le montant de chaque versement est le quart de l\'estimation annuelle.</div>';
+  h+='<div class="q-card"><div class="q-card-title">Calendrier fiscal '+y+'</div>';
+  L.forEach(function(x){
+    var done=x.pays&&x.pays.filter(function(p){return p.need;}).length>0&&x.pays.filter(function(p){return p.need;}).every(function(p){return paid[p.key];});
+    h+='<div class="tx-dl'+(x===next?' next':'')+(txDays(x.iso)<0&&!done?' past':'')+'"><div class="tx-dl-d"><b>'+txDateFr(x.iso)+'</b>'+txStatus(x.iso,done)+'</div><div class="tx-dl-m"><div class="tx-dl-t">'+escapeHtml(x.title)+'</div>';
+    if(x.note)h+='<div class="stat-sub">'+escapeHtml(x.note)+'</div>';
+    (x.pays||[]).forEach(function(p){
+      h+=p.need?'<label class="tx-pay"><input type="checkbox" data-act="paid" data-key="'+p.key+'"'+(paid[p.key]?' checked':'')+'><span>'+escapeHtml(p.who)+'</span><b>'+txM2(p.amt)+'</b></label>':'<div class="tx-pay off"><span>'+escapeHtml(p.who)+' : non requis selon ton estimation</span></div>';
+    });
+    h+='</div></div>';
+  });
+  return h+'<div class="hm-note">Si une date tombe un week-end ou un jour férié, le paiement est accepté le jour ouvrable suivant.</div></div>';
+}
+
+/* ----- droits de cotisation ----- */
+function txCotis(M){
+  var B=M.B,rooms=M.yc.rooms||{},h='<div class="info-box">Ton droit de cotisation personnel est inscrit sur ton avis de cotisation et dans Mon dossier (ARC). Inscris-le ici une fois par année. Les cotisations faites viennent de ta page Investissements'+(tx.investErr?' <b>(illisible pour le moment)</b>':'')+'.</div><div class="tx-three">';
+  var defs=[
+    ['REER','reer','REER','#2d4a8a','Plafond '+tx.year+' : '+txM(B.reg.reer)+'. Les cotisations réduisent ton impôt.'],
+    ['CELI','celi','CELI','#1a7a4a','Ajout annuel de '+txM(B.reg.celi)+', plus les droits non utilisés des années passées.'],
+    ['CELIAPP','celiapp','CELIAPP','#b8862e','Ajout annuel de '+txM(B.reg.celiapp)+', maximum à vie de '+txM(B.reg.celiappLife)+'. Les cotisations sont déductibles.']];
+  defs.forEach(function(d){
+    var room=parseFloat(rooms[d[1]]),has=isFinite(room),used=d[0]==='REER'?M.reer:txContribY(d[0]);
+    var rem=has?Math.max(0,room-used):null,pct=has&&room>0?used/room*100:0;
+    h+='<div class="q-card"><div class="q-card-title">'+d[2]+'</div>'
+      +'<label class="input-label" for="tx-room-'+d[1]+'">Droit de cotisation disponible</label><input type="number" step="0.01" class="q-input" id="tx-room-'+d[1]+'" data-y="rooms.'+d[1]+'" value="'+cpAttr(txNum(rooms[d[1]]))+'" placeholder="Ex. 15 000">'
+      +'<div class="tx-meter big"><i style="width:'+Math.min(100,pct).toFixed(1)+'%;background:'+d[3]+'"></i></div>'
+      +'<div class="tx-sum"><span>Cotisé en '+tx.year+'</span><b>'+txM2(used)+'</b></div>'
+      +'<div class="tx-sum"><span>Droit restant</span><b>'+(has?txM2(rem):'À inscrire')+'</b></div>';
+    if(d[0]==='REER'&&has&&rem>0){var s=txCalc(M.biz,M.reer,B).total-txCalc(M.biz,M.reer+rem,B).total;h+='<div class="stat-sub" style="margin-top:6px;">Si tu utilises tout ton droit restant, tu économises environ <b>'+txM(s)+'</b> d\'impôt.</div>';}
+    if(d[0]==='REER'&&M.reer!==M.reerAuto)h+='<div class="stat-sub">Montant manuel de '+txM2(M.reer)+' utilisé pour le calcul (placements : '+txM2(M.reerAuto)+').</div>';
+    h+='<div class="stat-sub" style="margin-top:8px;">'+d[4]+'</div></div>';
+  });
+  return h+'</div>';
+}
+
+/* ----- TPS / TVQ ----- */
+function txTaxes(M){
+  var A=M.A,freq=tx.cfg.freq||'annual';
+  var h='<div class="q-card"><div class="q-card-title">TPS et TVQ ('+tx.year+')</div><div class="input-row" style="margin-bottom:0.6rem;"><div><label class="input-label" for="tx-freq">Fréquence de production</label><select class="q-input" id="tx-freq" data-g="freq"><option value="annual"'+(freq==='annual'?' selected':'')+'>Annuelle</option><option value="quarterly"'+(freq==='quarterly'?' selected':'')+'>Trimestrielle</option></select></div><div></div></div>'
+    +'<div style="overflow-x:auto;"><table class="cp-table"><thead><tr><th>Entreprise</th><th>TPS perçue</th><th>TVQ perçue</th><th>TPS payée</th><th>TVQ payée</th><th>À remettre</th></tr></thead><tbody>';
+  A.ents.forEach(function(a){h+='<tr><td>'+escapeHtml(a.name)+'</td><td>'+txM2(a.tpsC)+'</td><td>'+txM2(a.tvqC)+'</td><td>'+txM2(a.tpsP)+'</td><td>'+txM2(a.tvqP)+'</td><td><b>'+txM2(a.tpsC+a.tvqC-a.tpsP-a.tvqP)+'</b></td></tr>';});
+  var T=A.tot;h+='<tr class="total"><td>Total</td><td>'+txM2(T.tpsC)+'</td><td>'+txM2(T.tvqC)+'</td><td>'+txM2(T.tpsP)+'</td><td>'+txM2(T.tvqP)+'</td><td>'+txM2(T.tpsC+T.tvqC-T.tpsP-T.tvqP)+'</td></tr></tbody></table></div>'
+    +'<div class="hm-note">« Payée » est la taxe sur tes dépenses que tu peux récupérer (crédits de taxe sur les intrants et remboursement de la TVQ). Elle suit le pourcentage déductible de chaque catégorie, par exemple 50 % pour les repas. Les revenus exclus (salaire, remboursement) sont ignorés. Vérifie la fréquence de production dans ton dossier de TPS/TVQ.</div></div>';
+  if(freq==='quarterly'){
+    h+='<div class="q-card"><div class="q-card-title">Par trimestre</div><div style="overflow-x:auto;"><table class="cp-table"><thead><tr><th>Trimestre</th><th>Perçue</th><th>Payée</th><th>À remettre</th></tr></thead><tbody>';
+    A.q.forEach(function(q,i){var c=q.tpsC+q.tvqC,p=q.tpsP+q.tvqP;h+='<tr><td>T'+(i+1)+'</td><td>'+txM2(c)+'</td><td>'+txM2(p)+'</td><td><b>'+txM2(c-p)+'</b></td></tr>';});
+    h+='</tbody></table></div></div>';
+  }
+  return h;
+}
+
+/* ----- dépenses ----- */
+function txDepenses(M){
+  var A=M.A,h='<div class="info-box">Choisis, pour chaque catégorie, la part qui est déductible. J\'ai mis des valeurs de départ prudentes (par exemple 50 % pour l\'alimentation, 0 % pour le logement et la santé) : ajuste-les selon ta situation, par exemple une partie du logement si tu travailles à domicile. Les changements s\'appliquent à tout le terminal.</div>';
+  h+='<div class="q-card"><div class="q-card-title">Revenus inclus dans le revenu d\'entreprise</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:300px;"><thead><tr><th>Catégorie</th><th>'+tx.year+'</th><th>Inclure</th></tr></thead><tbody>';
+  var rc=Object.keys(TX_REV_DEF);Object.keys(A.cats.rev).forEach(function(c){if(rc.indexOf(c)<0)rc.push(c);});
+  rc.forEach(function(c){var x=A.cats.rev[c]||{n:0,amt:0};h+='<tr><td>'+escapeHtml(c)+'</td><td>'+txM(x.amt)+'</td><td><input type="checkbox" data-gc="rev" data-cat="'+cpAttr(c)+'"'+(txRevOk(c)?' checked':'')+' aria-label="Inclure '+cpAttr(c)+'"></td></tr>';});
+  h+='</tbody></table></div></div><div class="q-card"><div class="q-card-title">Dépenses déductibles</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:340px;"><thead><tr><th>Catégorie</th><th>'+tx.year+'</th><th>Déductible</th></tr></thead><tbody>';
+  var dc=Object.keys(TX_DEP_DEF);Object.keys(A.cats.dep).forEach(function(c){if(dc.indexOf(c)<0)dc.push(c);});
+  dc.forEach(function(c){var x=A.cats.dep[c]||{n:0,amt:0},p=txDepPct(c);
+    h+='<tr><td>'+escapeHtml(c)+'</td><td>'+txM(x.amt)+'</td><td><select class="q-input tx-sel" data-gc="dep" data-cat="'+cpAttr(c)+'" aria-label="Part déductible : '+cpAttr(c)+'">'+[0,25,50,75,100].concat([0,25,50,75,100].indexOf(p)<0?[p]:[]).sort(function(a,b){return a-b;}).map(function(v){return '<option value="'+v+'"'+(v===p?' selected':'')+'>'+v+' %</option>';}).join('')+'</select></td></tr>';});
+  h+='</tbody></table></div></div>';
+  h+='<div class="q-card"><div class="q-card-title">Pièces justificatives et export</div><div class="stat-sub" style="margin-bottom:0.8rem;">'+(A.tot.noFile?'<b>'+A.tot.noFile+'</b> dépense'+(A.tot.noFile>1?'s':'')+' de '+tx.year+' sans facture jointe. Garde tes preuves pendant au moins 6 ans.':'Toutes les dépenses de '+tx.year+' ont une facture jointe.')+'</div><button type="button" class="btn-next btn-sm" data-act="csv">Exporter '+tx.year+' pour le comptable (CSV)</button></div>';
+  return h;
+}
+
+/* ----- barèmes ----- */
+function txBaremes(M){
+  var ov=((tx.cfg.years||{})[String(tx.year)]||{}).bar||{},groups=[],h='<div class="info-box">Les valeurs viennent des sources officielles consultées le 21 novembre 2026. Tu peux les modifier quand elles changent. Les champs marqués <span class="tx-flag">à valider</span> sont une déduction de ma part ou un détail que je n\'ai pas pu confirmer dans la source : vérifie-les avec ton comptable.</div>';
+  TX_FIELDS.forEach(function(f){if(groups.indexOf(f[0])<0)groups.push(f[0]);});
+  groups.forEach(function(g){
+    h+='<div class="q-card"><div class="q-card-title">'+escapeHtml(g)+'</div><div class="tx-grid">';
+    TX_FIELDS.filter(function(f){return f[0]===g;}).forEach(function(f){
+      var k=f[1].replace(/\./g,'_'),isOv=ov[k]!==undefined&&ov[k]!==null&&ov[k]!=='';
+      h+='<div><label class="input-label" for="tx-b-'+k+'">'+escapeHtml(f[2])+' ('+f[3]+')'+(f[4]?' <span class="tx-flag">à valider</span>':'')+'</label><input type="number" step="any" class="q-input'+(isOv?' tx-ov':'')+'" id="tx-b-'+k+'" data-b="'+k+'" value="'+txGet(M.B,f[1])+'"></div>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="q-card"><div class="q-card-title">Sources</div>'+TX_SOURCES.map(function(s){return '<div class="tx-src"><a href="'+s[1]+'" target="_blank" rel="noopener">'+escapeHtml(s[0])+'</a></div>';}).join('')
+    +'<button type="button" class="link-btn" data-act="resetbar" style="margin-top:0.8rem;">Rétablir les valeurs officielles de '+M.B._base+'</button></div>';
+  return h;
+}
+
+/* ---------- événements ---------- */
+function txClick(e){
+  var b=e.target.closest('[data-act]');if(!b||!tx.host.contains(b))return;
+  var a=b.getAttribute('data-act');
+  if(a==='paid')return;
+  if(a==='tab'){tx.tab=b.getAttribute('data-t');txRender();}
+  else if(a==='yr'){tx.year+=parseInt(b.getAttribute('data-d'),10);txRender();}
+  else if(a==='proj'){tx.proj=b.getAttribute('data-v')==='1';txRender();}
+  else if(a==='refresh'){tx.loaded=false;txLoad();}
+  else if(a==='csv')txCsv();
+  else if(a==='resetbar'){
+    if(!confirm('Rétablir les valeurs officielles pour '+tx.year+' ?'))return;
+    var o={};TX_FIELDS.forEach(function(f){o[f[1].replace(/\./g,'_')]=null;});
+    txPatchY({bar:o}).then(txRender);
+  }
+}
+function txInput(e){
+  var t=e.target;
+  if(t.id==='tx-sim-rev'||t.id==='tx-sim-reer'){
+    tx.sim[t.id==='tx-sim-rev'?'rev':'reer']=t.value;
+    var o=document.getElementById('tx-sim-out');if(o)o.innerHTML=txSimHtml(txModel());
+  }
+}
+function txChange(e){
+  var t=e.target,v;
+  if(t.getAttribute('data-act')==='paid'){var o={paid:{}};o.paid[t.getAttribute('data-key')]=t.checked;txPatchY(o).then(txRender);return;}
+  var y=t.getAttribute('data-y');
+  if(y){v=t.value===''?'':Number(t.value);if(v!==''&&!isFinite(v))return;txPatchY(txNest(y,v)).then(txRender);return;}
+  var gc=t.getAttribute('data-gc');
+  if(gc){var c={};c[t.getAttribute('data-cat')]=t.type==='checkbox'?(t.checked?1:0):Number(t.value);var p={};p[gc]=c;txPatch(p).then(txRender);return;}
+  var g=t.getAttribute('data-g');
+  if(g){txPatch(txNest(g,t.value)).then(txRender);return;}
+  var b=t.getAttribute('data-b');
+  if(b){var bo={};bo[b]=t.value===''?null:Number(t.value);txPatchY({bar:bo}).then(txRender);}
+}
+function txCsv(){
+  var A=txAgg(tx.year),q=function(s){s=String(s==null?'':s);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  var head=['Entreprise','Date de paiement','Type','Catégorie','Description','Montant avant taxes','TPS','TVQ','Pourboire','Total payé','Part déductible (%)','Montant retenu','Pièce jointe'];
+  var lines=[head.map(q).join(';')];
+  A.rows.sort(function(a,b){return String(a[1]).localeCompare(String(b[1]));}).forEach(function(r){lines.push(r.map(function(x,i){return (i>=5&&i<=9||i===11)?Number(x).toFixed(2).replace('.',','):q(x);}).join(';'));});
+  var blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Impots-'+tx.year+'.csv';document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+}
+
 /* ---- INVESTISSEMENTS (portefeuilles, cotisations, revenus T5) ---- */
 var IV_TYPES=[{k:'REER',label:'REER'},{k:'CELI',label:'CELI'},{k:'CELIAPP',label:'CELIAPP'},{k:'NR',label:'Non enregistré'}];
 var IV_COLORS={REER:'#2d4a8a',CELI:'#1a7a4a',CELIAPP:'#b8862e',NR:'#6e5b8a'};
@@ -3816,11 +4268,11 @@ function fcRender(){
   root.appendChild(tabs);
   if(fc.view==='gen')fcRenderGen(root);else fcRenderDocs(root);
 }
-function fcAuthCard(root){
+function fcAuthCard(root,cb,msg){
   var c=fcEl('div','q-card');c.appendChild(fcEl('div','q-card-title','Connexion sécurisée'));
-  c.appendChild(fcEl('div','info-box','Tes factures sont protégées et partagées entre tes appareils. Connecte-toi une seule fois sur cet appareil avec le même compte Google que sur ton ordinateur.'));
+  c.appendChild(fcEl('div','info-box',msg||'Tes factures sont protégées et partagées entre tes appareils. Connecte-toi une seule fois sur cet appareil avec le même compte Google que sur ton ordinateur.'));
   var er=fcEl('div','login-error');
-  function after(){fc.loaded=false;fc.needAuth=false;fcMount();}
+  function after(){if(cb){cb();return;}fc.loaded=false;fc.needAuth=false;fcMount();}
   var g=fcBtn('Se connecter avec Google','btn-next',async function(){
     er.style.display='none';
     if(!window.fbSignInGoogle){er.textContent='Le module de connexion n\'est pas chargé. Recharge la page.';er.style.display='block';return;}
