@@ -3465,9 +3465,13 @@ function txModel(){
   var rev=A.tot.rev*k,dep=A.tot.dep*k,other=Number(yc.other)||0;
   var reerAuto=txReerAuto();
   var reer=(yc.reer!==undefined&&yc.reer!==null&&yc.reer!=='')?Number(yc.reer):reerAuto;
+  var celiappAuto=txContribY('CELIAPP');
+  var celiappRaw=(yc.celiapp!==undefined&&yc.celiapp!==null&&yc.celiapp!=='')?Number(yc.celiapp):celiappAuto;
+  var roomC=parseFloat((yc.rooms||{}).celiapp),celiappCap=isFinite(roomC)?roomC:B.reg.celiapp;
+  var celiapp=Math.max(0,Math.min(celiappRaw,celiappCap)),ded=reer+celiapp;
   var biz=rev-dep+other;
   var gst=(A.tot.tpsC+A.tot.tvqC-A.tot.tpsP-A.tot.tvqP)*k;
-  return {B:B,A:A,k:k,rev:rev,dep:dep,other:other,biz:biz,reerAuto:reerAuto,reer:reer,R:txCalc(biz,reer,B),yc:yc,gst:gst};
+  return {celiappAuto:celiappAuto,celiappRaw:celiappRaw,celiappCap:celiappCap,celiapp:celiapp,ded:ded,B:B,A:A,k:k,rev:rev,dep:dep,other:other,biz:biz,reerAuto:reerAuto,reer:reer,R:txCalc(biz,ded,B),yc:yc,gst:gst};
 }
 
 /* ---------- affichage ---------- */
@@ -3528,9 +3532,11 @@ function txApercu(M){
     +'<label class="input-label" for="tx-other">Autres revenus d\'entreprise (ex. trading)</label><input type="number" step="0.01" class="q-input" id="tx-other" data-y="other" value="'+cpAttr(txNum(M.yc.other))+'" placeholder="0">'
     +'<div class="stat-sub" style="margin:4px 0 12px;">Ton trading n\'est pas calculé ici. Quand tu auras tes relevés, entre le revenu net d\'entreprise à ajouter.</div>'
     +'<label class="input-label" for="tx-reer">Cotisations REER à déduire</label><input type="number" step="0.01" class="q-input" id="tx-reer" data-y="reer" value="'+cpAttr(txNum(M.yc.reer))+'" placeholder="'+cpAttr(M.reerAuto.toFixed(2))+'">'
-    +'<div class="stat-sub" style="margin-top:4px;">'+(tx.investErr?'Placements illisibles pour l\'instant. ':'Vide = cotisations REER de '+tx.year+' inscrites dans Investissements ('+txM2(M.reerAuto)+').')+'</div></div></div>';
+    +'<div class="stat-sub" style="margin:4px 0 12px;">'+(tx.investErr?'Placements illisibles pour l\'instant. ':'Vide = cotisations REER de '+tx.year+' inscrites dans Investissements ('+txM2(M.reerAuto)+').')+'</div>'
+    +'<label class="input-label" for="tx-celiapp">Cotisations CELIAPP à déduire</label><input type="number" step="0.01" class="q-input" id="tx-celiapp" data-y="celiapp" value="'+cpAttr(txNum(M.yc.celiapp))+'" placeholder="'+cpAttr(M.celiappAuto.toFixed(2))+'">'
+    +'<div class="stat-sub" style="margin-top:4px;">Vide = cotisations CELIAPP de '+tx.year+' inscrites dans Investissements ('+txM2(M.celiappAuto)+'). Plafonné à ton droit inscrit dans Cotisations, ou à '+txM(M.B.reg.celiapp)+' s\'il n\'est pas inscrit.'+(M.celiappRaw>M.celiappCap?' <b>Plafond atteint : '+txM2(M.celiapp)+' déduit.</b>':'')+'</div></div></div>';
   h+='<div class="q-card"><div class="q-card-title">Et si... ?</div><div class="tx-sim"><div><label class="input-label" for="tx-sim-rev">Revenu net additionnel</label><input type="number" step="100" class="q-input" id="tx-sim-rev" value="'+cpAttr(tx.sim.rev)+'" placeholder="0"></div>'
-    +'<div><label class="input-label" for="tx-sim-reer">Cotisation REER additionnelle</label><input type="number" step="100" class="q-input" id="tx-sim-reer" value="'+cpAttr(tx.sim.reer)+'" placeholder="0"></div></div><div id="tx-sim-out">'+txSimHtml(M)+'</div></div>';
+    +'<div><label class="input-label" for="tx-sim-reer">Cotisation additionnelle (REER ou CELIAPP)</label><input type="number" step="100" class="q-input" id="tx-sim-reer" value="'+cpAttr(tx.sim.reer)+'" placeholder="0"></div></div><div id="tx-sim-out">'+txSimHtml(M)+'</div></div>';
   h+='<div class="q-card"><div class="q-card-title">Par entreprise ('+tx.year+')</div><div style="overflow-x:auto;"><table class="cp-table"><thead><tr><th>Entreprise</th><th>Revenus</th><th>Dépenses</th><th>Net</th><th>Sans pièce</th></tr></thead><tbody>';
   M.A.ents.forEach(function(a){h+='<tr><td>'+escapeHtml(a.name)+'</td><td>'+txM(a.rev)+'</td><td>'+txM(a.dep)+'</td><td><b>'+txM(a.net)+'</b></td><td>'+(a.noFile?'<span class="tx-warn">'+a.noFile+'</span>':'0')+'</td></tr>';});
   if(!M.A.ents.length)h+='<tr><td colspan="5" style="text-align:center;color:var(--text3);">Aucune entreprise</td></tr>';
@@ -3541,9 +3547,9 @@ function txApercu(M){
 }
 function txSimHtml(M){
   var a=parseFloat(tx.sim.rev)||0,b=parseFloat(tx.sim.reer)||0;
-  if(!a&&!b)return '<div class="stat-sub">Entre un montant pour voir l\'effet sur ton impôt. Chaque 1 000 $ de revenu additionnel te coûte environ <b>'+txM(txCalc(M.biz+1000,M.reer,M.B).total-M.R.total)+'</b> d\'impôt et de cotisations.</div>';
-  var R2=txCalc(M.biz+a,M.reer+b,M.B),d=R2.total-M.R.total;
-  return '<div class="tx-sim-res"><span>Nouveau total à mettre de côté</span><b>'+txM(R2.total)+'</b></div><div class="stat-sub">'+(d>=0?'Environ '+txM(d)+' de plus':'Environ '+txM(-d)+' de moins')+' qu\'aujourd\'hui.'+(b>0?' Le REER seul réduit ton impôt, pas tes cotisations RRQ.':'')+'</div>';
+  if(!a&&!b)return '<div class="stat-sub">Entre un montant pour voir l\'effet sur ton impôt. Chaque 1 000 $ de revenu additionnel te coûte environ <b>'+txM(txCalc(M.biz+1000,M.ded,M.B).total-M.R.total)+'</b> d\'impôt et de cotisations.</div>';
+  var R2=txCalc(M.biz+a,M.ded+b,M.B),d=R2.total-M.R.total;
+  return '<div class="tx-sim-res"><span>Nouveau total à mettre de côté</span><b>'+txM(R2.total)+'</b></div><div class="stat-sub">'+(d>=0?'Environ '+txM(d)+' de plus':'Environ '+txM(-d)+' de moins')+' qu\'aujourd\'hui.'+(b>0?' Une cotisation au REER ou au CELIAPP réduit ton impôt, pas tes cotisations RRQ.':'')+'</div>';
 }
 
 /* ----- échéances ----- */
@@ -3618,8 +3624,13 @@ function txCotis(M){
       +'<div class="tx-meter big"><i style="width:'+Math.min(100,pct).toFixed(1)+'%;background:'+d[3]+'"></i></div>'
       +'<div class="tx-sum"><span>Cotisé en '+tx.year+'</span><b>'+txM2(used)+'</b></div>'
       +'<div class="tx-sum"><span>Droit restant</span><b>'+(has?txM2(rem):'À inscrire')+'</b></div>';
-    if(d[0]==='REER'&&has&&rem>0){var s=txCalc(M.biz,M.reer,B).total-txCalc(M.biz,M.reer+rem,B).total;h+='<div class="stat-sub" style="margin-top:6px;">Si tu utilises tout ton droit restant, tu économises environ <b>'+txM(s)+'</b> d\'impôt.</div>';}
+    if(d[0]==='REER'&&has&&rem>0){var s=txCalc(M.biz,M.ded,B).total-txCalc(M.biz,M.ded+rem,B).total;h+='<div class="stat-sub" style="margin-top:6px;">Si tu utilises tout ton droit restant, tu économises environ <b>'+txM(s)+'</b> d\'impôt.</div>';}
     if(d[0]==='REER'&&M.reer!==M.reerAuto)h+='<div class="stat-sub">Montant manuel de '+txM2(M.reer)+' utilisé pour le calcul (placements : '+txM2(M.reerAuto)+').</div>';
+    if(d[0]==='CELIAPP'){
+      h+='<div class="stat-sub" style="margin-top:6px;">Déduit dans ton calcul d\'impôt : <b>'+txM2(M.celiapp)+'</b>'+(M.celiappRaw>M.celiappCap?' (plafonné à '+txM2(M.celiappCap)+' : l\'excédent n\'est pas déductible)':'')+'.</div>';
+      var extra=Math.max(0,Math.min(has?rem:M.celiappCap,M.celiappCap-M.celiapp));
+      if(extra>0){var sv=txCalc(M.biz,M.ded,B).total-txCalc(M.biz,M.ded+extra,B).total;h+='<div class="stat-sub">Une cotisation de '+txM(extra)+' de plus te ferait économiser environ <b>'+txM(sv)+'</b> d\'impôt.</div>';}
+    }
     h+='<div class="stat-sub" style="margin-top:8px;">'+d[4]+'</div></div>';
   });
   return h+'</div>';
@@ -3731,6 +3742,7 @@ function txReportHtml(M){
   h+='<h2>1. Estimation des impôts et cotisations</h2>'+tb(['Poste','Montant'],[
     td(['Revenu net d\'entreprise',txM2(R.biz)]),
     td(['Cotisations REER déduites',txM2(M.reer)]),
+    td(['Cotisations CELIAPP déduites',txM2(M.celiapp)]),
     td(['Revenu net après déductions',txM2(R.net)]),
     td(['Impôt fédéral (après abattement du Québec)',txM2(R.fed)]),
     td(['Impôt du Québec',txM2(R.qc)]),
