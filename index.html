@@ -466,6 +466,61 @@ body.is-student .qbar{display:none;}
 @media(max-width:900px){.qbar{padding:8px 14px;gap:18px;}}
 @media(max-width:600px){.home-kpis .stat-card .hm-kpi-row svg{display:none;}.home-kpis .stat-val{white-space:nowrap;}}
 
+/* v5 : calendrier, à faire, carnet, objectif */
+.cal-nav{display:flex;gap:4px;align-items:center;}
+.cal-nav button{width:26px;height:24px;border:1px solid var(--border2);background:var(--cream);border-radius:8px;cursor:pointer;color:var(--navy);font-size:15px;line-height:1;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px 2px;cursor:pointer;}
+.cal-h{font-size:10px;color:var(--text3);text-align:center;font-weight:700;}
+.cal-d{display:flex;align-items:center;justify-content:center;height:26px;}
+.cal-d span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:11px;color:var(--text2);}
+.cal-d.win span{background:#1a7a4a;color:#fff;font-weight:700;}
+.cal-d.loss span{background:#b03030;color:#fff;font-weight:700;}
+.cal-d.flat span{background:var(--cream);color:var(--navy);font-weight:700;box-shadow:inset 0 0 0 1px var(--border2);}
+.cal-d.today span{box-shadow:0 0 0 2px var(--navy);}
+.hm-todo{display:flex;align-items:center;gap:10px;padding:0.42rem 0 0.42rem 8px;border-bottom:1px solid var(--border);border-left:4px solid transparent;}
+.hm-todo.u-red{border-left-color:#b03030;}.hm-todo.u-yellow{border-left-color:#d9a406;}.hm-todo.u-green{border-left-color:#1a7a4a;}
+.hm-todo input{width:18px;height:18px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+.hm-todo .tx{flex:1;min-width:0;font-size:12.5px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hm-todo .todo-pill{margin:0;white-space:nowrap;font-size:10.5px;}
+.hm-todo-more{font-size:11px;color:var(--text3);padding:0.4rem 0 0.5rem;}
+#home-todo .hm-dash{margin-top:0.5rem;}
+.hm-count{font-size:11px;color:var(--text3);}
+.nt-add{display:flex;gap:6px;margin-bottom:0.5rem;}
+.nt-add input,.gl-edit input{flex:1;min-width:0;height:34px;border:1px solid var(--border2);border-radius:8px;padding:0 10px;font-family:'Lato',sans-serif;font-size:12.5px;background:#fff;color:var(--navy);}
+.nt-list{max-height:150px;overflow-y:auto;}
+.nt-row{display:flex;gap:8px;align-items:flex-start;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.nt-row:last-child{border-bottom:none;}
+.nt-row .tx{flex:1;min-width:0;word-break:break-word;color:var(--navy);}
+.nt-row small{display:block;color:var(--text3);font-size:10px;}
+.nt-row button{background:none;border:none;color:var(--text3);cursor:pointer;min-width:28px;min-height:28px;}
+.gl{display:flex;gap:14px;align-items:center;}
+.gl svg{flex-shrink:0;}
+.gl-pct{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--navy);line-height:1;}
+.gl-line{font-size:11.5px;color:var(--text2);margin-top:5px;}
+.gl-line b{color:var(--navy);}
+.gl-edit{display:flex;gap:6px;margin-top:8px;}
+.fl-lvl{transition:transform 1.1s cubic-bezier(.3,.7,.3,1);}
+.fl-w1{animation:flwave 3.2s linear infinite;}
+.fl-w2{animation:flwave 4.8s linear infinite reverse;}
+@keyframes flwave{to{transform:translateX(50px);}}
+@media(prefers-reduced-motion:reduce){.fl-w1,.fl-w2{animation:none;}.fl-lvl{transition:none;}}
+@media(max-width:600px){.nt-add input,.gl-edit input{font-size:16px;}}
+
+/* v6 : carnet à lignes + coffre-fort */
+.nb{position:relative;background:#fffdf6;border:1px solid #e6dfc8;border-radius:6px 10px 10px 6px;padding:12px 10px 6px 40px;box-shadow:0 1px 3px rgba(26,39,68,.08);}
+.nb:before{content:'';position:absolute;left:31px;top:0;bottom:0;width:1.5px;background:#eaa3a3;}
+.nb:after{content:'';position:absolute;left:8px;top:12px;bottom:6px;width:12px;background:radial-gradient(circle at 6px 16px,#cfc8b2 3.2px,transparent 3.8px) 0 0/12px 32px repeat-y;}
+.nb input{display:block;width:100%;height:32px;border:none;border-bottom:1px solid #c5d3ea;background:transparent;font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#1a2744;padding:0 4px;outline:none;border-radius:0;}
+.nb input:focus{border-bottom-color:#1a2744;background:rgba(255,236,160,.28);}
+.vb.new{animation:vbdrop .55s cubic-bezier(.3,.8,.3,1) both;}
+@keyframes vbdrop{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:none;}}
+.vt-spark{animation:vtspark 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+@keyframes vtspark{0%,100%{opacity:0;transform:scale(.4);}50%{opacity:1;transform:scale(1);}}
+@media(prefers-reduced-motion:reduce){.vb.new,.vt-spark{animation:none;}.mt-flag{animation:none;}}
+.mt-flag{transform-box:fill-box;transform-origin:left center;animation:mtwave 2.6s ease-in-out infinite;}
+@keyframes mtwave{0%,100%{transform:skewY(-3deg);}50%{transform:skewY(3deg);}}
+@media(max-width:600px){.nb input{font-size:16px;}}
+
 </style>
 </head>
 <body>
@@ -580,8 +635,9 @@ body.is-student .qbar{display:none;}
 
       <div class="hm-row hm-row-b">
         <div class="q-card" style="margin-bottom:0;">
-          <div class="hm-head"><div class="q-card-title">Derniers trades</div><button type="button" class="link-btn" onclick="switchTab('trades')">Tout voir</button></div>
-          <div id="home-trades"><div class="loading-msg">Aucun trade</div></div>
+          <div class="hm-head"><div class="q-card-title" id="cal-title">Calendrier</div><div class="cal-nav"><button type="button" onclick="homeCalShift(-1)" aria-label="Mois précédent">‹</button><button type="button" onclick="homeCalShift(1)" aria-label="Mois suivant">›</button></div></div>
+          <div id="home-cal"></div>
+          <div class="hm-note" id="home-cal-sub"></div>
         </div>
         <div class="q-card" style="margin-bottom:0;">
           <div class="hm-head"><div class="q-card-title">Factures récentes</div><button type="button" class="btn-next btn-sm" onclick="switchTab('factures')">Téléverser un fichier</button></div>
@@ -596,6 +652,21 @@ body.is-student .qbar{display:none;}
             <div><div class="stat-label">Ma part</div><div class="stat-val green" id="home-st-part">—</div></div>
           </div>
           <div id="home-students"><div class="loading-msg">Aucun étudiant</div></div>
+        </div>
+      </div>
+
+      <div class="hm-row hm-row-b">
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">À faire</div><button type="button" class="link-btn" onclick="switchTab('todo')">Tout voir</button></div>
+          <div id="home-todo"><div class="loading-msg">Chargement...</div></div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title">Carnet</div></div>
+          <div class="nb" id="home-notes"></div>
+        </div>
+        <div class="q-card" style="margin-bottom:0;">
+          <div class="hm-head"><div class="q-card-title" id="goal-title">Objectif de l'année</div><button type="button" class="link-btn" id="goal-edit" onclick="goalToggle()">Modifier</button></div>
+          <div id="home-goal"></div>
         </div>
       </div>
     </div>
@@ -1932,7 +2003,7 @@ async function startApp(){
 }
 
 function logout(){
-  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];
+  currentUser=null;currentRole=null;currentSlug=null;allTrades=[];upNstu=[];entList=[];entCurrent=null;todoList=[];homeLines=['','','','',''];homeGoal={};
   clearSession();
   cpReset();ivReset();homeComp.loaded=false;homeComp.map={};homeComp.fcAsked=false;qt.items=[];qt.updatedAt='';fc.loaded=false;fc.data=null;fc.needAuth=false;fc.stamp='';fc.removed={};fc.folderId=null;fc.catId=null;fc.view='docs';
   try{if(window.fbAuth&&window.fbSignOut)window.fbSignOut(window.fbAuth);}catch(e){}
@@ -2084,7 +2155,7 @@ function renderHome(skipLoad){
   var coll=cmp.reduce(function(s,x){return s+(parseFloat(x.frontsell)||0);},0);
   var actifs=upNstu.filter(function(s){return nsIsActive(s,now.getFullYear(),now.getMonth());}).length;
 
-  var total=pnl+entNet;
+  var total=pnl+entNet;homeState.total=total;
   el=document.getElementById('home-total');if(el)el.textContent=hmMoney(total,true);
   el=document.getElementById('home-trading');if(el){el.textContent=hmMoney(pnl,true);el.className='stat-val'+(trades.length?(pnl>=0?' green':' red'):'');}
   el=document.getElementById('home-trading-sub');if(el)el.textContent=trades.length?trades.length+' trade'+(trades.length>1?'s':'')+' · '+Math.round(wins/trades.length*100)+' % gagnants · '+pctStr(pnlPct):'0 trade · 0 % gagnants';
@@ -2113,19 +2184,8 @@ function renderHome(skipLoad){
         scales:{x:{grid:{display:false},ticks:{font:{family:'Lato',size:10},color:'#7a8599'}},y:{grid:{color:'rgba(26,39,68,0.07)'},border:{display:false},ticks:{display:false}}}}});
   }
 
-  /* Derniers trades */
-  var trEl=document.getElementById('home-trades');
-  if(trEl){
-    trEl.innerHTML='';
-    if(!allTrades.length)trEl.innerHTML='<div class="loading-msg">Aucun trade</div>';
-    allTrades.slice(-5).reverse().forEach(function(t){
-      var row=document.createElement('div');row.className='hm-tr';
-      var l=document.createElement('div');var b=document.createElement('b');b.textContent=t.sym;var em=document.createElement('em');em.textContent=t.dir;l.appendChild(b);l.appendChild(em);
-      var r=document.createElement('div');r.className=t.pnl>=0?'pnl-pos':'pnl-neg';r.textContent=pctStr(tPct(t))+' ';
-      var i=document.createElement('i');i.textContent=(t.pnl>=0?'+':'−')+'$'+Math.abs(t.pnl).toFixed(0);r.appendChild(i);
-      row.appendChild(l);row.appendChild(r);trEl.appendChild(row);
-    });
-  }
+  /* Calendrier, à faire, carnet, objectif */
+  homeExtras();
 
   /* Mes entreprises */
   var entEl=document.getElementById('home-ent-list');
@@ -2880,17 +2940,234 @@ async function todoLoad(){
   try{
     await cpDb();
     var snap=await window.fsGetDoc(cpRef('todo','list'));
-    todoList=snap.exists()&&snap.data().list?snap.data().list:[];
+    var dd=snap.exists()?snap.data():{};
+    todoList=dd.list||[];ntApply(dd.lines||(dd.notes||[]).slice(0,5).map(function(n){return String(n.text||'').slice(0,70);}));homeGoal=dd.goal||{};
     if(todoPurge())await todoPersist();
   }catch(e){console.error('todoLoad',e);todoList=[];todoFailed=true;}
-  todoRender();
+  todoRender();homeExtras();
 }
-async function todoPersist(){
+var todoSaving=0;
+async function todoPersist(){return tdSave({list:todoList});}
+/* Une seule fiche « todo/list » : tâches, carnet et objectif. On relit la version distante pour ne remplacer que la partie modifiée. */
+async function tdSave(patch){
   if(todoFailed){alert('La liste n\'a pas pu être chargée. Recharge la page avant de la modifier.');return false;}
   setSaveBadge('☁️ Sauvegarde...');
-  var ok=await fsSave('todo/list',{list:todoList,updatedAt:new Date().toISOString()});
+  todoSaving++;var ok=false;
+  try{
+    var base={list:todoList,lines:homeLines,goal:homeGoal};
+    try{await cpDb();var snap=await window.fsGetDoc(cpRef('todo','list'));if(snap.exists())base=Object.assign(base,snap.data());}catch(e){}
+    var next=Object.assign({},base,patch,{updatedAt:new Date().toISOString()});
+    ok=await fsSave('todo/list',next);
+  }finally{todoSaving--;}
   setSaveBadge(ok?'☁️ Sauvegardé':'⚠ Erreur');
   return ok;
+}
+async function todoRefresh(){
+  if(currentRole!=='prof'||todoFailed||todoSaving)return;
+  try{
+    await cpDb();var snap=await window.fsGetDoc(cpRef('todo','list'));
+    if(!snap.exists()||todoSaving)return;var d=snap.data();
+    todoList=d.list||[];if(d.lines)ntApply(d.lines);homeGoal=d.goal||{};
+    todoRender();homeExtras();
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)todoRefresh();});
+window.addEventListener('focus',todoRefresh);
+
+/* ---- Accueil : calendrier du mois, à faire, carnet, objectif ---- */
+var homeLines=['','','','',''],ntDirty={},ntTimer=null,homeGoal={},homeState={total:0,goalEdit:false,mp:0};
+var homeCal={y:new Date().getFullYear(),m:new Date().getMonth()};
+function homeExtras(){
+  if(currentRole!=='prof'||!document.getElementById('home-cal'))return;
+  homeCalRender();homeTodo();homeNotesRender();homeGoalRender();
+}
+function homeCalShift(n){
+  homeCal.m+=n;
+  if(homeCal.m<0){homeCal.m=11;homeCal.y--;}
+  if(homeCal.m>11){homeCal.m=0;homeCal.y++;}
+  homeCalRender();
+}
+function homeCalRender(){
+  var box=document.getElementById('home-cal');if(!box)return;
+  var y=homeCal.y,m=homeCal.m,ym=y+'-'+(m<9?'0':'')+(m+1);
+  var tt=document.getElementById('cal-title');if(tt)tt.textContent=MONTHS[m]+' '+y;
+  var mt=allTrades.filter(function(t){return (t.date||'').slice(0,7)===ym;});
+  var by={};mt.forEach(function(t){var d=parseInt(t.date.slice(8,10),10);by[d]=(by[d]||0)+(Number(t.pnl)||0);});
+  var now=new Date(),isCur=now.getFullYear()===y&&now.getMonth()===m;
+  box.innerHTML='';
+  var g=document.createElement('div');g.className='cal-grid';
+  g.addEventListener('click',function(){switchTab('trades');});
+  ['D','L','M','M','J','V','S'].forEach(function(l){var h=document.createElement('div');h.className='cal-h';h.textContent=l;g.appendChild(h);});
+  var first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
+  for(var b=0;b<first;b++)g.appendChild(document.createElement('div'));
+  var win=0,loss=0;
+  for(var d=1;d<=n;d++){
+    var c=document.createElement('div'),sp=document.createElement('span');sp.textContent=d;
+    var cls='cal-d';
+    if(by[d]!==undefined){
+      var v=Math.round(by[d]*100)/100;
+      cls+=v>0?' win':(v<0?' loss':' flat');if(v>0)win++;else if(v<0)loss++;
+      c.title=d+' '+MONTHS[m].toLowerCase()+' : '+(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(2);
+    }
+    if(isCur&&d===now.getDate())cls+=' today';
+    c.className=cls;c.appendChild(sp);g.appendChild(c);
+  }
+  box.appendChild(g);
+  var sub=document.getElementById('home-cal-sub');
+  if(sub)sub.textContent=mt.length?(win+' jour'+(win>1?'s':'')+' vert'+(win>1?'s':'')+' · '+loss+' rouge'+(loss>1?'s':'')+' · '+pctStr(pctSum(mt))):'Aucun trade ce mois-ci';
+}
+function homeTodo(){
+  var box=document.getElementById('home-todo');if(!box)return;
+  box.innerHTML='';
+  var pending=todoList.filter(function(t){return !t.done;}).sort(function(a,b){
+    if(a.dueDate&&b.dueDate)return a.dueDate.localeCompare(b.dueDate)||a.createdAt-b.createdAt;
+    if(a.dueDate)return -1;if(b.dueDate)return 1;
+    return a.createdAt-b.createdAt;
+  });
+  if(!pending.length){var e=document.createElement('div');e.className='loading-msg';e.textContent=todoFailed?'Liste indisponible pour le moment':'Rien à faire pour l\'instant';box.appendChild(e);}
+  pending.slice(0,3).forEach(function(t){
+    var pill=t.dueDate?todoPill(todoDays(t.dueDate),t.dueDate):null;
+    var r=document.createElement('div');r.className='hm-todo'+(pill?' u-'+pill.cls:'');
+    var cb=document.createElement('input');cb.type='checkbox';cb.setAttribute('aria-label','Terminée : '+t.text);
+    cb.addEventListener('change',function(){todoToggle(t.id);});
+    var tx=document.createElement('div');tx.className='tx';tx.textContent=t.text;tx.title=t.text;
+    r.appendChild(cb);r.appendChild(tx);
+    if(pill){var pl=document.createElement('span');pl.className='todo-pill '+pill.cls;pl.textContent=pill.text;r.appendChild(pl);}
+    box.appendChild(r);
+  });
+  if(pending.length>3){var mo=document.createElement('div');mo.className='hm-todo-more';mo.textContent='+ '+(pending.length-3)+' autre'+(pending.length-3>1?'s':'')+' tâche'+(pending.length-3>1?'s':'');box.appendChild(mo);}
+  var add=document.createElement('button');add.type='button';add.className='hm-dash';add.textContent='+ Ajouter une tâche';
+  add.addEventListener('click',function(){switchTab('todo');var i=document.getElementById('todo-input');if(i)i.focus();});
+  box.appendChild(add);
+}
+function ntApply(arr){arr=arr||[];for(var i=0;i<5;i++){if(!ntDirty[i])homeLines[i]=String(arr[i]||'');}}
+function ntChange(i,v){homeLines[i]=v;ntDirty[i]=true;if(ntTimer)clearTimeout(ntTimer);ntTimer=setTimeout(noteSave,700);}
+async function noteSave(){
+  if(ntTimer){clearTimeout(ntTimer);ntTimer=null;}
+  if(todoFailed)return;
+  var sent=Object.keys(ntDirty);if(!sent.length)return;
+  var mine={};sent.forEach(function(k){mine[k]=homeLines[k];});
+  var merged=homeLines.slice();
+  try{await cpDb();var snap=await window.fsGetDoc(cpRef('todo','list'));
+    if(snap.exists()&&snap.data().lines){var rl=snap.data().lines;for(var i=0;i<5;i++)if(!(i in mine))merged[i]=String(rl[i]||'');}
+  }catch(e){}
+  var ok=await tdSave({lines:merged});
+  if(ok)sent.forEach(function(k){if(homeLines[k]===mine[k])delete ntDirty[k];});
+}
+function homeNotesRender(){
+  var box=document.getElementById('home-notes');if(!box)return;
+  if(!box.firstChild){
+    for(var i=0;i<5;i++)(function(i){
+      var inp=document.createElement('input');inp.type='text';inp.maxLength=70;inp.setAttribute('aria-label','Ligne '+(i+1)+' du carnet');
+      inp.addEventListener('input',function(){ntChange(i,inp.value);});
+      inp.addEventListener('blur',noteSave);
+      inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var n=box.children[i+1];if(n)n.focus();else inp.blur();}});
+      box.appendChild(inp);
+    })(i);
+  }
+  for(var k=0;k<5;k++){var el=box.children[k];if(document.activeElement!==el&&!ntDirty[k])el.value=homeLines[k]||'';}
+}
+window.addEventListener('pagehide',function(){if(Object.keys(ntDirty).length)noteSave();});
+function goalToggle(){homeState.goalEdit=!homeState.goalEdit;homeGoalRender();}
+function goalSave(){
+  var inp=document.getElementById('goal-input');if(!inp)return;
+  var v=parseFloat(String(inp.value).replace(/\s/g,'').replace(',','.'));
+  if(isNaN(v)||v<0){inp.focus();return;}
+  if(todoFailed){alert('L\'objectif n\'a pas pu être chargé. Recharge la page avant de le modifier.');return;}
+  var ys=String(homeYear);
+  if(v>0)homeGoal[ys]=v;else delete homeGoal[ys];
+  homeState.goalEdit=false;homeGoalRender();tdSave({goal:homeGoal});
+}
+function goalMountain(p){
+  p=Math.max(0,Math.min(1,p));
+  var trail='M18 126 C45 124 30 108 55 104 C85 100 40 84 62 76 C78 70 58 58 66 48 C68 44 69 40 70 32';
+  return '<svg width="150" height="134" viewBox="0 0 150 134" role="img" aria-label="Montagne : le randonneur est rendu à '+Math.round(p*100)+' % du sommet">'
+   +'<defs><linearGradient id="mt-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe2f5"/><stop offset="1" stop-color="#f7f1e2"/></linearGradient>'
+   +'<linearGradient id="mt-rock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a7ea6"/><stop offset="1" stop-color="#2b3d6b"/></linearGradient>'
+   +'<clipPath id="mt-clip"><rect x="0" y="0" width="150" height="134" rx="11"/></clipPath></defs>'
+   +'<g clip-path="url(#mt-clip)">'
+   +'<rect width="150" height="134" fill="url(#mt-sky)"/>'
+   +'<circle cx="124" cy="22" r="8" fill="#ffe9a6" opacity=".9"/>'
+   +'<path d="M95 134 L127 68 L160 134 Z" fill="#97a8c4"/>'
+   +'<path d="M-5 134 L70 30 L150 134 Z" fill="url(#mt-rock)"/>'
+   +'<path d="M70 30 L58 47 L64 44.5 L70 51 L76 44.5 L83 48 Z" fill="#fff"/>'
+   +'<path d="M70 30 L83 48 L76 44.5 L70 51 Z" fill="#dfe7f3"/>'
+   +'<path d="M0 134 V126 Q35 119 75 127 T150 123 V134 Z" fill="#2f7d55" opacity=".9"/>'
+   +'<path d="'+trail+'" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.4" stroke-dasharray="2 2.6" stroke-linecap="round"/>'
+   +'<path id="mt-prog" pathLength="100" d="'+trail+'" fill="none" stroke="#f2b705" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0 100"/>'
+   +'<path id="mt-base" d="'+trail+'" fill="none" stroke="none"/>'
+   +'<g id="mt-camps"></g>'
+   +'<line x1="70" y1="30" x2="70" y2="5" stroke="#3a3f4a" stroke-width="1.5" stroke-linecap="round"/>'
+   +'<g class="mt-flag"><path d="M70.7 6 Q80 3 89 6 T108 6 V26 Q98 29 89 26 T70.7 26 Z" fill="#fff" stroke="#c9a227" stroke-width=".9" stroke-linejoin="round"/>'
+   +'<image id="mt-logo" x="77" y="8" width="24" height="16.3" preserveAspectRatio="xMidYMid meet"/></g>'
+   +'<g id="mt-hiker"><ellipse cx="0" cy="0.4" rx="4" ry="1.1" fill="#000" opacity=".22"/>'
+   +'<line x1="-1.2" y1="-3.4" x2="-1.9" y2="0" stroke="#1a2744" stroke-width="1.3" stroke-linecap="round"/><line x1="1.2" y1="-3.4" x2="1.9" y2="0" stroke="#1a2744" stroke-width="1.3" stroke-linecap="round"/>'
+   +'<rect x="-2.6" y="-9" width="5.2" height="6" rx="1.6" fill="#c0392b"/><rect x="-4.4" y="-8.4" width="2.4" height="4.6" rx="1" fill="#1a2744"/>'
+   +'<circle cx="0.4" cy="-11" r="2.3" fill="#f2c9a0"/><path d="M-2 -11.6 Q0.4 -15 2.9 -11.6 Z" fill="#c0392b"/>'
+   +'<line x1="3.6" y1="-6" x2="4.6" y2="0" stroke="#7a5a2a" stroke-width="1" stroke-linecap="round"/></g>'
+   +'</g><rect x="0.5" y="0.5" width="149" height="133" rx="10.5" fill="none" stroke="#1a2744" stroke-opacity=".25"/></svg>';
+}
+function goalMountainInit(wrap,p){
+  p=Math.max(0,Math.min(1,p));
+  var li=document.querySelector('.login-header img'),lg=wrap.querySelector('#mt-logo');if(li&&lg)lg.setAttribute('href',li.src);
+  var base=wrap.querySelector('#mt-base'),prog=wrap.querySelector('#mt-prog'),hk=wrap.querySelector('#mt-hiker'),camps=wrap.querySelector('#mt-camps');
+  if(!base||!prog||!hk)return;
+  var L=base.getTotalLength(),NS='http://www.w3.org/2000/svg';
+  [0.25,0.5,0.75].forEach(function(f){
+    var pt=base.getPointAtLength(L*f),c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('r','2.4');c.setAttribute('stroke','#8a6508');c.setAttribute('stroke-width','.8');
+    c.setAttribute('fill',p>=f?'#f2b705':'#fff');camps.appendChild(c);
+  });
+  function place(f){
+    var pt=base.getPointAtLength(L*f);
+    hk.setAttribute('transform','translate('+pt.x.toFixed(2)+','+pt.y.toFixed(2)+')');
+    prog.style.strokeDasharray=(f*100).toFixed(2)+' 100';
+  }
+  var from=homeState.mp||0;homeState.mp=p;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduce||Math.abs(p-from)<0.001){place(p);return;}
+  place(from);
+  var t0=null,dur=1300;
+  function step(ts){
+    if(t0===null)t0=ts;var k=Math.min(1,(ts-t0)/dur),e=1-Math.pow(1-k,3);
+    place(from+(p-from)*e);if(k<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+function homeGoalRender(){
+  var box=document.getElementById('home-goal');if(!box)return;
+  var ys=String(homeYear),goal=Number(homeGoal[ys])||0,total=homeState.total||0,now=new Date();
+  var tt=document.getElementById('goal-title');if(tt)tt.textContent='Objectif '+ys;
+  var eb=document.getElementById('goal-edit');if(eb){eb.style.display=goal?'':'none';eb.textContent=homeState.goalEdit?'Annuler':'Modifier';}
+  var p=goal?total/goal:0,pc=Math.max(0,Math.round(p*100));
+  box.innerHTML='';
+  var wrap=document.createElement('div');wrap.className='gl';
+  wrap.insertAdjacentHTML('beforeend',goalMountain(Math.max(0,p)));
+  var info=document.createElement('div');info.style.minWidth='0';info.style.flex='1';
+  if(goal){
+    var big=document.createElement('div');big.className='gl-pct';big.textContent=pc+' %';info.appendChild(big);
+    var l1=document.createElement('div');l1.className='gl-line';
+    l1.innerHTML='<b></b> sur <b></b>';l1.children[0].textContent=hmMoney(total);l1.children[1].textContent=hmMoney(goal);info.appendChild(l1);
+    var l2=document.createElement('div');l2.className='gl-line';
+    if(total>=goal)l2.textContent='Objectif atteint, bravo.';
+    else{
+      var rest=goal-total;l2.textContent='Il reste '+hmMoney(rest);
+      if(homeYear===now.getFullYear()){var left=12-now.getMonth();l2.textContent+=' · environ '+hmMoney(rest/left)+' par mois jusqu\'en décembre';}
+    }
+    info.appendChild(l2);
+  }else{
+    var t=document.createElement('div');t.className='gl-line';t.style.marginTop='0';t.textContent='Fixe le montant que tu veux atteindre cette année. Le bocal se remplit avec ton rendement total.';info.appendChild(t);
+  }
+  if(!goal||homeState.goalEdit){
+    var ed=document.createElement('div');ed.className='gl-edit';
+    var inp=document.createElement('input');inp.type='text';inp.inputMode='decimal';inp.id='goal-input';inp.placeholder='Ex. 100 000';inp.setAttribute('aria-label','Objectif en dollars');
+    if(goal)inp.value=String(goal);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')goalSave();});
+    var bt=document.createElement('button');bt.type='button';bt.className='btn-next btn-sm';bt.textContent='Définir';bt.addEventListener('click',goalSave);
+    ed.appendChild(inp);ed.appendChild(bt);info.appendChild(ed);
+  }
+  wrap.appendChild(info);box.appendChild(wrap);
+  goalMountainInit(wrap,Math.max(0,p));
 }
 function todoDays(due){
   var p=due.split('-').map(Number),now=new Date();
@@ -2922,7 +3199,7 @@ function todoRender(){
     return a.createdAt-b.createdAt;
   });
   var done=todoList.filter(function(t){return t.done;}).sort(function(a,b){return b.doneAt-a.doneAt;});
-  todoBell();
+  todoBell();homeTodo();
   var cnt=document.getElementById('todo-count');
   if(cnt)cnt.textContent=pending.length?pending.length+' à faire':'Rien à faire';
   if(!todoList.length){box.innerHTML='<div class="loading-msg">Aucune tâche. Écris ta première ci-dessus.</div>';return;}
