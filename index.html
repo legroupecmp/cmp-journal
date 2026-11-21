@@ -561,9 +561,11 @@ body.is-student .qbar{display:none;}
 .tx-dl-d{flex:0 0 150px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;font-size:12.5px;color:var(--navy);}
 .tx-dl-m{flex:1;min-width:0;}
 .tx-dl-t{font-size:13px;font-weight:700;color:var(--navy);}
-.tx-pay{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--text2);cursor:pointer;}
+.tx-pay{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--text2);}
+.tx-pay-l{display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;}
+.tx-amt{width:130px;height:32px;padding:4px 8px;text-align:right;flex-shrink:0;}
 .tx-pay span{flex:1;min-width:0;}.tx-pay b{color:var(--navy);white-space:nowrap;}
-.tx-pay input{width:18px;height:18px;accent-color:var(--green);}
+.tx-pay input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);}
 .tx-pay.off{color:var(--text3);cursor:default;}
 .tx-chip{display:inline-block;padding:1px 9px;border-radius:999px;font-size:10.5px;font-weight:700;}
 .tx-chip.red{background:#fceaea;color:#9c2424;}.tx-chip.yellow{background:#fdf1c8;color:#6b4e00;}.tx-chip.green{background:#e8f4ec;color:#14633b;}.tx-chip.ok{background:#e8f4ec;color:#14633b;}.tx-chip.past{background:#eceff4;color:#5d6a82;}
@@ -3574,15 +3576,20 @@ function txEcheances(M){
     L.push({iso:(y+1)+'-06-15',title:'TPS/TVQ : production de la déclaration annuelle de '+y});
   }
   L.sort(function(a,b){return a.iso.localeCompare(b.iso);});
+  var amtOv=M.yc.amt||{};
+  L.forEach(function(x){(x.pays||[]).forEach(function(p){var o=amtOv[p.key];p.ov=(o!==undefined&&o!==null&&o!=='');p.eff=p.ov?Number(o):p.amt;});});
+  var sumP=function(pre){var t=0;L.forEach(function(x){(x.pays||[]).forEach(function(p){if(p.key.indexOf(pre)===0&&paid[p.key])t+=p.eff;});});return t;};
+  var qcPaid=sumP('qc-'),fedPaid=sumP('fed-'),qcAll=R.qc+R.rrq+R.rqap;
   var next=L.find(function(x){return txDays(x.iso)>=0&&!(x.pays||[]).every(function(p){return paid[p.key];})&&(x.pays?x.pays.some(function(p){return p.need;}):true);});
-  var h='<div class="info-box">Acomptes : l\'ARC et Revenu Québec en exigent quand l\'impôt à payer dépasse '+txM(B.inst)+' (selon ton estimation : Québec '+(needQc?'<b>oui</b>':'non')+', fédéral '+(needFed?'<b>oui</b>':'non')+'). Le montant de chaque versement est le quart de l\'estimation annuelle.</div>';
+  var h='<div class="info-box">Acomptes : l\'ARC et Revenu Québec en exigent quand l\'impôt à payer dépasse '+txM(B.inst)+' (selon ton estimation : Québec '+(needQc?'<b>oui</b>':'non')+', fédéral '+(needFed?'<b>oui</b>':'non')+'). Chaque montant est modifiable : laisse le champ vide pour revenir au quart de l\'estimation annuelle.</div>';
+  h+='<div class="q-card"><div class="q-card-title">Acomptes de '+y+'</div><div style="overflow-x:auto;"><table class="cp-table" style="min-width:340px;"><thead><tr><th>Organisme</th><th>Estimation annuelle</th><th>Déjà versé</th><th>Reste</th></tr></thead><tbody><tr><td>Revenu Québec (impôt, RRQ, RQAP)</td><td>'+txM2(qcAll)+'</td><td>'+txM2(qcPaid)+'</td><td><b>'+txM2(qcAll-qcPaid)+'</b></td></tr><tr><td>Agence du revenu du Canada</td><td>'+txM2(R.fed)+'</td><td>'+txM2(fedPaid)+'</td><td><b>'+txM2(R.fed-fedPaid)+'</b></td></tr></tbody></table></div><div class="hm-note">« Déjà versé » additionne les versements dont la case est cochée. Un reste négatif veut dire que tu as versé plus que l\'estimation.</div></div>';
   h+='<div class="q-card"><div class="q-card-title">Calendrier fiscal '+y+'</div>';
   L.forEach(function(x){
     var done=x.pays&&x.pays.filter(function(p){return p.need;}).length>0&&x.pays.filter(function(p){return p.need;}).every(function(p){return paid[p.key];});
     h+='<div class="tx-dl'+(x===next?' next':'')+(txDays(x.iso)<0&&!done?' past':'')+'"><div class="tx-dl-d"><b>'+txDateFr(x.iso)+'</b>'+txStatus(x.iso,done)+'</div><div class="tx-dl-m"><div class="tx-dl-t">'+escapeHtml(x.title)+'</div>';
     if(x.note)h+='<div class="stat-sub">'+escapeHtml(x.note)+'</div>';
     (x.pays||[]).forEach(function(p){
-      h+=p.need?'<label class="tx-pay"><input type="checkbox" data-act="paid" data-key="'+p.key+'"'+(paid[p.key]?' checked':'')+'><span>'+escapeHtml(p.who)+'</span><b>'+txM2(p.amt)+'</b></label>':'<div class="tx-pay off"><span>'+escapeHtml(p.who)+' : non requis selon ton estimation</span></div>';
+      h+='<div class="tx-pay'+(p.need||p.ov?'':' off')+'"><label class="tx-pay-l"><input type="checkbox" data-act="paid" data-key="'+p.key+'"'+(paid[p.key]?' checked':'')+'><span>'+escapeHtml(p.who)+(p.need?'':' (non requis selon ton estimation)')+'</span></label><input type="number" step="0.01" class="q-input tx-amt'+(p.ov?' tx-ov':'')+'" data-y="amt.'+p.key+'" value="'+(p.ov?cpAttr(p.eff):'')+'" placeholder="'+cpAttr(p.amt.toFixed(2))+'" aria-label="Montant : '+cpAttr(p.who)+'"></div>';
     });
     h+='</div></div>';
   });
